@@ -1,0 +1,38 @@
+start: expression
+
+expression: IDENTIFIER "=" arithm
+          | arithm
+
+arithm: arithm "+" term -> addition
+          | arithm "-" term -> subtraction
+          | arithm "$" term -> catenation
+          | term
+
+term:   term "*"  factor -> multiplication
+          | term "/"  factor -> division
+          | term "%"  factor -> remainder
+          | term "//" factor -> floor_division
+          | factor
+
+factor: "-" factor -> negation
+          | "+" factor -> idempotence
+          | power
+
+power:  power "**" die -> exponent
+          | power "%%" die -> logarithm
+          | die
+
+die:    die "d" atom -> scalar_die
+          | die "r" atom -> vector_die
+          | atom
+
+atom:   NUMBER
+          |  IDENTIFIER
+          | "(" expression ")"
+
+%import common.INT -> NUMBER
+%import common.CNAME -> IDENTIFIER
+%import common.WS
+%ignore WS
+
+
