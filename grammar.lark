@@ -1,6 +1,30 @@
 start: expression
 
-expression: IDENTIFIER "=" arithm
+expression: IDENTIFIER "=" arithm -> simple_assignment
+          | bool_or
+
+bool_or:    bool_or "or" bool_xor -> logical_or
+          | bool_xor
+
+bool_xor:   bool_xor "xor" bool_and -> logical_xor
+          | bool_and
+
+bool_and:   bool_and "and" bool_not -> logical_and
+          | bool_not
+
+bool_not:   "not" bool_not -> logical_not
+          | comp
+
+comp:       comp ">"  shift -> greater_than
+          | comp ">=" shift -> greater_equal
+          | comp "==" shift -> equal
+          | comp "!=" shift -> not_equal
+          | comp "<=" shift -> less_equal
+          | comp "<"  shift -> less_than
+          | shift
+
+shift:      shift "<<" arithm -> left_shift
+          | shift ">>" arithm -> right_shift
           | arithm
 
 arithm: arithm "+" term -> addition

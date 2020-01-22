@@ -8,15 +8,15 @@ if not grammar:
 parser = Lark(grammar)
 
 tests = [
-  '4d4',
-  '1 + 7',
-  'x = 9',
-  '-9 / 3',
-  '3 r 6',
+  'not 4d4',
+#  '1 + 7',
+#  'x = 9',
+#  '-9 / 3',
+#  '3 r 6',
 ]
 
 for test in tests:
-  print(parser.parse(test))
+  print(parser.parse(test).pretty())
 
 
 
