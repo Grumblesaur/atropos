@@ -1,4 +1,5 @@
 import lark
+import rolls
 
 def handle_instruction(tree):
   if tree.data == 'start':
@@ -111,15 +112,20 @@ def handle_instruction(tree):
   
   elif tree.data == 'die':
     out = handle_instruction(tree.children[0])
-  elif tree.data == 'scalar_die':
-    left = handle_instruction(tree.children[0])
-    right = handle_instruction(tree.children[1])
-    out = dice.roll_kernel(left, right)
-  elif tree.data == 'vector_die':
-    print(tree.children)
-    out = tree.data
+  elif 'scalar_die' in tree.data or 'vector_die' in tree.data:
+    result_type, _, keepmode = tree.data.split('_')
+    
+    dice  = handle_instruction(tree.children[0])
+    sides = handle_instruction(tree.children[1])
+    if len(tree.children) == 3:
+      count = handle_instruction(tree.children[2])
+    else:
+      count = 0
+    
+    as_sum = result_type == 'scalar'
+    out = rolls.kernel(dice, sides, count, mode=keepmode, return_sum=as_sum)
   
-  elif tree.data == 'handle_atom':
+  elif tree.data == 'atom':
     child = tree.children[0]
     out = handle_atom(child)
   elif tree.data == 'populated_list':
@@ -128,7 +134,7 @@ def handle_instruction(tree):
     out = handle_list(None)
   else:
     print(tree.data)
-    out = 'UNIMPLEMENTED'
+    out = '__UNIMPLEMENTED__'
   
   return out
 

@@ -46,8 +46,12 @@ power:  power "**" die -> exponent
           | power "%%" die -> logarithm
           | die
 
-die:    die "d" atom -> scalar_die
-          | die "r" atom -> vector_die
+die:    die "d" atom              -> scalar_die_all
+          | die "d" atom "h" atom -> scalar_die_highest
+          | die "d" atom "l" atom -> scalar_die_lowest
+          | die "r" atom          -> vector_die_all
+          | die "r" atom "h" atom -> vector_die_highest
+          | die "r" atom "l" atom -> vector_die_lowest
           | atom
 
 atom:   NUMBER

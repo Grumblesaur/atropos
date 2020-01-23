@@ -1,16 +1,11 @@
 import random
 import enum
 
-class KeepMode(enum.Enum):
-  LOWEST  = -1
-  ALL     =  0
-  HIGHEST =  1
-
-def roll_kernel(dice, sides, count=0, mode=KeepMode.ALL, return_sum=True):
+def kernel(dice, sides, count=0, mode='all', return_sum=True):
   results = [random.randint(1, sides) for die in range(dice)]
-  if mode == KeepMode.LOWEST:
+  if mode == 'lowest':
     out = sorted(results)[:count]
-  elif mode == KeepMode.HIGHEST:
+  elif mode == 'highest':
     out = sorted(results, reverse=True)[:count]
   else:
     out = results

@@ -1,7 +1,6 @@
 #!/usr/bin/python3
 
 import parser
-import dice
 import handlers
 
 class Interpreter(object):
@@ -18,6 +17,11 @@ class Interpreter(object):
       
 if __name__ == '__main__':
   dicelark = Interpreter()
-  #x = dicelark.execute('1d6')
-  x = dicelark.execute('[]')
+  x = dicelark.execute('1d6')
   print(x)
+  x = dicelark.execute('1r6')
+  print(x)
+  x = dicelark.execute('4r6h3')
+  print(x)
+  x = dicelark.execute('4d6l3')
+  
