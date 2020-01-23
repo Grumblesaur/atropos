@@ -52,7 +52,9 @@ die:    die "d" atom -> scalar_die
 
 atom:   NUMBER
           |  IDENTIFIER
-          | "(" expression ")"
+          | "(" expression ")"                   -> priority
+          | "[" expression ("," expression)* "]" -> populated_list
+          | "[" "]"                              -> empty_list
 
 %import common.INT -> NUMBER
 %import common.CNAME -> IDENTIFIER
