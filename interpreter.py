@@ -18,31 +18,37 @@ class Interpreter(object):
 def handle_instruction(tree):
   if tree.data == 'start':
     out = handle_instruction(tree.children[0])
+  
   elif tree.data == 'expression':
     out = handle_instruction(tree.children[0])
   elif tree.data == 'simple_assignment':
     print(tree.children)
     out = tree.data
+  
   elif tree.data == 'bool_or':
     out = handle_instruction(tree.children[0])
   elif tree.data == 'logical_or':
     print(tree.children)
     out = tree.data
+  
   elif tree.data == 'bool_xor':
     out = handle_instruction(tree.children[0])
   elif tree.data == 'logical_xor':
     print(tree.children)
     out = tree.data
+  
   elif tree.data == 'bool_and':
     out = handle_instruction(tree.children[0])
   elif tree.data == 'logical_and':
     print(tree.children)
     out = tree.data
+  
   elif tree.data == 'bool_not':
     out = handle_instruction(tree.children[0])
   elif tree.data == 'logical_not':
     print(tree.children)
     out = tree.data
+  
   elif tree.data == 'comp':
     out = handle_instruction(tree.children[0])
   elif tree.data == 'greater_than':
@@ -63,6 +69,7 @@ def handle_instruction(tree):
   elif tree.data == 'less_than':
     print(tree.children)
     out = tree.data
+  
   elif tree.data == 'shift':
     out = handle_instruction(tree.children[0])
   elif tree.data == 'left_shift':
@@ -71,6 +78,7 @@ def handle_instruction(tree):
   elif tree.data == 'right_shift':
     print(tree.children)
     out = tree.data
+  
   elif tree.data == 'arithm':
     out = handle_instruction(tree.children[0])
   elif tree.data == 'addition':
@@ -82,6 +90,7 @@ def handle_instruction(tree):
   elif tree.data == 'catenation':
     print(tree.children)
     out = tree.data
+  
   elif tree.data == 'term':
     out = handle_instruction(tree.children[0])
   elif tree.data == 'multiplication':
@@ -96,6 +105,7 @@ def handle_instruction(tree):
   elif tree.data == 'floor_division':
     print(tree.children)
     out = tree.data
+  
   elif tree.data == 'factor':
     out = handle_instruction(tree.children[0])
   elif tree.data == 'negation':
@@ -104,6 +114,7 @@ def handle_instruction(tree):
   elif tree.data == 'idempotence':
     print(tree.children)
     out = tree.data
+  
   elif tree.data == 'power':
     out = handle_instruction(tree.children[0])
   elif tree.data == 'exponent':
@@ -112,6 +123,7 @@ def handle_instruction(tree):
   elif tree.data == 'logarithm':
     print(tree.children)
     out = tree.data
+  
   elif tree.data == 'die':
     out = handle_instruction(tree.children[0])
   elif tree.data == 'scalar_die':
@@ -121,6 +133,7 @@ def handle_instruction(tree):
   elif tree.data == 'vector_die':
     print(tree.children)
     out = tree.data
+  
   elif tree.data == 'atom':
     print(tree.children)
     token = tree.children[0]
