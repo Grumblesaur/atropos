@@ -60,7 +60,7 @@ atom:   NUMBER
           | "[" expression ("," expression)* "]" -> populated_list
           | "[" "]"                              -> empty_list
 
-%import common.INT -> NUMBER
+%import common.NUMBER -> NUMBER
 %import common.CNAME -> IDENTIFIER
 %import common.WS
 %ignore WS

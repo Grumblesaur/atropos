@@ -10,12 +10,7 @@ def get_parser():
 
 if __name__ == '__main__':
   tests = [
-    '4d4',
-#    '6 * 8',
-#    '4 + 2',
-#    'foo = 3',
-#    '1 != 0',
-#    '6 $ 6',
+    '1.5',
   ]
   
   p = get_parser()

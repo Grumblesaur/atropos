@@ -1,27 +1,34 @@
 #!/usr/bin/python3
 
+import sys
 import command_parser
-import handlers
+import kernel
 
 class Interpreter(object):
   def __init__(self):
-    self.parser = parser.get_parser()
+    self.parser = command_parser.get_parser()
   
   def execute(self, command):
     tree = self.parser.parse(command)
     return self.interpret(tree)
     
   def interpret(self, tree):
-    return handlers.handle_instruction(tree)
+    return kernel.handle_instruction(tree)
 
-      
-if __name__ == '__main__':
+
+def main(*args):
+  filename = args[1]
   dicelark = Interpreter()
-  x = dicelark.execute('1d6')
-  print(x)
-  x = dicelark.execute('1r6')
-  print(x)
-  x = dicelark.execute('4r6h3')
-  print(x)
-  x = dicelark.execute('4d6l3')
-  
+  with open(filename, 'r') as test_file:
+    for line in test_file:
+      line = line.strip()
+      if line:
+        x = dicelark.execute(line)
+        print(line, '->', x)
+  return 0
+
+if __name__ == '__main__':
+  exit_code = main(*sys.argv)
+  sys.exit(exit_code)
+
+
