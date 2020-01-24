@@ -1,6 +1,6 @@
 #!/usr/bin/python3
 
-import parser
+import command_parser
 import handlers
 
 class Interpreter(object):
