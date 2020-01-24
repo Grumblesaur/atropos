@@ -2,7 +2,50 @@ import math
 import rolls
 import kernel
 
-def handle_power(children):
+def handle_addition(children):
+  augend = kernel.handle_instruction(children[0])
+  addend = kernel.handle_instruction(children[1])
+  return augend + addend
+
+def handle_subtraction(children):
+  minuend    = kernel.handle_instruction(children[0])
+  subtrahend = kernel.handle_instruction(children[1])
+  return minuend - subtrahend
+
+def handle_catenation(children):
+  catenant  = kernel.handle_instruction(children[0])
+  catenator = kernel.handle_instruction(children[1])
+  numbers = [catenant, catenator]
+  intstrings = map(lambda x: str(int(x)), numbers)
+  return int(''.join(intstrings))
+
+def handle_multiplication(children):
+  multiplier   = kernel.handle_instruction(children[0])
+  multiplicand = kernel.handle_instruction(children[1])
+  return multiplier * multiplicand
+
+def handle_division(children):
+  dividend = kernel.handle_instruction(children[0])
+  divisor  = kernel.handle_instruction(children[1])
+  return dividend / divisor
+
+def handle_remainder(children):
+  dividend = kernel.handle_instruction(children[0])
+  divisor  = kernel.handle_instruction(children[1])
+  return dividend % divisor
+
+def handle_floor_division(children):
+  dividend = kernel.handle_instruction(children[0])
+  divisor  = kernel.handle_instruction(children[1])
+  return dividend // divisor
+
+def handle_negation(children):
+  return -kernel.handle_instruction(children[0])
+
+def handle_idempotence(children):
+  return kernel.handle_instruction(children[0])
+
+def handle_exponent(children):
   mantissa = kernel.handle_instruction(children[0])
   exponent = kernel.handle_instruction(children[1])
   return mantissa ** exponent

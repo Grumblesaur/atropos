@@ -68,43 +68,34 @@ def handle_instruction(tree):
   elif tree.data == 'arithm':
     out = handle_instruction(tree.children[0])
   elif tree.data == 'addition':
-    print(tree.children)
-    out = tree.data
+    out = handlers.handle_addition(tree.children)
   elif tree.data == 'subtraction':
-    print(tree.children)
-    out = tree.data
+    out = handlers.handle_subtraction(tree.children)
   elif tree.data == 'catenation':
-    print(tree.children)
-    out = tree.data
+    out = handlers.handle_catenation(tree.children)
   
   elif tree.data == 'term':
     out = handle_instruction(tree.children[0])
   elif tree.data == 'multiplication':
-    print(tree.children)
-    out = tree.data
+    out = handlers.handle_multiplication(tree.children)
   elif tree.data == 'division':
-    print(tree.children)
-    out = tree.data
+    out = handlers.handle_division(tree.children)
   elif tree.data == 'remainder':
-    print(tree.children)
-    out = tree.data
+    out = handlers.handle_remainder(tree.children)
   elif tree.data == 'floor_division':
-    print(tree.children)
-    out = tree.data
+    out = handlers.handle_floor_division(tree.children)
   
   elif tree.data == 'factor':
     out = handle_instruction(tree.children[0])
   elif tree.data == 'negation':
-    print(tree.children)
-    out = tree.data
+    out = handlers.handle_negation(tree.children)
   elif tree.data == 'idempotence':
-    print(tree.children)
-    out = tree.data
+    out = handlers.handle_idempotence(tree.children)
   
   elif tree.data == 'power':
     out = handle_instruction(tree.children[0])
   elif tree.data == 'exponent':
-    out = handlers.handle_power(tree.children)
+    out = handlers.handle_exponent(tree.children)
   elif tree.data == 'logarithm':
     out = handlers.handle_logarithm(tree.children)
   
@@ -116,6 +107,8 @@ def handle_instruction(tree):
   elif tree.data == 'atom':
     child = tree.children[0]
     out = handlers.handle_atom(child)
+  elif tree.data == 'priority':
+    out = handle_instruction(tree.children[0])
   elif tree.data == 'populated_list':
     out = handlers.handle_list(tree.children)
   elif tree.data == 'empty_list':
