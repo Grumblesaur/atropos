@@ -38,32 +38,24 @@ def handle_instruction(tree):
   elif tree.data == 'comp':
     out = handle_instruction(tree.children[0])
   elif tree.data == 'greater_than':
-    print(tree.children)
-    out = tree.data
+    out = handlers.handle_greater_than(tree.children)
   elif tree.data == 'greater_equal':
-    print(tree.children)
-    out = tree.data
+    out = handlers.handle_greater_equal(tree.children)
   elif tree.data == 'equal':
-    print(tree.children)
-    out = tree.data
+    out = handlers.handle_equal(tree.children)
   elif tree.data == 'not_equal':
-    print(tree.children)
-    out = tree.data
+    out = handlers.handle_not_equal(tree.children)
   elif tree.data == 'less_equal':
-    print(tree.children)
-    out = tree.data
+    out = handlers.handle_less_equal(tree.children)
   elif tree.data == 'less_than':
-    print(tree.children)
-    out = tree.data
+    out = handlers.handle_less_than(tree.children)
   
   elif tree.data == 'shift':
     out = handle_instruction(tree.children[0])
   elif tree.data == 'left_shift':
-    print(tree.children)
-    out = tree.data
+    out = handlers.handle_left_shift(tree.children)
   elif tree.data == 'right_shift':
-    print(tree.children)
-    out = tree.data
+    out = handlers.handle_right_shift(tree.children)
   
   elif tree.data == 'arithm':
     out = handle_instruction(tree.children[0])

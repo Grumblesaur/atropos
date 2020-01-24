@@ -15,12 +15,12 @@ bool_and:   bool_and "and" bool_not -> logical_and
 bool_not:   "not" bool_not -> logical_not
           | comp
 
-comp:       comp ">"  shift -> greater_than
-          | comp ">=" shift -> greater_equal
-          | comp "==" shift -> equal
-          | comp "!=" shift -> not_equal
-          | comp "<=" shift -> less_equal
-          | comp "<"  shift -> less_than
+comp:       shift ">"  shift -> greater_than
+          | shift ">=" shift -> greater_equal
+          | shift "==" shift -> equal
+          | shift "!=" shift -> not_equal
+          | shift "<=" shift -> less_equal
+          | shift "<"  shift -> less_than
           | shift
 
 shift:      shift "<<" arithm -> left_shift

@@ -2,41 +2,71 @@ import math
 import rolls
 import kernel
 
+def binary_operation(children):
+  out = []
+  for child in children[:2]:
+    out.append(kernel.handle_instruction(child))
+  return tuple(out)
+
+def handle_greater_than(children):
+  left, right = binary_operation(children)
+  return left > right
+
+def handle_greater_equal(children):
+  left, right = binary_operation(children)
+  return left >= right
+
+def handle_equal(children):
+  left, right = binary_operation(children)
+  return left == right
+
+def handle_not_equal(children):
+  left, right = binary_operation(children)
+  return left != right
+
+def handle_less_equal(children):
+  left, right = binary_operation(children)
+  return left <= right
+
+def handle_less_than(children):
+  left, right = binary_operation(children)
+  return left < right 
+
+def handle_left_shift(children):
+  number, displacement = binary_operation(children)
+  return number << displacement
+
+def handle_right_shift(children):
+  number, displacement = binary_operation(children)
+  return number >> displacement
+
 def handle_addition(children):
-  augend = kernel.handle_instruction(children[0])
-  addend = kernel.handle_instruction(children[1])
+  augend, addend = binary_operation(children)
   return augend + addend
 
 def handle_subtraction(children):
-  minuend    = kernel.handle_instruction(children[0])
-  subtrahend = kernel.handle_instruction(children[1])
+  minuend, subtrahend = binary_operation(children)
   return minuend - subtrahend
 
 def handle_catenation(children):
-  catenant  = kernel.handle_instruction(children[0])
-  catenator = kernel.handle_instruction(children[1])
-  numbers = [catenant, catenator]
+  numbers = binary_operation(children)
   intstrings = map(lambda x: str(int(x)), numbers)
   return int(''.join(intstrings))
 
 def handle_multiplication(children):
-  multiplier   = kernel.handle_instruction(children[0])
-  multiplicand = kernel.handle_instruction(children[1])
+  multiplier, multiplicand = binary_operation(children)
   return multiplier * multiplicand
 
 def handle_division(children):
-  dividend = kernel.handle_instruction(children[0])
-  divisor  = kernel.handle_instruction(children[1])
+  dividend, divisor = binary_operation(children)
   return dividend / divisor
 
 def handle_remainder(children):
-  dividend = kernel.handle_instruction(children[0])
-  divisor  = kernel.handle_instruction(children[1])
+  dividend, divisor = binary_operation(children)
   return dividend % divisor
 
 def handle_floor_division(children):
-  dividend = kernel.handle_instruction(children[0])
-  divisor  = kernel.handle_instruction(children[1])
+  dividend, divisor = binary_operation(children)
   return dividend // divisor
 
 def handle_negation(children):
@@ -46,14 +76,12 @@ def handle_idempotence(children):
   return kernel.handle_instruction(children[0])
 
 def handle_exponent(children):
-  mantissa = kernel.handle_instruction(children[0])
-  exponent = kernel.handle_instruction(children[1])
+  mantissa, exponent = binary_operation(children)
   return mantissa ** exponent
 
 def handle_logarithm(children):
-  base = kernel.handle_instruction(children[0])
-  anti = kernel.handle_instruction(children[1])
-  return math.log(anti, base)
+  base, antilogarithm = binary_operation(children)
+  return math.log(antilogarithm, base)
 
 def handle_dice(node_type, children):
   result_type, _, keep_mode = node_type.split('_')
