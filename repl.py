@@ -2,7 +2,7 @@
 
 from interpreter import Interpreter
 import readline
-from lark.exceptions import UnexpectedToken 
+from lark.exceptions import UnexpectedToken, UnexpectedCharacters 
 
 running = True
 
@@ -24,6 +24,6 @@ while running:
         try:
             output = dicelark.execute(command, user, server)
             print(output)
-        except UnexpectedToken as e:
+        except (UnexpectedToken, UnexpectedCharacters) as e:
             print(f"Unknown command: {command}")
 
