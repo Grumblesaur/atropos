@@ -101,7 +101,7 @@ def handle_subtraction(children):
     except:
       raise e
 
-    return result
+  return result
 
 def handle_catenation(children):
   numbers = binary_operation(children)
