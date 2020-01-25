@@ -14,24 +14,26 @@ class Interpreter(object):
     self.parser = Lark(grammar, start='start', parser='lalr', lexer='contextual')
     self.debug  = debug
   
-  def execute(self, command):
+  def execute(self, command, user, server):
     tree = self.parser.parse(command)
     if self.debug:
       print(tree, '\n')
-    return self.interpret(tree)
+    return self.interpret(tree, user, server)
     
-  def interpret(self, tree):
-    return kernel.handle_instruction(tree)
+  def interpret(self, tree, user, server):
+    return kernel.handle_instruction(tree, user, server)
 
 
 def main(*args):
   filename = args[1]
   dicelark = Interpreter('grammar.lark')
+  user     = 'Tester'
+  server   = 'Test Server'
   with open(filename, 'r') as test_file:
     for line in test_file:
       line = line.strip()
       if line:
-        x = dicelark.execute(line)
+        x = dicelark.execute(line, user, server)
         print(line, '->', x)
   return 0
 

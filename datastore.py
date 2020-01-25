@@ -28,12 +28,11 @@ class _DataStore(object):
     with open(self.storage_file_name, 'r') as f:
       storage_text = f.read()
     try:
-      self.variables = eval(user_text)
+      self.variables = eval(storage_text)
     except Exception as e:
-      print(e)
       self.variables = {}
     
-  def get(self, key, default=Undefined())
+  def get(self, key, default=Undefined()):
     try:
       out = self.variables[key]
     except KeyError:
@@ -48,7 +47,7 @@ class _DataStore(object):
       f.write(repr(self.variables))
 
 
-private = _DataStore('private')
-server  = _DataStore('server')
-public  = _DataStore('public')
+private = _DataStore('vars/private')
+server  = _DataStore('vars/server')
+public  = _DataStore('vars/public')
   

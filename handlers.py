@@ -8,6 +8,9 @@ def binary_operation(children):
     out.append(kernel.handle_instruction(child))
   return tuple(out)
 
+def handle_simple_assignment(data, children, user, server):
+  return '__{}__'.format(data)
+
 def handle_logical_or(children):
   left, right = binary_operation(children)
   return left or right

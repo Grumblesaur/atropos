@@ -37,4 +37,8 @@ not 0
 0 xor 0
 True
 False
+x = 1
+my y = 2
+our z = 3
+
 

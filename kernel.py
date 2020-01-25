@@ -1,16 +1,38 @@
 import lark
 import handlers
+import datastore
 
-def handle_instruction(tree):
+class OwnershipData:
+  current_user   = ''
+  current_server = ''
+  
+  def set(user, server):
+    OwnershipData.current_user   = user
+    OwnershipData.current_server = server
+
+  def clear():
+    OwnershipData.current_user   = ''
+    OwnershipData.current_server = ''
+  
+  def get():
+    return (OwnershipData.current_user, OwnershipData.current_server)
+
+assignment_types = (
+  'simple_scoped_assignment',
+  'simple_private_assignment',
+  'simple_server_assignment'
+)
+
+def handle_instruction(tree, user='', server=''):
   if tree.data == 'start':
+    OwnershipData.set(user, server)
     out = handle_instruction(tree.children[0])
   
   elif tree.data == 'expression':
     out = handle_instruction(tree.children[0])
-  elif tree.data == 'simple_assignment':
-    print(tree.children)
-    out = tree.data
-  
+  elif tree.data in assignment_types:
+    args = (tree.data, tree.children, *OwnershipData.get())
+    out = handlers.handle_simple_assignment(*args)
   elif tree.data == 'bool_or':
     out = handle_instruction(tree.children[0])
   elif tree.data == 'logical_or':
@@ -108,6 +130,9 @@ def handle_instruction(tree):
     print(tree.data)
     out = '__UNIMPLEMENTED__'
   
+  if tree.data == 'start':
+    OwnershipData.clear()
+   
   return out
 
 
