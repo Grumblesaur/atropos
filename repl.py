@@ -2,6 +2,7 @@
 
 from interpreter import Interpreter
 import readline
+from lark.exceptions import UnexpectedToken 
 
 running = True
 
@@ -20,6 +21,9 @@ while running:
     if command == "!quit":
         running = False
     else:
-        output = dicelark.execute(command, user, server)
-        print(output)
+        try:
+            output = dicelark.execute(command, user, server)
+            print(output)
+        except UnexpectedToken as e:
+            print(f"Unknown command: {command}")
 
