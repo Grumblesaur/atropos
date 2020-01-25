@@ -127,6 +127,8 @@ def handle_instruction(tree, user='', server=''):
     out = handlers.handle_list(tree.children)
   elif tree.data == 'empty_list':
     out = handlers.handle_list(None)
+  elif tree.data == 'string_literal':
+    out = handlers.handle_string_literal(tree.children)
   
   elif tree.data == 'identifier':
     ident = handlers.handle_identifiers(tree.children)
@@ -139,7 +141,7 @@ def handle_instruction(tree, user='', server=''):
   
     
   else:
-    print(tree.data)
+    print(tree.data, tree.children)
     out = '__UNIMPLEMENTED__'
   
   if tree.data == 'start':

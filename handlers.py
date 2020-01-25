@@ -163,6 +163,9 @@ def handle_number_literal(children):
   out = x if x == f else f
   return out
 
+def handle_string_literal(children):
+  return eval(children.pop().value)
+
 def handle_boolean_literal(children):
   return eval(children.pop().value)
 

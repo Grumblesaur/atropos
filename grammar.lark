@@ -58,6 +58,7 @@ die: die "d" atom              -> scalar_die_all
 
 atom: number_literal
     | boolean_literal
+    | string_literal
     | identifier
     | "(" expression ")"                   -> priority
     | "[" expression ("," expression)* "]" -> populated_list
@@ -68,6 +69,8 @@ boolean_literal: TRUE
 
 number_literal: NUMBER
 
+string_literal: STRING
+
 identifier: scoped_identifier | private_identifier | server_identifier
 
 scoped_identifier :       IDENT
@@ -77,6 +80,7 @@ server_identifier : "our" IDENT
 TRUE:  "True"
 FALSE: "False"
 IDENT: /[a-zA-Z_]+[a-zA-Z0-9_]*/
+STRING: /("(?!"").*?(?<!\\)(\\\\)*?"|'(?!'').*?(?<!\\)(\\\\)*?')/i
 
 %import common.NUMBER -> NUMBER
 %import common.WS

@@ -49,4 +49,8 @@ our z = 3
 x
 my y
 our z
+"double quoted string"
+'single quoted string'
+'single quoted\n escaped string'
+"double quoted\n escaped string"
 
