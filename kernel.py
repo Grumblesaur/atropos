@@ -93,8 +93,11 @@ def handle_instruction(tree):
     out = handlers.handle_dice(tree.data, tree.children)
   
   elif tree.data == 'atom':
-    child = tree.children[0]
-    out = handlers.handle_atom(child)
+    out = handle_instruction(tree.children[0])
+  elif tree.data == 'number_literal':
+    out = handlers.handle_number_literal(tree.children)
+  elif tree.data == 'boolean_literal':
+    out = handlers.handle_boolean_literal(tree.children)
   elif tree.data == 'priority':
     out = handle_instruction(tree.children[0])
   elif tree.data == 'populated_list':

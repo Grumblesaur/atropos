@@ -21,5 +21,20 @@
 5 < 9
 8 >= 8
 4 <= 4.5
-
+1 and 0
+1 and 1
+0 and 1
+0 and 0
+not 1
+not 0
+0 or 1
+1 or 0
+0 or 0
+1 or 1
+4 xor 0
+0 xor 4
+4 xor 4
+0 xor 0
+True
+False
 

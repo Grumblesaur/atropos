@@ -11,7 +11,7 @@ class Interpreter(object):
       grammar = grammar_file.read()
     if not grammar:
       raise ValueError('grammar file renamed or missing!')
-    self.parser = Lark(grammar)
+    self.parser = Lark(grammar, start='start', parser='lalr', lexer='contextual')
     self.debug  = debug
   
   def execute(self, command):

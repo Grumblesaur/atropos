@@ -5,67 +5,80 @@ expression: scoped_identifier  "=" bool_or -> simple_scoped_assignment
           | server_identifier  "=" bool_or -> simple_server_assignment
           | bool_or
 
-bool_or:    bool_or "or" bool_xor -> logical_or
-          | bool_xor
+bool_or: bool_or "or" bool_xor -> logical_or
+       | bool_xor
 
-bool_xor:   bool_xor "xor" bool_and -> logical_xor
-          | bool_and
+bool_xor: bool_xor "xor" bool_and -> logical_xor
+        | bool_and
 
-bool_and:   bool_and "and" bool_not -> logical_and
-          | bool_not
+bool_and: bool_and "and" bool_not -> logical_and
+        | bool_not
 
-bool_not:   "not" bool_not -> logical_not
-          | comp
+bool_not: "not" bool_not -> logical_not
+        | comp
 
-comp:       shift ">"  shift -> greater_than
-          | shift ">=" shift -> greater_equal
-          | shift "==" shift -> equal
-          | shift "!=" shift -> not_equal
-          | shift "<=" shift -> less_equal
-          | shift "<"  shift -> less_than
-          | shift
+comp: shift ">"  shift -> greater_than
+    | shift ">=" shift -> greater_equal
+    | shift "==" shift -> equal
+    | shift "!=" shift -> not_equal
+    | shift "<=" shift -> less_equal
+    | shift "<"  shift -> less_than
+    | shift
 
-shift:      shift "<<" arithm -> left_shift
-          | shift ">>" arithm -> right_shift
-          | arithm
+shift: shift "<<" arithm -> left_shift
+     | shift ">>" arithm -> right_shift
+     | arithm
 
 arithm: arithm "+" term -> addition
-          | arithm "-" term -> subtraction
-          | arithm "$" term -> catenation
-          | term
+      | arithm "-" term -> subtraction
+      | arithm "$" term -> catenation
+      | term
 
-term:   term "*"  factor -> multiplication
-          | term "/"  factor -> division
-          | term "%"  factor -> remainder
-          | term "//" factor -> floor_division
-          | factor
+term: term "*"  factor -> multiplication
+    | term "/"  factor -> division
+    | term "%"  factor -> remainder
+    | term "//" factor -> floor_division
+    | factor
 
 factor: "-" factor -> negation
-          | "+" factor -> idempotence
-          | power
+      | "+" factor -> idempotence
+      | power
 
-power:  power "**" die -> exponent
-          | power "%%" die -> logarithm
-          | die
+power: power "**" die -> exponent
+     | power "%%" die -> logarithm
+     | die
 
-die:    die "d" atom              -> scalar_die_all
-          | die "d" atom "h" atom -> scalar_die_highest
-          | die "d" atom "l" atom -> scalar_die_lowest
-          | die "r" atom          -> vector_die_all
-          | die "r" atom "h" atom -> vector_die_highest
-          | die "r" atom "l" atom -> vector_die_lowest
-          | atom
+die: die "d" atom              -> scalar_die_all
+   | die "d" atom "h" atom -> scalar_die_highest
+   | die "d" atom "l" atom -> scalar_die_lowest
+   | die "r" atom          -> vector_die_all
+   | die "r" atom "h" atom -> vector_die_highest
+   | die "r" atom "l" atom -> vector_die_lowest
+   | atom
 
-atom:   NUMBER
-          |  IDENT                         -> scoped_identifier
-          |  "my"  IDENT                   -> private_identifier
-          |  "our" IDENT                   -> server_identifier
-          | "(" expression ")"                   -> priority
-          | "[" expression ("," expression)* "]" -> populated_list
-          | "[" "]"                              -> empty_list
+atom: number_literal
+    | boolean_literal
+    | identifier
+    | "(" expression ")"                   -> priority
+    | "[" expression ("," expression)* "]" -> populated_list
+    | "[" "]"                              -> empty_list
+
+boolean_literal: TRUE
+               | FALSE
+
+number_literal: NUMBER
+
+identifier: scoped_identifier | private_identifier | server_identifier
+
+scoped_identifier :       IDENT
+private_identifier: "my"  IDENT
+server_identifier : "our" IDENT
+
+TRUE:  "True"
+FALSE: "False"
+IDENT: /[a-zA-Z_]+[a-zA-Z0-9_]*/
 
 %import common.NUMBER -> NUMBER
-%import common.CNAME -> IDENT
 %import common.WS
 %ignore WS
 

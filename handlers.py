@@ -9,7 +9,7 @@ def binary_operation(children):
   return tuple(out)
 
 def handle_logical_or(children):
-  left, right = binary_operation(children):
+  left, right = binary_operation(children)
   return left or right
 
 def handle_logical_xor(children):
@@ -21,7 +21,7 @@ def handle_logical_and(children):
   return left and right
 
 def handle_logical_not(children):
-  return not bool(kernel.handle_instruction(children[0])
+  return not bool(kernel.handle_instruction(children[0]))
 
 def handle_greater_than(children):
   left, right = binary_operation(children)
@@ -113,15 +113,18 @@ def handle_list(children):
       items.append(kernel.handle_instruction(child))
   return items
 
-def handle_atom(token):
-  if token.type == 'NUMBER':
-    try:
-      x = int(token.value)
-      f = float(token.value)
-    except ValueError:
-      x = None
-      f = float(token.value)
-    out = x if x == f else f
+def handle_number_literal(children):
+  child = children.pop()
+  try:
+    x = int(child.value)
+    f = float(child.value)
+  except ValueError:
+    x = None
+    f = float(child.value)
+  out = x if x == f else f
   return out
+
+def handle_boolean_literal(children):
+  return eval(children.pop().value)
 
 
