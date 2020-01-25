@@ -1,6 +1,8 @@
 start: expression
 
-expression: IDENTIFIER "=" arithm -> simple_assignment
+expression: scoped_identifier  "=" bool_or -> simple_scoped_assignment
+          | private_identifier "=" bool_or -> simple_private_assignment
+          | server_identifier  "=" bool_or -> simple_server_assignment
           | bool_or
 
 bool_or:    bool_or "or" bool_xor -> logical_or
@@ -55,13 +57,15 @@ die:    die "d" atom              -> scalar_die_all
           | atom
 
 atom:   NUMBER
-          |  IDENTIFIER
+          |  IDENT                         -> scoped_identifier
+          |  "my"  IDENT                   -> private_identifier
+          |  "our" IDENT                   -> server_identifier
           | "(" expression ")"                   -> priority
           | "[" expression ("," expression)* "]" -> populated_list
           | "[" "]"                              -> empty_list
 
 %import common.NUMBER -> NUMBER
-%import common.CNAME -> IDENTIFIER
+%import common.CNAME -> IDENT
 %import common.WS
 %ignore WS
 

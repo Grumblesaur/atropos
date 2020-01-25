@@ -8,6 +8,21 @@ def binary_operation(children):
     out.append(kernel.handle_instruction(child))
   return tuple(out)
 
+def handle_logical_or(children):
+  left, right = binary_operation(children):
+  return left or right
+
+def handle_logical_xor(children):
+  left, right = binary_operation(children)
+  return (left or right) and not (left and right)
+
+def handle_logical_and(children):
+  left, right = binary_operation(children)
+  return left and right
+
+def handle_logical_not(children):
+  return not bool(kernel.handle_instruction(children[0])
+
 def handle_greater_than(children):
   left, right = binary_operation(children)
   return left > right

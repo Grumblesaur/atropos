@@ -14,26 +14,22 @@ def handle_instruction(tree):
   elif tree.data == 'bool_or':
     out = handle_instruction(tree.children[0])
   elif tree.data == 'logical_or':
-    print(tree.children)
-    out = tree.data
+    out = handlers.handle_logical_or(tree.children)
   
   elif tree.data == 'bool_xor':
     out = handle_instruction(tree.children[0])
   elif tree.data == 'logical_xor':
-    print(tree.children)
-    out = tree.data
+    out = handlers.handle_logical_xor(tree.children)
   
   elif tree.data == 'bool_and':
     out = handle_instruction(tree.children[0])
   elif tree.data == 'logical_and':
-    print(tree.children)
-    out = tree.data
+    out = handlers.handle_logical_and(tree.children)
   
   elif tree.data == 'bool_not':
     out = handle_instruction(tree.children[0])
   elif tree.data == 'logical_not':
-    print(tree.children)
-    out = tree.data
+    out = handlers.handle_logical_not(tree.children)
   
   elif tree.data == 'comp':
     out = handle_instruction(tree.children[0])
