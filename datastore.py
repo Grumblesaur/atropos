@@ -44,7 +44,7 @@ class _DataStore(object):
     return value
   
   def save(self):
-    with open(self.storage_file_name, 'w'):
+    with open(self.storage_file_name, 'w') as f:
       f.write(repr(self.variables))
 
 class _OwnedDataStore(_DataStore):
@@ -66,5 +66,10 @@ class _OwnedDataStore(_DataStore):
 private = _OwnedDataStore('vars/private')
 server  = _OwnedDataStore('vars/server')
 public  = _DataStore('vars/public')
+
+def save_all():
+  private.save()
+  server.save()
+  public.save()
 
 

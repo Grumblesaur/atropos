@@ -4,6 +4,7 @@ import sys
 from lark import Lark
 
 import kernel
+import datastore
 
 class Interpreter(object):
   def __init__(self, grammar_file_name, debug=False):
@@ -35,6 +36,7 @@ def main(*args):
       if line:
         x = dicelark.execute(line, user, server)
         print(line, '->', x)
+  datastore.save_all()
   return 0
 
 if __name__ == '__main__':
