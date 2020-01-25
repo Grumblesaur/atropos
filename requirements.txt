@@ -8,7 +8,6 @@ idna==2.8
 idna-ssl==1.1.0
 lark-parser==0.8.1
 multidict==4.7.4
-pkg-resources==0.0.0
 typing-extensions==3.7.4.1
 websockets==6.0
 yarl==1.4.2
