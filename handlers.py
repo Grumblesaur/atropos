@@ -89,7 +89,18 @@ def handle_addition(children):
 
 def handle_subtraction(children):
   minuend, subtrahend = binary_operation(children)
-  return minuend - subtrahend
+  try:
+    return minuend - subtrahend
+  except TypeError as e:
+    result = minuend
+    try:
+      for x in subtrahend:
+        if x in minuend:
+          result.remove(x)
+
+      return result
+    except:
+      raise e
 
 def handle_catenation(children):
   numbers = binary_operation(children)
