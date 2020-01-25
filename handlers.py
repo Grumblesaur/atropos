@@ -134,12 +134,28 @@ def handle_dice(node_type, children):
   as_sum = result_type == 'scalar'
   return rolls.kernel(dice, sides, count, mode=keep_mode, return_sum=as_sum) 
 
-def handle_list(children):
+def handle_subscript(children):
+  indexee = kernel.handle_instruction(children[0])
+  indexors = children[1:]
+  for indexor in indexors:
+    index = kernel.handle_instruction(indexor)
+    indexee = indexee[index]
+  return indexee
+
+def handle_list_literal(children):
   items = [ ]
   if children:
     for child in children:
       items.append(kernel.handle_instruction(child))
   return items
+
+def handle_dict_literal(children):
+  pairs = { }
+  if children:
+    for child in children:
+      key, value = binary_operation(child.children)
+      pairs[key] = value
+  return pairs
 
 def handle_identifiers(children):
   first = children[0]

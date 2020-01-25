@@ -44,11 +44,14 @@ factor: "-" factor -> negation
       | "+" factor -> idempotence
       | power
 
-power: power "**" die -> exponent
-     | power "%%" die -> logarithm
-     | die
+power: power "**" access -> exponent
+     | power "%%" access -> logarithm
+     | access
 
-die: die "d" atom              -> scalar_die_all
+access: access ("[" die "]")+ -> subscript
+      | die
+
+die: die "d" atom          -> scalar_die_all
    | die "d" atom "h" atom -> scalar_die_highest
    | die "d" atom "l" atom -> scalar_die_lowest
    | die "r" atom          -> vector_die_all
@@ -59,10 +62,10 @@ die: die "d" atom              -> scalar_die_all
 atom: number_literal
     | boolean_literal
     | string_literal
+    | list_literal
+    | dict_literal
     | identifier
     | "(" expression ")"                   -> priority
-    | "[" expression ("," expression)* "]" -> populated_list
-    | "[" "]"                              -> empty_list
 
 boolean_literal: TRUE
                | FALSE
@@ -70,6 +73,14 @@ boolean_literal: TRUE
 number_literal: NUMBER
 
 string_literal: STRING
+
+list_literal: "[" expression ("," expression)* "]" -> populated_list
+            | "[" "]"                              -> empty_list
+
+dict_literal: "{" key_value_pair ("," key_value_pair)* "}" -> populated_dict
+            | "{" "}"                                      -> empty_dict
+
+key_value_pair: expression ":" expression
 
 identifier: scoped_identifier | private_identifier | server_identifier
 

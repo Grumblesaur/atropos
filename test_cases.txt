@@ -51,6 +51,9 @@ my y
 our z
 "double quoted string"
 'single quoted string'
-'single quoted\n escaped string'
-"double quoted\n escaped string"
-
+{}
+{'x' : 4}
+d = {6 : 6.5, 'p' : "q"}
+[1,2,3][0]
+[[[True]]][0][0][0]
+d['p']

@@ -109,6 +109,11 @@ def handle_instruction(tree, user='', server=''):
     out = handlers.handle_exponent(tree.children)
   elif tree.data == 'logarithm':
     out = handlers.handle_logarithm(tree.children)
+
+  elif tree.data == 'access':
+    out = handle_instruction(tree.children[0])
+  elif tree.data == 'subscript':
+    out = handlers.handle_subscript(tree.children)
   
   elif tree.data == 'die':
     out = handle_instruction(tree.children[0])
@@ -124,12 +129,16 @@ def handle_instruction(tree, user='', server=''):
   elif tree.data == 'priority':
     out = handle_instruction(tree.children[0])
   elif tree.data == 'populated_list':
-    out = handlers.handle_list(tree.children)
+    out = handlers.handle_list_literal(tree.children)
   elif tree.data == 'empty_list':
-    out = handlers.handle_list(None)
+    out = handlers.handle_list_literal(None)
   elif tree.data == 'string_literal':
     out = handlers.handle_string_literal(tree.children)
-  
+  elif tree.data == 'populated_dict':
+    out = handlers.handle_dict_literal(tree.children)
+  elif tree.data == 'empty_dict':
+    out = handlers.handle_dict_literal(None)
+   
   elif tree.data == 'identifier':
     ident = handlers.handle_identifiers(tree.children)
     if ident.private:
