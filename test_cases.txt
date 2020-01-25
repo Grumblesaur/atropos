@@ -46,5 +46,7 @@ our z
 x = 1
 my y = 2
 our z = 3
-
+x
+my y
+our z
 

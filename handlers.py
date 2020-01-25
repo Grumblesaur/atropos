@@ -1,6 +1,7 @@
 import math
 import rolls
 import kernel
+import datastore
 
 class Identifier(object):
   def __init__(self, name, user, server):
@@ -21,7 +22,19 @@ def binary_operation(children):
   return tuple(out)
 
 def handle_simple_assignment(data, children, user, server):
-  return '__{}__'.format(data)
+  _, ownership, _ = data.split('_')
+  id_child  = children[0]
+  name = id_child.children[0].value
+  value = kernel.handle_instruction(children[1])
+  
+  if ownership == 'private':
+    out = datastore.private.put(user, name, value)
+  elif ownership == 'server':
+    out = datastore.server.put(server, name, value)
+  elif ownership == 'scoped':
+    out = datastore.public.put(name, value)
+  
+  return out
 
 def handle_logical_or(children):
   left, right = binary_operation(children)

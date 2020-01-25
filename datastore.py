@@ -41,7 +41,8 @@ class _DataStore(object):
   
   def put(self, key, value):
     self.variables[key] = value
-   
+    return value
+  
   def save(self):
     with open(self.storage_file_name, 'w'):
       f.write(repr(self.variables))
