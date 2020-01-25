@@ -2,6 +2,18 @@ import math
 import rolls
 import kernel
 
+class Identifier(object):
+  def __init__(self, name, user, server):
+    self.name    = name
+    self.user    = user
+    self.server  = server
+    self.private = user is not None
+    self.shared  = server is not None
+    self.scoped  = user is None and server is None
+  
+  def __str__(self):
+    return self.name
+
 def binary_operation(children):
   out = []
   for child in children[:2]:
@@ -115,6 +127,17 @@ def handle_list(children):
     for child in children:
       items.append(kernel.handle_instruction(child))
   return items
+
+def handle_identifiers(children):
+  first = children[0]
+  usr, svr = kernel.OwnershipData.get()
+  if first.data == 'scoped_identifier':
+    out = (first.children[0].value, None, None)
+  elif first.data == 'private_identifier':
+    out = (first.children[0].value, usr, None)
+  elif first.data == 'server_identifier':
+    out = (first.children[0].value, None, svr)
+  return Identifier(*out)
 
 def handle_number_literal(children):
   child = children.pop()

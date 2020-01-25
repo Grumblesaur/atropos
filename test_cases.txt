@@ -37,6 +37,12 @@ not 0
 0 xor 0
 True
 False
+[ ]
+[7]
+[7, 7, 7, 7, 7]
+x
+my y
+our z
 x = 1
 my y = 2
 our z = 3

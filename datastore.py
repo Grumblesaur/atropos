@@ -46,8 +46,24 @@ class _DataStore(object):
     with open(self.storage_file_name, 'w'):
       f.write(repr(self.variables))
 
-
-private = _DataStore('vars/private')
-server  = _DataStore('vars/server')
-public  = _DataStore('vars/public')
+class _OwnedDataStore(_DataStore):
+  def get(self, owner_tag, key, default=Undefined()):
+    try:
+      out = self.variables[owner_tag][key]
+    except KeyError as e:
+      if str(e) == owner_tag:
+        self.variables[owner_tag] = { }
+      out = default
+    return out
   
+  def put(self, owner_tag, key, value):
+    if owner_tag not in self.variables:
+      self.variables[owner_tag] = { }
+    self.variables[owner_tag][key] = value
+    return value
+
+private = _OwnedDataStore('vars/private')
+server  = _OwnedDataStore('vars/server')
+public  = _DataStore('vars/public')
+
+

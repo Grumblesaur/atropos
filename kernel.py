@@ -30,6 +30,7 @@ def handle_instruction(tree, user='', server=''):
   
   elif tree.data == 'expression':
     out = handle_instruction(tree.children[0])
+  
   elif tree.data in assignment_types:
     args = (tree.data, tree.children, *OwnershipData.get())
     out = handlers.handle_simple_assignment(*args)
@@ -126,6 +127,17 @@ def handle_instruction(tree, user='', server=''):
     out = handlers.handle_list(tree.children)
   elif tree.data == 'empty_list':
     out = handlers.handle_list(None)
+  
+  elif tree.data == 'identifier':
+    ident = handlers.handle_identifiers(tree.children)
+    if ident.private:
+      out = datastore.private.get(ident.user, ident.name)
+    elif ident.shared:
+      out = datastore.server.get(ident.server, ident.name)
+    elif ident.scoped:
+      out = datastore.public.get(ident.name)
+  
+    
   else:
     print(tree.data)
     out = '__UNIMPLEMENTED__'
