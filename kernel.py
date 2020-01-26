@@ -38,10 +38,9 @@ def handle_instruction(tree, user='', server=''):
   elif tree.data == 'assignment':
     out = handle_instruction(tree.children[0])
   elif tree.data == 'identifier_set':
-    args = (tree.data, tree.children, *OwnershipData.get())
-    out = handlers.handle_identifier_set(*args)
+    out = handlers.handle_identifier_set(tree.children)
   elif tree.data == 'identifier_set_subscript':
-    return handlers.handle_identifier_set_subscript(tree.data, tree.children)
+    return handlers.handle_identifier_set_subscript(tree.children)
     
   elif tree.data == 'bool_or':
     out = handle_instruction(tree.children[0])
@@ -109,8 +108,8 @@ def handle_instruction(tree, user='', server=''):
     out = handle_instruction(tree.children[0])
   elif tree.data == 'negation':
     out = handlers.handle_negation(tree.children)
-  elif tree.data == 'idempotence':
-    out = handlers.handle_idempotence(tree.children)
+  elif tree.data == 'absolute_value':
+    out = handlers.handle_absolute_value(tree.children)
   
   elif tree.data == 'power':
     out = handle_instruction(tree.children[0])

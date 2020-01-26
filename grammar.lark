@@ -50,7 +50,7 @@ term: term "*"  factor -> multiplication
     | factor
 
 factor: "-" factor -> negation
-      | "+" factor -> idempotence
+      | "+" factor -> absolute_value
       | power
 
 power: power "**" access -> exponent
