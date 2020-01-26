@@ -4,6 +4,12 @@ import pytest
 from undefined import Undefined
 
 def get_test_cases(filename):
+  '''test cases file pointed to by filename must have the following properties:
+    * lines are either blank or contain a test case
+    * test cases consist of three things in the following order:
+      * the command to be executed by the dicelang interpreter
+      * the exact sequence of characters '===>' without quotes
+      * the value in Python to which the command should resolve'''
   test_cases = [ ]
   with open(filename, 'r') as f:
     for line in f:
@@ -22,18 +28,4 @@ class TestInterpreter:
     server = "Test Server"
     actual = dicelark.execute(command, user, server)
     assert actual == expected
-    return 1
-
-if __name__ == '__main__':
-  ti = TestInterpreter()
-  passed = 0
-  test_cases = get_test_cases('test_cases.txt')
-  for test_case in test_cases:
-    try:
-      passed += ti.test_execute(*test_case)
-    except AssertionError as e:
-      print(e)
-      break
-  print('{} out of {} test cases passed.'.format(passed, len(test_cases)))
-
 
