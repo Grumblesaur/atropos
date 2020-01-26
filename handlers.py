@@ -333,6 +333,8 @@ def handle_dict_literal(children):
   return pairs
 
 def handle_number_literal(children):
+  '''Evaluates a numeric literal and returns an integer if the floating point
+  result and integer result are the same, else returns a floating point value.'''
   child = children.pop()
   try:
     x = int(child.value)
@@ -344,9 +346,11 @@ def handle_number_literal(children):
   return out
 
 def handle_string_literal(children):
+  '''Evaluates a string literal and returns a string.'''
   return eval(children.pop().value)
 
 def handle_boolean_literal(children):
+  '''Evaluates a boolean literal and returns a boolean.'''
   return eval(children.pop().value)
 
 
