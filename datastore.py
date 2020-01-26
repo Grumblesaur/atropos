@@ -1,23 +1,5 @@
 from collections import defaultdict
-
-class _Singleton(object):
-  '''Used for the implementation of `Undefined`. This class should
-  never be used for any other reason.'''
-  _instance = None
-  def __new__(cls, *args, **kwargs):
-    if not isinstance(cls._instance, cls):
-      cls._instance = object.__new__(cls, *args, **kwargs)
-    return cls._instance
-  
-class Undefined(_Singleton, object):
-  '''A placeholder singleton value like Python's `None` to stand in
-  when a a user references an identifier that does not yet exist.'''
-  def __repr__(self):
-    return 'Undefined()'
-  def __str__(self):
-    return 'Undefined'
-  def __bool__(self):
-    return False
+from undefined   import Undefined
 
 class _DataStore(object):
   '''Internal class for saving, loading, accessing, and mutating
@@ -32,7 +14,7 @@ class _DataStore(object):
     except Exception as e:
       self.variables = {}
     
-  def get(self, key, default=Undefined()):
+  def get(self, key, default=Undefined):
     try:
       out = self.variables[key]
     except KeyError:
@@ -48,7 +30,7 @@ class _DataStore(object):
       f.write(repr(self.variables))
 
 class _OwnedDataStore(_DataStore):
-  def get(self, owner_tag, key, default=Undefined()):
+  def get(self, owner_tag, key, default=Undefined):
     try:
       out = self.variables[owner_tag][key]
     except KeyError as e:

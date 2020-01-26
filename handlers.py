@@ -21,20 +21,49 @@ def binary_operation(children):
     out.append(kernel.handle_instruction(child))
   return tuple(out)
 
-def handle_simple_assignment(data, children, user, server):
-  _, ownership, _ = data.split('_')
-  id_child  = children[0]
-  name = id_child.children[0].value
+def handle_identifiers(data, children, user, server):
+  ownership, _ = data.split('_')
+  name = children[0].value
+  if ownership == 'scoped':
+    user, server = None, None
+  elif ownership == 'shared':
+    user = None
+  elif ownership == 'private':
+    server = None
+  return Identifier(name, user, server)
+
+def handle_identifier_set(data, children, user, server):
+  ident = kernel.handle_instruction(children[0])
   value = kernel.handle_instruction(children[1])
-  
-  if ownership == 'private':
-    out = datastore.private.put(user, name, value)
-  elif ownership == 'server':
-    out = datastore.server.put(server, name, value)
-  elif ownership == 'scoped':
-    out = datastore.public.put(name, value)
-  
+  if ident.scoped:
+    out = datastore.public.put(ident.name, value)
+  elif ident.shared:
+    out = datastore.server.put(server, ident.name, value)
+  elif ident.private:
+    out = datastore.private.put(user, ident.name, value)
   return out
+
+def handle_identifier_set_subscript(data, children):
+  value = kernel.handle_instruction(children.pop())
+  ident = kernel.handle_instruction(children[0])
+  subscripts = [kernel.handle_instruction(child) for child in children[1:]]
+  if ident.private:
+    target = datastore.private.get(ident.user, ident.name)
+  elif ident.shared:
+    target = datastore.server.get(ident.server, ident.name)
+  elif ident.scoped:
+    target = datastore.public.get(ident.name)
+  
+  subscripts = ''.join(['[{}]'.format(repr(subscript)) for subscript in subscripts])
+  exec('target{ss} = {value}'.format(ss=subscripts, value=repr(value)))
+  return value
+
+def handle_subscript_assignment(data, children, user, server):
+  inputs = '''  data = {}\n  children = {}\n  user = {}\n  server = {}'''.format(
+    data, children, user, server
+  )
+  print('handle_subscript_assignment: {}'.format(inputs))
+  return '__handle_subscript_assignment__'
 
 def handle_logical_or(children):
   left, right = binary_operation(children)
@@ -146,8 +175,8 @@ def handle_dice(node_type, children):
   as_sum = result_type == 'scalar'
   return rolls.kernel(dice, sides, count, mode=keep_mode, return_sum=as_sum) 
 
-def handle_subscript(children):
-  indexee = kernel.handle_instruction(children[0])
+def handle_subscript_access(children):
+  indexee  = kernel.handle_instruction(children[0])
   indexors = children[1:]
   for indexor in indexors:
     index = kernel.handle_instruction(indexor)
@@ -169,8 +198,8 @@ def handle_dict_literal(children):
       pairs[key] = value
   return pairs
 
-def handle_identifiers(children):
-  first = children[0]
+def handle_identifier_get(children):
+  first = children[0].children[0]
   usr, svr = kernel.OwnershipData.get()
   if first.data == 'scoped_identifier':
     out = (first.children[0].value, None, None)

@@ -57,6 +57,14 @@ d = {6 : 6.5, 'p' : "q"}
 [1,2,3][0]
 [[[True]]][0][0][0]
 d['p']
+
+nested = {'first' : {'second' : Undefined}}
+nested['new'] = {}
+nested
+nested['first']['second']
+nested['first']['second'] = 'm'
+nested
+
 [1] - [1]
 [1,2,3,4] - [1,3]
 [1,2,3,4] - [2,5]

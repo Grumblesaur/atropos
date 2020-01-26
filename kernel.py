@@ -1,6 +1,7 @@
 import lark
 import handlers
 import datastore
+from undefined import Undefined
 
 class OwnershipData:
   current_user   = ''
@@ -17,11 +18,6 @@ class OwnershipData:
   def get():
     return (OwnershipData.current_user, OwnershipData.current_server)
 
-assignment_types = (
-  'simple_scoped_assignment',
-  'simple_private_assignment',
-  'simple_server_assignment'
-)
 
 def handle_instruction(tree, user='', server=''):
   if tree.data == 'start':
@@ -31,9 +27,14 @@ def handle_instruction(tree, user='', server=''):
   elif tree.data == 'expression':
     out = handle_instruction(tree.children[0])
   
-  elif tree.data in assignment_types:
+  elif tree.data == 'assignment':
+    out = handle_instruction(tree.children[0])
+  elif tree.data == 'identifier_set':
     args = (tree.data, tree.children, *OwnershipData.get())
-    out = handlers.handle_simple_assignment(*args)
+    out = handlers.handle_identifier_set(*args)
+  elif tree.data == 'identifier_set_subscript':
+    return handlers.handle_identifier_set_subscript(tree.data, tree.children)
+    
   elif tree.data == 'bool_or':
     out = handle_instruction(tree.children[0])
   elif tree.data == 'logical_or':
@@ -112,8 +113,8 @@ def handle_instruction(tree, user='', server=''):
 
   elif tree.data == 'access':
     out = handle_instruction(tree.children[0])
-  elif tree.data == 'subscript':
-    out = handlers.handle_subscript(tree.children)
+  elif tree.data == 'subscript_access':
+    out = handlers.handle_subscript_access(tree.children)
   
   elif tree.data == 'die':
     out = handle_instruction(tree.children[0])
@@ -138,9 +139,16 @@ def handle_instruction(tree, user='', server=''):
     out = handlers.handle_dict_literal(tree.children)
   elif tree.data == 'empty_dict':
     out = handlers.handle_dict_literal(None)
-   
   elif tree.data == 'identifier':
-    ident = handlers.handle_identifiers(tree.children)
+    out = handle_instruction(tree.children[0])
+  elif tree.data in ['scoped_identifier', 'private_identifier', 'server_identifier']:
+    args = (tree.data, tree.children, *OwnershipData.get())
+    out = handlers.handle_identifiers(*args)
+  elif tree.data == 'undefined_literal':
+    out = Undefined
+  
+  elif tree.data == 'identifier_get':
+    ident = handlers.handle_identifier_get(tree.children)
     if ident.private:
       out = datastore.private.get(ident.user, ident.name)
     elif ident.shared:
@@ -148,6 +156,9 @@ def handle_instruction(tree, user='', server=''):
     elif ident.scoped:
       out = datastore.public.get(ident.name)
   
+  elif tree.data == 'suffix':
+    out = [handle_instruction(child) for child in tree.children]
+    print(out)
     
   else:
     print(tree.data, tree.children)

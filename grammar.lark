@@ -1,8 +1,13 @@
 start: expression
 
-expression: scoped_identifier  "=" bool_or -> simple_scoped_assignment
-          | private_identifier "=" bool_or -> simple_private_assignment
-          | server_identifier  "=" bool_or -> simple_server_assignment
+identifier_get: identifier
+identifier_set: identifier "=" expression
+identifier_set_subscript: identifier ("[" expression "]")+ "=" expression
+
+assignment: identifier_set
+          | identifier_set_subscript
+
+expression: assignment 
           | bool_or
 
 bool_or: bool_or "or" bool_xor -> logical_or
@@ -48,7 +53,7 @@ power: power "**" access -> exponent
      | power "%%" access -> logarithm
      | access
 
-access: access ("[" die "]")+ -> subscript
+access: access ("[" die "]")+ -> subscript_access
       | die
 
 die: die "d" atom          -> scalar_die_all
@@ -64,8 +69,11 @@ atom: number_literal
     | string_literal
     | list_literal
     | dict_literal
-    | identifier
-    | "(" expression ")"                   -> priority
+    | undefined_literal
+    | identifier_get
+    | "(" expression ")" -> priority
+
+undefined_literal: UNDEFINED
 
 boolean_literal: TRUE
                | FALSE
@@ -90,6 +98,7 @@ server_identifier : "our" IDENT
 
 TRUE:  "True"
 FALSE: "False"
+UNDEFINED: "Undefined"
 IDENT: /[a-zA-Z_]+[a-zA-Z0-9_]*/
 STRING: /("(?!"").*?(?<!\\)(\\\\)*?"|'(?!'').*?(?<!\\)(\\\\)*?')/i
 
