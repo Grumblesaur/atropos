@@ -247,6 +247,8 @@ def handle_negation(children):
   return -kernel.handle_instruction(children[0])
 
 def handle_absolute_value(children):
+  '''Evaluates its operand and returns the arithmetic inverse
+  of the operand if the operand is less than 0.'''
   out = kernel.handle_instruction(children[0])
   return out if out >= 0 else -out
 
