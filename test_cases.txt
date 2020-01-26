@@ -64,8 +64,15 @@ nested['first']['second']
 nested['first']['second'] = 'm'
 nested
 
-x = Undefined
 x
+del x
+x
+
+our box = {'a' : {'a' : {'a' : 1} } }
+our box
+our box['a']['a']['a']
+del our box['a']['a']['a']
+our box
 
 [1] - [1]
 [1,2,3,4] - [1,3]

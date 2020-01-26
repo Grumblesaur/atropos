@@ -1,1 +1,1 @@
-{'x': Undefined, 'd': {6: 6.5, 'p': 'q'}, 'nested': {'first': {'second': 'm'}, 'new': {}}}
+{'d': {6: 6.5, 'p': 'q'}, 'nested': {'first': {'second': 'm'}, 'new': {}}}

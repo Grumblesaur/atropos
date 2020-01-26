@@ -25,6 +25,11 @@ class _DataStore(object):
     self.variables[key] = value
     return value
   
+  def drop(self, key):
+    out = self.variables[key]
+    del self.variables[key]
+    return out
+  
   def save(self):
     with open(self.storage_file_name, 'w') as f:
       f.write(repr(self.variables))
@@ -44,6 +49,11 @@ class _OwnedDataStore(_DataStore):
       self.variables[owner_tag] = { }
     self.variables[owner_tag][key] = value
     return value
+  
+  def drop(self, owner_tag, key):
+    out = self.variables[owner_tag][key].copy()
+    del self.variables[key]
+    return out
 
 private = _OwnedDataStore('vars/private')
 server  = _OwnedDataStore('vars/server')

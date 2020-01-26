@@ -27,6 +27,14 @@ def handle_instruction(tree, user='', server=''):
   elif tree.data == 'expression':
     out = handle_instruction(tree.children[0])
   
+  elif tree.data == 'deletion':
+    out = handle_instruction(tree.children[0])
+  elif tree.data == 'delete_variable':
+    out = handlers.handle_delete_variable(tree.children)
+  elif tree.data == 'delete_element':
+    print(tree.data)
+    out = handlers.handle_delete_element(tree.children)
+  
   elif tree.data == 'assignment':
     out = handle_instruction(tree.children[0])
   elif tree.data == 'identifier_set':

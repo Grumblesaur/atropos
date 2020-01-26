@@ -12,6 +12,13 @@ class Identifier(object):
     self.shared  = server is not None
     self.scoped  = user is None and server is None
   
+  def __repr__(self):
+    return 'Identifier({n}, {u}, {s})'.format(
+      n=repr(self.name),
+      u=repr(self.user),
+      s=repr(self.server))
+
+  
   def __str__(self):
     return self.name
 
@@ -25,12 +32,38 @@ def handle_identifiers(data, children, user, server):
   ownership, _ = data.split('_')
   name = children[0].value
   if ownership == 'scoped':
-    user, server = None, None
-  elif ownership == 'shared':
-    user = None
+    args = (name, None, None)
+  elif ownership == 'server':
+    args = (name, None, server)
   elif ownership == 'private':
-    server = None
-  return Identifier(name, user, server)
+    args = (name, user, None)
+  out = Identifier(*args)
+  return out
+
+def handle_delete_variable(children):
+  ident = kernel.handle_instruction(children[0])
+  if ident.private:
+    out = datastore.private.drop(ident.user, ident.name)
+  elif ident.shared:
+    out = datastore.shared.drop(ident.server, ident.name)
+  elif ident.scoped:
+    out = datastore.public.drop(ident.name)
+  return out
+
+def handle_delete_element(children):
+  ident = kernel.handle_instruction(children[0])
+  subscripts = [kernel.handle_instruction(child) for child in children[1:]]
+  subscripts = ''.join(['[{}]'.format(repr(s)) for s in subscripts])
+  if ident.private:
+    target = datastore.private.get(ident.user, ident.name)
+  elif ident.shared:
+    target = datastore.server.get(ident.server, ident.name)
+  elif ident.scoped:
+    target = datastore.public.get(ident.name)
+  val_repr = 'target{ss}'.format(ss=subscripts)
+  out = eval(val_repr)
+  exec('del {}'.format(val_repr))
+  return out
 
 def handle_identifier_set(data, children, user, server):
   ident = kernel.handle_instruction(children[0])
@@ -47,6 +80,7 @@ def handle_identifier_set_subscript(data, children):
   value = kernel.handle_instruction(children.pop())
   ident = kernel.handle_instruction(children[0])
   subscripts = [kernel.handle_instruction(child) for child in children[1:]]
+  subscripts = ''.join(['[{}]'.format(repr(subscript)) for subscript in subscripts])
   if ident.private:
     target = datastore.private.get(ident.user, ident.name)
   elif ident.shared:
@@ -54,7 +88,6 @@ def handle_identifier_set_subscript(data, children):
   elif ident.scoped:
     target = datastore.public.get(ident.name)
   
-  subscripts = ''.join(['[{}]'.format(repr(subscript)) for subscript in subscripts])
   exec('target{ss} = {value}'.format(ss=subscripts, value=repr(value)))
   return value
 

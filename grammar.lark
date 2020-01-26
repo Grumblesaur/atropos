@@ -4,10 +4,14 @@ identifier_get: identifier
 identifier_set: identifier "=" expression
 identifier_set_subscript: identifier ("[" expression "]")+ "=" expression
 
+deletion.2: "del" identifier                       -> delete_variable
+          | "del" identifier ("[" expression "]")+ -> delete_element
+
 assignment: identifier_set
           | identifier_set_subscript
 
-expression: assignment 
+expression: assignment
+          | deletion
           | bool_or
 
 bool_or: bool_or "or" bool_xor -> logical_or
