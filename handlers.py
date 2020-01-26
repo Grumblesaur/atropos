@@ -30,6 +30,7 @@ class Identifier(object):
     return self.name
   
   def get(self):
+    '''Retrieves the identifier's value from the appropriate datastore.'''
     if self.private:
       out = datastore.private.get(self.user, self.name)
     elif self.shared:
@@ -39,6 +40,7 @@ class Identifier(object):
     return out
   
   def put(self, value):
+    '''Stores the identifier's value in the appropriate datastore.'''
     if self.private:
       out = datastore.private.put(self.user, self.name, value)
     elif self.shared:
@@ -48,6 +50,7 @@ class Identifier(object):
     return out
 
   def drop(self):
+    '''Removes the identifier from the appropriate datastore.'''
     if self.private:
       out = datastore.private.drop(self.user, self.name)
     elif self.shared:
