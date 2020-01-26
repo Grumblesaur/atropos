@@ -146,7 +146,6 @@ def handle_instruction(tree, user='', server=''):
     out = handlers.handle_identifiers(*args)
   elif tree.data == 'undefined_literal':
     out = Undefined
-  
   elif tree.data == 'identifier_get':
     ident = handlers.handle_identifier_get(tree.children)
     if ident.private:

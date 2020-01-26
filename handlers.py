@@ -58,13 +58,6 @@ def handle_identifier_set_subscript(data, children):
   exec('target{ss} = {value}'.format(ss=subscripts, value=repr(value)))
   return value
 
-def handle_subscript_assignment(data, children, user, server):
-  inputs = '''  data = {}\n  children = {}\n  user = {}\n  server = {}'''.format(
-    data, children, user, server
-  )
-  print('handle_subscript_assignment: {}'.format(inputs))
-  return '__handle_subscript_assignment__'
-
 def handle_logical_or(children):
   left, right = binary_operation(children)
   return left or right
