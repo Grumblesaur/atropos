@@ -24,6 +24,9 @@ def handle_instruction(tree, user='', server=''):
     OwnershipData.set(user, server)
     out = handle_instruction(tree.children[0])
   
+  elif tree.data == 'block':
+    out = handlers.handle_block(tree.children)
+  
   elif tree.data == 'expression':
     out = handle_instruction(tree.children[0])
   

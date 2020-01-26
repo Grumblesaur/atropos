@@ -10,8 +10,11 @@ deletion: "del" identifier                       -> delete_variable
 assignment: identifier_set
           | identifier_set_subscript
 
+block: "begin" expression [ ";" expression ]+ "end"
+
 expression: assignment
           | deletion
+          | block
           | bool_or
 
 bool_or: bool_or "or" bool_xor -> logical_or

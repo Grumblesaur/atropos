@@ -68,6 +68,12 @@ def binary_operation(children):
     out.append(kernel.handle_instruction(child))
   return tuple(out)
 
+def handle_block(children):
+  tail = children.pop()
+  for child in children:
+    kernel.handle_instruction(child)
+  return kernel.handle_instruction(tail)
+
 def handle_identifiers(data, children, user, server):
   '''Passes an Identifier object back to the interpreter
   when an identifier token is reached.'''
