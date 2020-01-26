@@ -1,5 +1,4 @@
 import random
-import enum
 
 def kernel(dice, sides, count=0, mode='all', return_sum=True):
   results = [random.randint(1, sides) for die in range(dice)]
