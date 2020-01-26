@@ -24,23 +24,3 @@ class Interpreter(object):
   def interpret(self, tree, user, server):
     return kernel.handle_instruction(tree, user, server)
 
-
-def main(*args):
-  filename = args[1]
-  dicelark = Interpreter('grammar.lark')
-  user     = 'Tester'
-  server   = 'Test Server'
-  with open(filename, 'r') as test_file:
-    for line in test_file:
-      line = line.strip()
-      if line:
-        x = dicelark.execute(line, user, server)
-        print(line, '->', x)
-  datastore.save_all()
-  return 0
-
-if __name__ == '__main__':
-  exit_code = main(*sys.argv)
-  sys.exit(exit_code)
-
-

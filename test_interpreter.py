@@ -1,77 +1,39 @@
+#!/usr/bin/env python3
 import interpreter
 import pytest
+from undefined import Undefined
+
+def get_test_cases(filename):
+  test_cases = [ ]
+  with open(filename, 'r') as f:
+    for line in f:
+      line = line.strip()
+      if line:
+        command, expected = map(lambda s: s.strip(), line.split('===>'))
+        test_cases.append((command, eval(expected)))
+  return test_cases 
+
 
 class TestInterpreter:
+  @pytest.mark.parametrize("command, expected", get_test_cases('test_cases.txt'))
+  def test_execute(self, command, expected):
+    dicelark = interpreter.Interpreter("grammar.lark")
+    user = "Tester"
+    server = "Test Server"
+    actual = dicelark.execute(command, user, server)
+    assert actual == expected
+    return 1
 
-    @pytest.mark.parametrize("command, expected",
-                            [["[]",                  []],
-                             ["[2]",                 [2]],
-                             ["[1,2,3]",             [1,2,3]],
-                             ['["a","b","c"]',       ["a","b","c"]],
-                             ["[True, False]",       [True, False]],
-                             ["[1,2,3][0]",          1],
-                             ['["a","b"][1]',        "b"],
-                             ["[[[True]]][0][0][0]", True],
-                             ["1",                   1],
-                             ["-1",                  -1],
-                             ["+-2",                 2],
-                             ["1+1",                 2],
-                             ["1-1",                 0],
-                             ["1+1-1",               1],
-                             ["1*1",                 1],
-                             ["2*2",                 4],
-                             ["2**2",                4],
-                             ["2**3",                8],
-                             ["2%%8",                3],
-                             ["4/2",                 2],
-                             ["5/2",                 2.5],
-                             ["5//2",                2],
-                             ["[1] + [1]",           [1,1]],
-                             ["[1] - [1]",           []],
-                             ["[1,2] - [1,2]",       []],
-                             ["[1,2,3] - [1,2]",     [3]],
-                             ["[1,2] + [1,2]",       [1,2,1,2]],
-                             ["(((0)))",             0],
-                             ["(1 * (1 + (1 / 1)))", 2],
-                             ["-10 - -9",            -1],
-                             ["6$9",                 69],
-                             ["1 << 4",              16],
-                             ["10 >> 2",             2],
-                             ["6 == 10 - 4",         True],
-                             ["7 != 7.1",            True],
-                             ["9 > 5",               True],
-                             ["5 > 9",               False],
-                             ["9 < 5",               False],
-                             ["5 < 9",               True],
-                             ["8 >= 8",              True],
-                             ["4 <= 4.5",            True],
-                             ["1 and 0",             0],
-                             ["1 and 1",             1],
-                             ["0 and 1",             0],
-                             ["0 and 0",             0],
-                             ["not 1",               False],
-                             ["not 0",               True],
-                             ["0 or 1",              1],
-                             ["1 or 0",              1],
-                             ["0 or 0",              0],
-                             ["1 or 1",              1],
-                             ["4 xor 0",             True],
-                             ["0 xor 4",             True],
-                             ["4 xor 4",             False],
-                             ["0 xor 0",             False],
-                             ["True",                True],
-                             ["False",               False],
-                             ["[ ]",                 []],
-                             ['"double quotes"',     "double quotes"],
-                             ["'single quotes'",     "single quotes"],
-                             ["{}",                  {}],
-                             ["{'x': 4}",            {"x":4}],
-                             ["{'x':4}['x']",        4]])
-    def test_execute(self, command, expected):
-        dicelark = interpreter.Interpreter("grammar.lark")
-        user = "Tester"
-        server = "Test Server"
+if __name__ == '__main__':
+  ti = TestInterpreter()
+  passed = 0
+  test_cases = get_test_cases('test_cases.txt')
+  for test_case in test_cases:
+    try:
+      passed += ti.test_execute(*test_case)
+    except AssertionError as e:
+      print(e)
+      break
+  print('{} out of {} test cases passed.'.format(passed, len(test_cases)))
 
-        actual = dicelark.execute(command, user, server)
 
-        assert actual == expected

@@ -1,83 +1,110 @@
-1
-1.5
-1d6
-4d6h3
-4r6l3
-2 ** 4
-2 %% 8
--4
-+-2
-(((0)))
-(1 * (1 + (1 / 1)))
--10 - -9
-6$9
-1 << 4
-10 >> 2
-6 == 10 - 4
-7 != 7.1
-9 > 5
-5 > 9
-9 < 5
-5 < 9
-8 >= 8
-4 <= 4.5
-1 and 0
-1 and 1
-0 and 1
-0 and 0
-not 1
-not 0
-0 or 1
-1 or 0
-0 or 0
-1 or 1
-4 xor 0
-0 xor 4
-4 xor 4
-0 xor 0
-True
-False
-[ ]
-[7]
-[7, 7, 7, 7, 7]
-x
-my y
-our z
-x = 1
-my y = 2
-our z = 3
-x
-my y
-our z
-"double quoted string"
-'single quoted string'
-{}
-{'x' : 4}
-d = {6 : 6.5, 'p' : "q"}
-[1,2,3][0]
-[[[True]]][0][0][0]
-d['p']
-nested = {'first' : {'second' : Undefined}}
-nested['new'] = {}
-nested
-nested['first']['second']
-nested['first']['second'] = 'm'
-nested
+1 ===> 1
+1.5 ===> 1.5
 
-x
-del x
-x
+2 ** 4 ===> 16
+2 %% 8 ===> 3.0
 
-our box = {'a' : {'a' : {'a' : 1} } }
-our box
-our box['a']['a']['a']
-del our box['a']['a']['a']
-our box
+1+1 ===> 2
+1-1 ===> 0
+2*2 ===> 4
+1+1-1 ===> 1
+1*1 ===> 1
+2**2 ===> 4
+2**3 ===> 8
+4/2 ===> 2
+5/2 ===> 2.5
+5//2 ===> 2
 
-[1] - [1]
-[1,2,3,4] - [1,3]
-[1,2,3,4] - [2,5]
-[1,2,3,4] - [5,6]
+-4 ===> -4
++-2 ===> 2
 
-[0 to 10]
-[0 to 10 by 2]
+(((0))) ===> 0
+(1 * (1 + (1 / 1))) ===> 2.0
+
+-10 - -9 ===> -1
+
+6$9 ===> 69
+1 << 4 ===> 16
+10 >> 2 ===> 2
+
+6 == 10 - 4 ===> True
+7 != 7.1 ===> True
+9 > 5 ===> True
+5 > 9 ===> False
+9 < 5 ===> False
+5 < 9 ===> True
+8 >= 8 ===> True
+4 <= 4.5 ===> True
+
+1 and 0 ===> 0
+1 and 1 ===> 1
+0 and 1 ===> 0
+0 and 0 ===> 0
+
+not 1 ===> False
+not 0 ===> True
+
+0 or 1 ===> 1
+1 or 0 ===> 1
+0 or 0 ===> 0
+1 or 1 ===> 1
+
+4 xor 0 ===> True
+0 xor 4 ===> True
+4 xor 4 ===> False
+0 xor 0 ===> False
+
+True ===> True
+False ===> False
+
+[ ] ===> []
+[7] ===> [7]
+[7] * 5 ===> [7, 7, 7, 7, 7]
+[1] - [1] ===> []
+[1] + [1] ===> [1,1]
+[1,2,3,4] - [1,3] ===> [2,4]
+[1,2,3,4] - [2,5] ===> [1, 3, 4]
+[1,2,3,4] - [5,6] ===> [1, 2, 3, 4]
+[0 to 10] ===> [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+[0 to 10 by 2] ===> [0, 2, 4, 6, 8]
+
+x ===> Undefined
+my y ===> Undefined
+our z ===> Undefined
+
+x = 1 ===> 1
+my y = 2 ===> 2
+our z = 3 ===> 3
+
+x ===> 1
+my y ===> 2
+our z ===> 3
+
+"double quoted string" ===> 'double quoted string'
+'single quoted string' ===> 'single quoted string'
+
+{} ===> {}
+{'x' : 4} ===> {'x' : 4}
+d = {6 : 6.5, 'p' : "q"} ===> {6 : 6.5, 'p' : 'q'}
+d['p'] ===> 'q'
+
+[1,2,3][0] ===> 1
+[[[True]]][0][0][0] ===> True
+
+nested = {'first' : {'second' : Undefined}} ===> {'first' : {'second' : Undefined}}
+nested['new'] = {} ===> {}
+nested ===> {'first' : {'second' : Undefined}, 'new' : {}}
+nested['first']['second'] ===> Undefined
+nested['first']['second'] = 'm' ===> 'm'
+nested ===> {'first' : {'second' : 'm'}, 'new' : {}}
+
+x ===> 1
+del x ===> 1
+x ===> Undefined
+
+our box = {'a' : {'a' : {'a' : 1} } } ===> {'a' : {'a' : {'a' : 1}}}
+our box ===> {'a' : {'a' : {'a' : 1}}}
+our box['a']['a']['a'] ===> 1
+del our box['a']['a']['a'] ===> 1
+our box ===> {'a' : {'a' : {} }}
+
