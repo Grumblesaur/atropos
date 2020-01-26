@@ -1,5 +1,3 @@
-#!/usr/bin/python3
-
 import sys
 from lark import Lark
 
@@ -23,4 +21,5 @@ class Interpreter(object):
     
   def interpret(self, tree, user, server):
     return kernel.handle_instruction(tree, user, server)
+
 

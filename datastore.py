@@ -1,4 +1,3 @@
-from collections import defaultdict
 from undefined   import Undefined
 
 class _DataStore(object):
