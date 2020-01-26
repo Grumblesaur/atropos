@@ -28,7 +28,33 @@ class Identifier(object):
   
   def __str__(self):
     return self.name
+  
+  def get(self):
+    if self.private:
+      out = datastore.private.get(self.user, self.name)
+    elif self.shared:
+      out = datastore.server.get(self.server, self.name)
+    elif self.scoped:
+      out = datastore.public.get(self.name)
+    return out
+  
+  def put(self, value):
+    if self.private:
+      out = datastore.private.put(self.user, self.name, value)
+    elif self.shared:
+      out = datastore.server.put(self.server, self.name, value)
+    elif self.scoped:
+      out = datastore.public.put(self.name, value)
+    return out
 
+  def drop(self):
+    if self.private:
+      out = datastore.private.drop(self.user, self.name)
+    elif self.shared:
+      out = datastore.server.drop(self.server, self.name)
+    elif self.scoped:
+      out = datastore.public.drop(self.name)
+    return out
 
 def binary_operation(children):
   '''Internal function. Evaluates the first two elements
@@ -59,12 +85,7 @@ def handle_delete_variable(children):
   belongs, possibly in accordance with a user or a
   server.'''
   ident = kernel.handle_instruction(children[0])
-  if ident.private:
-    out = datastore.private.drop(ident.user, ident.name)
-  elif ident.shared:
-    out = datastore.shared.drop(ident.server, ident.name)
-  elif ident.scoped:
-    out = datastore.public.drop(ident.name)
+  out = ident.drop()
   return out
 
 def handle_delete_element(children):
@@ -75,12 +96,7 @@ def handle_delete_element(children):
   ident = kernel.handle_instruction(children[0])
   subscripts = [kernel.handle_instruction(child) for child in children[1:]]
   subscripts = ''.join(['[{}]'.format(repr(s)) for s in subscripts])
-  if ident.private:
-    target = datastore.private.get(ident.user, ident.name)
-  elif ident.shared:
-    target = datastore.server.get(ident.server, ident.name)
-  elif ident.scoped:
-    target = datastore.public.get(ident.name)
+  target = ident.get()
   val_repr = 'target{ss}'.format(ss=subscripts)
   out = eval(val_repr)
   exec('del {}'.format(val_repr))
@@ -92,13 +108,7 @@ def handle_identifier_set(children):
   identifier is added to the appropriate datastore.'''
   ident = kernel.handle_instruction(children[0])
   value = kernel.handle_instruction(children[1])
-  if ident.scoped:
-    out = datastore.public.put(ident.name, value)
-  elif ident.shared:
-    out = datastore.server.put(ident.server, ident.name, value)
-  elif ident.private:
-    out = datastore.private.put(ident.user, ident.name, value)
-  return out
+  return ident.put(value)
 
 def handle_identifier_set_subscript(children):
   '''This handles when a subscripted element of a variable is
@@ -107,13 +117,7 @@ def handle_identifier_set_subscript(children):
   ident = kernel.handle_instruction(children[0])
   subscripts = [kernel.handle_instruction(child) for child in children[1:]]
   subscripts = ''.join(['[{}]'.format(repr(subscript)) for subscript in subscripts])
-  if ident.private:
-    target = datastore.private.get(ident.user, ident.name)
-  elif ident.shared:
-    target = datastore.server.get(ident.server, ident.name)
-  elif ident.scoped:
-    target = datastore.public.get(ident.name)
-  
+  target = ident.get()
   exec('target{ss} = {value}'.format(ss=subscripts, value=repr(value)))
   return value
 
@@ -219,7 +223,10 @@ def handle_catenation(children):
   return int(''.join(intstrings))
 
 def handle_multiplication(children):
-  '''Evaluates its operands and returns their product.'''
+  '''Evaluates its operands and returns their product. If
+  one operand is iterable and the other is integral, it returns
+  the value of the iterable operand repeated a number of times
+  equal to the integral operand.'''
   multiplier, multiplicand = binary_operation(children)
   return multiplier * multiplicand
 
@@ -253,14 +260,34 @@ def handle_absolute_value(children):
   return out if out >= 0 else -out
 
 def handle_exponent(children):
+  '''Evaluates its operands and returns the left operand
+  raised to the power of the right operand.'''
   mantissa, exponent = binary_operation(children)
   return mantissa ** exponent
 
 def handle_logarithm(children):
+  '''Evaluates its operands and returns logarithm of
+  the right operand in the base specified by the left operand.'''
   base, antilogarithm = binary_operation(children)
   return math.log(antilogarithm, base)
 
 def handle_dice(node_type, children):
+  '''Evaluates its operands and generates a random number
+  in a manner akin to rolling dice:
+    two-operand rolls have dice and sides
+    three-operand rolls have dice, sides, and count
+    
+    dice: the number of dice to roll
+    sides: the number of sides each die has (numbered from 1 to `sides`)
+    count: the number of rolls kept for the final result
+    
+    all keep mode will keep all the rolls in the result list (2-op)
+    high keep mode will keep the highest `count` rolls in the result list (3-op)
+    low keep mode will keep the lowest `count` rolls in the result list (3-op)
+    
+    scalar result types will sum the output of the die roll.
+    vector result types will return the list of components of the die roll.
+  '''
   result_type, _, keep_mode = node_type.split('_')
   dice   = kernel.handle_instruction(children[0])
   sides  = kernel.handle_instruction(children[1])
@@ -269,6 +296,8 @@ def handle_dice(node_type, children):
   return rolls.kernel(dice, sides, count, mode=keep_mode, return_sum=as_sum) 
 
 def handle_subscript_access(children):
+  '''Evaluates its operands, and iteratively indexes/subscripts the
+  first operand with the rest of the operands from left to right.'''
   indexee  = kernel.handle_instruction(children[0])
   indexors = children[1:]
   for indexor in indexors:
@@ -277,6 +306,8 @@ def handle_subscript_access(children):
   return indexee
 
 def handle_list_literal(children):
+  '''Evaluates its components and inserts them into a list,
+  then returns that list.'''
   items = [ ]
   if children:
     for child in children:
@@ -284,27 +315,22 @@ def handle_list_literal(children):
   return items
 
 def handle_list_range_literal(children):
+  '''Constructs and returns list of numbers in a linear order. For two
+  arguments, the resulting list will consist of all integers in the half-
+  open interval from the value of the first argument to the second argument.
+  For three arguments, the third argument specifies a skip interval.'''
   args = [kernel.handle_instruction(child) for child in children]
   return [x for x in range(*args)]
 
 def handle_dict_literal(children):
+  '''Evaluates its components and constructs a hash table of
+  key-value pairs, then returns that hash table.'''
   pairs = { }
   if children:
     for child in children:
       key, value = binary_operation(child.children)
       pairs[key] = value
   return pairs
-
-def handle_identifier_get(children):
-  first = children[0].children[0]
-  usr, svr = kernel.OwnershipData.get()
-  if first.data == 'scoped_identifier':
-    out = (first.children[0].value, None, None)
-  elif first.data == 'private_identifier':
-    out = (first.children[0].value, usr, None)
-  elif first.data == 'server_identifier':
-    out = (first.children[0].value, None, svr)
-  return Identifier(*out)
 
 def handle_number_literal(children):
   child = children.pop()

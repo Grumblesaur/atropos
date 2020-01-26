@@ -32,7 +32,6 @@ def handle_instruction(tree, user='', server=''):
   elif tree.data == 'delete_variable':
     out = handlers.handle_delete_variable(tree.children)
   elif tree.data == 'delete_element':
-    print(tree.data)
     out = handlers.handle_delete_element(tree.children)
   
   elif tree.data == 'assignment':
@@ -158,7 +157,7 @@ def handle_instruction(tree, user='', server=''):
   elif tree.data == 'undefined_literal':
     out = Undefined
   elif tree.data == 'identifier_get':
-    ident = handlers.handle_identifier_get(tree.children)
+    ident = handle_instruction(tree.children[0])
     if ident.private:
       out = datastore.private.get(ident.user, ident.name)
     elif ident.shared:
@@ -166,10 +165,6 @@ def handle_instruction(tree, user='', server=''):
     elif ident.scoped:
       out = datastore.public.get(ident.name)
   
-  elif tree.data == 'suffix':
-    out = [handle_instruction(child) for child in tree.children]
-    print(out)
-    
   else:
     print(tree.data, tree.children)
     out = '__UNIMPLEMENTED__'
