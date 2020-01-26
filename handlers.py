@@ -216,6 +216,10 @@ def handle_list_literal(children):
       items.append(kernel.handle_instruction(child))
   return items
 
+def handle_list_range_literal(children):
+  args = [kernel.handle_instruction(child) for child in children]
+  return [x for x in range(*args)]
+
 def handle_dict_literal(children):
   pairs = { }
   if children:

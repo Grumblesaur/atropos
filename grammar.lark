@@ -86,8 +86,10 @@ number_literal: NUMBER
 
 string_literal: STRING
 
-list_literal: "[" expression ("," expression)* "]" -> populated_list
-            | "[" "]"                              -> empty_list
+list_literal: "[" expression ("," expression)* "]"              -> populated_list
+            | "[" "]"                                           -> empty_list
+            | "[" expression "to" expression "]"                -> range_list
+            | "[" expression "to" expression "by" expression "]"-> range_list_stepped
 
 dict_literal: "{" key_value_pair ("," key_value_pair)* "}" -> populated_dict
             | "{" "}"                                      -> empty_dict

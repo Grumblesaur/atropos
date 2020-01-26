@@ -141,6 +141,10 @@ def handle_instruction(tree, user='', server=''):
     out = handlers.handle_list_literal(tree.children)
   elif tree.data == 'empty_list':
     out = handlers.handle_list_literal(None)
+  elif tree.data == 'range_list':
+    out = handlers.handle_list_range_literal(tree.children)
+  elif tree.data == 'range_list_stepped':
+    out = handlers.handle_list_range_literal(tree.children)
   elif tree.data == 'string_literal':
     out = handlers.handle_string_literal(tree.children)
   elif tree.data == 'populated_dict':
