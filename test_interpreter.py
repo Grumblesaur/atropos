@@ -19,13 +19,14 @@ def get_test_cases(filename):
         test_cases.append((command, eval(expected)))
   return test_cases 
 
-
 class TestInterpreter:
+  dicelark = interpreter.Interpreter('grammar.lark')
+  
   @pytest.mark.parametrize("command, expected", get_test_cases('test_cases.txt'))
   def test_execute(self, command, expected):
-    dicelark = interpreter.Interpreter("grammar.lark")
-    user = "Tester"
-    server = "Test Server"
-    actual = dicelark.execute(command, user, server)
+    user = 'Tester'
+    server = 'Test Server'
+    actual = TestInterpreter.dicelark.execute(command, user, server)
     assert actual == expected
+
 

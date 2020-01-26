@@ -158,12 +158,7 @@ def handle_instruction(tree, user='', server=''):
     out = Undefined
   elif tree.data == 'identifier_get':
     ident = handle_instruction(tree.children[0])
-    if ident.private:
-      out = datastore.private.get(ident.user, ident.name)
-    elif ident.shared:
-      out = datastore.server.get(ident.server, ident.name)
-    elif ident.scoped:
-      out = datastore.public.get(ident.name)
+    out = ident.get()
   
   else:
     print(tree.data, tree.children)

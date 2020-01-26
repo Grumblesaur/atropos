@@ -10,10 +10,7 @@ dicelark = Interpreter("grammar.lark")
 user = "Tester"
 server = "Test Server"
 
-print(
-"""Dicelark v0.1
-Enter !quit or press Ctrl-Z to exit."""
-)
+print('Dicelark v0.1\nEnter !quit or press Ctrl-Z to exit.')
 
 while running:
     command = input("dice > ")
