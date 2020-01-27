@@ -1,31 +1,21 @@
 import lark
 import handlers
 import datastore
+import ownership
 from undefined import Undefined
 
-class OwnershipData:
-  current_user   = ''
-  current_server = ''
-  
-  def set(user, server):
-    OwnershipData.current_user   = user
-    OwnershipData.current_server = server
-
-  def clear():
-    OwnershipData.current_user   = ''
-    OwnershipData.current_server = ''
-  
-  def get():
-    return (OwnershipData.current_user, OwnershipData.current_server)
-
+scoping_data = None
 
 def handle_instruction(tree, user='', server=''):
+  global scoping_data
+  if isinstance(tree, lark.Token):
+    print(tree)
   if tree.data == 'start':
-    OwnershipData.set(user, server)
+    scoping_data = ownership.ScopingData(user, server)
     out = handle_instruction(tree.children[0])
   
   elif tree.data == 'block':
-    out = handlers.handle_block(tree.children)
+    out = handlers.handle_block(tree.children, scoping_data)
   
   elif tree.data == 'expression':
     out = handle_instruction(tree.children[0])
@@ -155,8 +145,7 @@ def handle_instruction(tree, user='', server=''):
   elif tree.data == 'identifier':
     out = handle_instruction(tree.children[0])
   elif tree.data in ['scoped_identifier', 'private_identifier', 'server_identifier']:
-    args = (tree.data, tree.children, *OwnershipData.get())
-    out = handlers.handle_identifiers(*args)
+    out = handlers.handle_identifiers(tree.data, tree.children, scoping_data)
   elif tree.data == 'undefined_literal':
     out = Undefined
   elif tree.data == 'identifier_get':
@@ -168,7 +157,7 @@ def handle_instruction(tree, user='', server=''):
     out = '__UNIMPLEMENTED__'
   
   if tree.data == 'start':
-    OwnershipData.clear()
+    scoping_data = None
    
   return out
 

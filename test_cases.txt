@@ -109,6 +109,6 @@ del our box['a']['a']['a'] ===> 1
 our box ===> {'a' : {'a' : {} }}
 
 begin block_x = 1; block_y = 2; block_x + block_y end ===> 3
-block_result = begin block_z = block_x + block_y; block_z * 3 end ===> 9
+block_result = begin block_y end ===> Undefined
 
 

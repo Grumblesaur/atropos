@@ -2,62 +2,7 @@ import math
 import rolls
 import kernel
 import datastore
-
-class Identifier(object):
-  '''Internal class for storing the information of
-  an identifier prior to its evaluation.'''
-  
-  def __init__(self, name, user, server):
-    '''Creates an Identifier object.
-      name: the name of this identifier.
-      user: if this identifier is associated with a person, this is their name.
-      server: if this identifier is associated with a server, this is its name.'''
-    self.name    = name
-    self.user    = user
-    self.server  = server
-    self.private = user is not None
-    self.shared  = server is not None
-    self.scoped  = user is None and server is None
-  
-  def __repr__(self):
-    '''eval-able string representation of an Identifier.'''
-    return 'Identifier({n}, {u}, {s})'.format(
-      n=repr(self.name),
-      u=repr(self.user),
-      s=repr(self.server))
-  
-  def __str__(self):
-    return self.name
-  
-  def get(self):
-    '''Retrieves the identifier's value from the appropriate datastore.'''
-    if self.private:
-      out = datastore.private.get(self.user, self.name)
-    elif self.shared:
-      out = datastore.server.get(self.server, self.name)
-    elif self.scoped:
-      out = datastore.public.get(self.name)
-    return out
-  
-  def put(self, value):
-    '''Stores the identifier's value in the appropriate datastore.'''
-    if self.private:
-      out = datastore.private.put(self.user, self.name, value)
-    elif self.shared:
-      out = datastore.server.put(self.server, self.name, value)
-    elif self.scoped:
-      out = datastore.public.put(self.name, value)
-    return out
-
-  def drop(self):
-    '''Removes the identifier from the appropriate datastore.'''
-    if self.private:
-      out = datastore.private.drop(self.user, self.name)
-    elif self.shared:
-      out = datastore.server.drop(self.server, self.name)
-    elif self.scoped:
-      out = datastore.public.drop(self.name)
-    return out
+from identifier import Identifier
 
 def binary_operation(children):
   '''Internal function. Evaluates the first two elements
@@ -68,24 +13,21 @@ def binary_operation(children):
     out.append(kernel.handle_instruction(child))
   return tuple(out)
 
-def handle_block(children):
+def handle_block(children, scoping_data):
+  scoping_data.push_scope()
   tail = children.pop()
   for child in children:
     kernel.handle_instruction(child)
-  return kernel.handle_instruction(tail)
+  out = kernel.handle_instruction(tail)
+  scoping_data.pop_scope()
+  return out
 
-def handle_identifiers(data, children, user, server):
+def handle_identifiers(tree_data, children, scoping_data):
   '''Passes an Identifier object back to the interpreter
   when an identifier token is reached.'''
-  ownership, _ = data.split('_')
+  ownership, _ = tree_data.split('_')
   name = children[0].value
-  if ownership == 'scoped':
-    args = (name, None, None)
-  elif ownership == 'server':
-    args = (name, None, server)
-  elif ownership == 'private':
-    args = (name, user, None)
-  out = Identifier(*args)
+  out = Identifier(name, scoping_data, ownership)
   return out
 
 def handle_delete_variable(children):
