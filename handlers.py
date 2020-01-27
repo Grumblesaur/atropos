@@ -3,6 +3,8 @@ import rolls
 import kernel
 import datastore
 from identifier import Identifier
+from function import Function
+
 
 def binary_operation(children):
   '''Internal function. Evaluates the first two elements
@@ -12,6 +14,11 @@ def binary_operation(children):
   for child in children[:2]:
     out.append(kernel.handle_instruction(child))
   return tuple(out)
+
+def handle_function(children):
+  code = children.pop()
+  params = [child[0] for child in children]
+  return repr(Function(code, params))
 
 def handle_block(children, scoping_data):
   scoping_data.push_scope()

@@ -111,4 +111,13 @@ our box ===> {'a' : {'a' : {} }}
 begin block_x = 1; block_y = 2; block_x + block_y end ===> 3
 block_result = begin block_y end ===> Undefined
 
+block_result = begin q = (begin q = 5 end) + 1 end ===> 6
+block_result = begin q = (begin q = 5 end); q = q + (begin q = 5 end) end ===> 10
+
+() -> begin 'nullary function' end ===> __NO_TEST_CASE__
+
+(first) -> begin 'unary function' end ===> __NO_TEST_CASE__
+
+(first, second) -> begin 'binary function' end  ===> __NO_TEST_CASE__
+
 

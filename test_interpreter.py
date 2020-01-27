@@ -2,6 +2,7 @@
 import interpreter
 import pytest
 from undefined import Undefined
+from function import Function
 
 def get_test_cases(filename):
   '''test cases file pointed to by filename must have the following properties:

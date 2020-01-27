@@ -36,7 +36,6 @@ class Identifier(object):
       else:
         lookup = datastore.public.get(self.name)
       out = lookup if lookup is not None else Undefined
-      print("GET: {} -> {}".format(self.name, out))
     return out
   
   def put(self, value):
@@ -62,10 +61,8 @@ class Identifier(object):
     elif self.mode == 'scoped':
       if self.scoping_data:
         drop = self.scoping_data.drop(self.name)
-        print('local drop =', drop)
       else:
         drop = datastore.public.drop(self.name)
-        print('global drop =', drop)
       out = drop if drop is not None else Undefined
     return out
 
