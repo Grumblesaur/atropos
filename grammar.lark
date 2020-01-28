@@ -72,6 +72,9 @@ power: power "**" access -> exponent
 access: access ("[" die "]")+ -> subscript_access
       | die
 
+//sum_or_join: "&" die -> ampersand
+//           | die
+
 die: die "d" atom          -> scalar_die_all
    | die "d" atom "h" atom -> scalar_die_highest
    | die "d" atom "l" atom -> scalar_die_lowest

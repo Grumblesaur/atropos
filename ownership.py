@@ -25,14 +25,14 @@ class ScopingData(object):
     return self.scopes.pop()
   
   def get(self, key):
-    i = self.depth() - 1
     out = None
-    while i >= 0:
+    for scope in reversed(self.scopes):
       try:
-        out = self.scopes[i][key]
+        out = scope[key]
       except KeyError:
         out = None
-      i -= 1
+      else:
+        break
     return out
   
   def put(self, key, value):

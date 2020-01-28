@@ -8,8 +8,6 @@ scoping_data = None
 
 def handle_instruction(tree, user='', server=''):
   global scoping_data
-  if isinstance(tree, lark.Token):
-    print(tree)
   if tree.data == 'start':
     scoping_data = ownership.ScopingData(user, server)
     out = handle_instruction(tree.children[0])
