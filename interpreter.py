@@ -27,7 +27,6 @@ class Interpreter(object):
   def interpret(self, tree, user, server):
     return kernel.handle_instruction(tree, user, server)
 
-
 def main(*args):
   from test_interpreter import get_test_cases
   from test_interpreter import Skip
@@ -40,11 +39,14 @@ def main(*args):
   interpreter = Interpreter('grammar.lark')
   for command, expected in test_cases:
     actual = interpreter.execute(command, 'Tester', 'Test Server')
+    msg = '{} ===> actual = {}'.format(command, actual)
+    check_msg = msg + (' :: expected = {}'.format(expected))
     if expected is not Skip:
       data = (command, actual, expected)
-      print('{} ===> actual = {} :: expected = {}'.format(*data))
+      print(check_msg)
       assert actual == expected
     else:
+      print(msg)
       assert True
   return 0
 

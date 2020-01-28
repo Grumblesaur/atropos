@@ -265,6 +265,13 @@ def handle_dice(node_type, children):
   as_sum = result_type == 'scalar'
   return rolls.kernel(dice, sides, count, mode=keep_mode, return_sum=as_sum) 
 
+def handle_repetition(children):
+  times = kernel.handle_instruction(children[1])
+  out = [ ]
+  for time in range(times):
+    out.append(kernel.handle_instruction(children[0]))
+  return out
+
 def handle_subscript_access(children):
   '''Evaluates its operands, and iteratively indexes/subscripts the
   first operand with the rest of the operands from left to right.'''
@@ -305,7 +312,7 @@ def handle_dict_literal(children):
 def handle_number_literal(children):
   '''Evaluates a numeric literal and returns an integer if the floating point
   result and integer result are the same, else returns a floating point value.'''
-  child = children.pop()
+  child = children[-1]
   try:
     x = int(child.value)
     f = float(child.value)
@@ -317,10 +324,10 @@ def handle_number_literal(children):
 
 def handle_string_literal(children):
   '''Evaluates a string literal and returns a string.'''
-  return eval(children.pop().value)
+  return eval(children[-1].value)
 
 def handle_boolean_literal(children):
   '''Evaluates a boolean literal and returns a boolean.'''
-  return eval(children.pop().value)
+  return eval(children[-1].value)
 
 

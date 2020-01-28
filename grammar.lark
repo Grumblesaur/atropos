@@ -21,7 +21,10 @@ expression: assignment
           | block
           | function
           | function_call
-          | bool_or
+          | repeat
+
+repeat: repeat "^" bool_or -> repetition
+      | bool_or
 
 bool_or: bool_or "or" bool_xor -> logical_or
        | bool_xor

@@ -126,6 +126,11 @@ def handle_instruction(tree, user='', server=''):
   elif 'scalar_die' in tree.data or 'vector_die' in tree.data:
     out = handlers.handle_dice(tree.data, tree.children)
   
+  elif tree.data == 'repeat':
+    out = handle_instruction(tree.children[0])
+  elif tree.data == 'repetition':
+    out = handlers.handle_repetition(tree.children)
+  
   elif tree.data == 'atom':
     out = handle_instruction(tree.children[0])
   elif tree.data == 'number_literal':
