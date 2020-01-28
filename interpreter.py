@@ -9,9 +9,6 @@ from function import Function
 from lark import Tree
 from lark import Token
 
-from test_interpreter import get_test_cases
-from test_interpreter import Skip
-
 class Interpreter(object):
   def __init__(self, grammar_file_name, debug=False):
     with open(grammar_file_name, 'r') as grammar_file:
@@ -32,23 +29,19 @@ class Interpreter(object):
 
 
 def main(*args):
-  args = list(args)
-  no_expected = '--no-test' in args
-  if no_expected:
-    args.pop(args.index('--no-test'))
+  from test_interpreter import get_test_cases
+  from test_interpreter import Skip
   try:
     filename = args[1]
   except IndexError:
     print('No filename provided!')
     return 1
-  test_cases = get_test_cases(filename, no_expected)
+  test_cases = get_test_cases(filename)
   interpreter = Interpreter('grammar.lark')
   for command, expected in test_cases:
     print(command)
     actual = interpreter.execute(command, 'Tester', 'Test Server')
-    if no_expected:
-      print(command, '===>', actual)
-    elif expected is not Skip
+    if expected is not Skip:
       if actual != expected:
         print('actual = {}\n expected = {}'.format(actual, expected))
       assert actual == expected
