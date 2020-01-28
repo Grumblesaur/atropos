@@ -67,13 +67,18 @@ factor: "-" factor -> negation
 
 power: power "**" access -> exponent
      | power "%%" access -> logarithm
+     | ampersand
+
+ampersand: "&" slice -> sum_or_join
+         | slice
+
+slice: slice ("[" access ":" access "]")+ -> contiguous_slice
+     | slice ("[" access ":" access ":" access "]")+ -> skip_slice
      | access
 
 access: access ("[" die "]")+ -> subscript_access
       | die
 
-//sum_or_join: "&" die -> ampersand
-//           | die
 
 die: die "d" atom          -> scalar_die_all
    | die "d" atom "h" atom -> scalar_die_highest

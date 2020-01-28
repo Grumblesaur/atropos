@@ -2,6 +2,7 @@ import math
 import rolls
 import kernel
 import datastore
+from collections.abc import Iterable
 from identifier import Identifier
 from function import Function
 from function import FunctionCallException
@@ -241,6 +242,19 @@ def handle_logarithm(children):
   base, antilogarithm = binary_operation(children)
   return math.log(antilogarithm, base)
 
+def handle_sum_or_join(children):
+  operand = kernel.handle_instruction(children[0])
+  if isinstance(operand, Iterable) and operand:
+    out = operand[0]
+    for element in operand[1:]:
+      out += element
+  elif isinstance(operand, Iterable) and not operand:
+    out = 0
+  else:
+    out = operand
+  return out
+    
+
 def handle_dice(node_type, children):
   '''Evaluates its operands and generates a random number
   in a manner akin to rolling dice:
@@ -270,6 +284,23 @@ def handle_repetition(children):
   out = [ ]
   for time in range(times):
     out.append(kernel.handle_instruction(children[0]))
+  return out
+
+def handle_contiguous_slice(children):
+  v, start, stop = [kernel.handle_instruction(child) for child in children]
+  return v[start:stop]
+
+def handle_skip_slice(children):
+  v, start, stop, skip = [kernel.handle_instruction(child) for child in children]
+  return v[start:stop:skip]
+
+def handle_subscript(children):
+  is_slice = len(children) > 1
+  args = [kernel.handle_instruction(child) for child in children]
+  if is_slice:
+    out = slice(*args)
+  else:
+    out = args[0]
   return out
 
 def handle_subscript_access(children):

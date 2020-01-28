@@ -113,7 +113,19 @@ def handle_instruction(tree, user='', server=''):
     out = handlers.handle_exponent(tree.children)
   elif tree.data == 'logarithm':
     out = handlers.handle_logarithm(tree.children)
-
+  
+  elif tree.data == 'ampersand':
+    out = handle_instruction(tree.children[0])
+  elif tree.data == 'sum_or_join':
+    out = handlers.handle_sum_or_join(tree.children)
+  
+  elif tree.data == 'slice':
+    out = handle_instruction(tree.children[0])
+  elif tree.data == 'contiguous_slice':
+    out = handlers.handle_contiguous_slice(tree.children)
+  elif tree.data == 'skip_slice':
+    out = handlers.handle_skip_slice(tree.children)
+  
   elif tree.data == 'access':
     out = handle_instruction(tree.children[0])
   elif tree.data == 'subscript_access':
