@@ -121,10 +121,8 @@ def handle_instruction(tree, user='', server=''):
   
   elif tree.data == 'slice':
     out = handle_instruction(tree.children[0])
-  elif tree.data == 'contiguous_slice':
-    out = handlers.handle_contiguous_slice(tree.children)
-  elif tree.data == 'skip_slice':
-    out = handlers.handle_skip_slice(tree.children)
+  elif "_slice" in tree.data:
+    out = handlers.handle_slices(tree.data, tree.children)
   
   elif tree.data == 'access':
     out = handle_instruction(tree.children[0])

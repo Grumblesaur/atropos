@@ -253,7 +253,6 @@ def handle_sum_or_join(children):
   else:
     out = operand
   return out
-    
 
 def handle_dice(node_type, children):
   '''Evaluates its operands and generates a random number
@@ -286,32 +285,34 @@ def handle_repetition(children):
     out.append(kernel.handle_instruction(children[0]))
   return out
 
-def handle_contiguous_slice(children):
-  v, start, stop = [kernel.handle_instruction(child) for child in children]
-  return v[start:stop]
-
-def handle_skip_slice(children):
-  v, start, stop, skip = [kernel.handle_instruction(child) for child in children]
-  return v[start:stop:skip]
-
-def handle_subscript(children):
-  is_slice = len(children) > 1
-  args = [kernel.handle_instruction(child) for child in children]
-  if is_slice:
-    out = slice(*args)
-  else:
-    out = args[0]
+def handle_slices(slice_type, children):
+  v = kernel.handle_instruction(children[0])
+  slice_args = [kernel.handle_instruction(child) for child in children[1:]]
+  if slice_type == 'whole_slice':
+    out = v[:]
+  elif slice_type == 'start_slice':
+    out = v[slice_args[0]:]
+  elif slice_type == 'start_step_slice':
+    out = v[slice_args[0]::slice_args[1]]
+  elif slice_type == 'start_stop_slice':
+    out = v[slice_args[0]:slice_args[1]]
+  elif slice_type == 'fine_slice':
+    out = v[slice_args[0]:slice_args[1]:slice_args[2]]
+  elif slice_type == 'stop_slice':
+    out = v[:slice_args[0]]
+  elif slice_type == 'stop_step_slice':
+    out = v[:slice_args[0]:slice_args[1]]
+  elif slice_type == 'step_slice':
+    out = v[::slice_args[0]]
+  elif slice_type == 'not_a_slice':
+    out = handle_subscript_access(children)
   return out
 
 def handle_subscript_access(children):
   '''Evaluates its operands, and iteratively indexes/subscripts the
   first operand with the rest of the operands from left to right.'''
-  indexee  = kernel.handle_instruction(children[0])
-  indexors = children[1:]
-  for indexor in indexors:
-    index = kernel.handle_instruction(indexor)
-    indexee = indexee[index]
-  return indexee
+  iterable, index = binary_operation(children)
+  return iterable[index]
 
 def handle_list_literal(children):
   '''Evaluates its components and inserts them into a list,

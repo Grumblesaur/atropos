@@ -65,20 +65,23 @@ factor: "-" factor -> negation
       | "+" factor -> absolute_value
       | power
 
-power: power "**" access -> exponent
-     | power "%%" access -> logarithm
+power: power "**" ampersand -> exponent
+     | power "%%" ampersand -> logarithm
      | ampersand
 
 ampersand: "&" slice -> sum_or_join
          | slice
 
-slice: slice ("[" access ":" access "]")+ -> contiguous_slice
-     | slice ("[" access ":" access ":" access "]")+ -> skip_slice
-     | access
-
-access: access ("[" die "]")+ -> subscript_access
-      | die
-
+slice: slice ("["            ":"             (":")?           "]") -> whole_slice
+     | slice ("[" expression ":"             (":")?           "]") -> start_slice
+     | slice ("[" expression ":"              ":"  expression "]") -> start_step_slice
+     | slice ("[" expression ":" expression  (":")?           "]") -> start_stop_slice
+     | slice ("[" expression ":" expression   ":"  expression "]") -> fine_slice
+     | slice ("["            ":" expression  (":")?           "]") -> stop_slice
+     | slice ("["            ":" expression   ":"  expression "]") -> stop_step_slice
+     | slice ("["            ":"              ":"  expression "]") -> step_slice
+     | slice ("[" expression "]")                                  -> not_a_slice
+     | die
 
 die: die "d" atom          -> scalar_die_all
    | die "d" atom "h" atom -> scalar_die_highest
