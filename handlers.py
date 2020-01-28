@@ -18,8 +18,8 @@ def binary_operation(children):
 def handle_function(children):
   '''Produces a function object from the function syntax
   and returns that function object to be called later.'''
-  code = children.pop()
-  params = [child.value for child in children]
+  code = children[-1]
+  params = [child.value for child in children[:-1]]
   out = Function(code, *params)
   return out
 
@@ -34,8 +34,8 @@ def handle_function_call(children, scoping_data):
 
 def handle_block(children, scoping_data):
   scoping_data.push_scope()
-  tail = children.pop()
-  for child in children:
+  tail = children[-1]
+  for child in children[:-1]:
     kernel.handle_instruction(child)
   out = kernel.handle_instruction(tail)
   scoping_data.pop_scope()
@@ -83,9 +83,9 @@ def handle_identifier_set(children):
 def handle_identifier_set_subscript(children):
   '''This handles when a subscripted element of a variable is
   assigned a value, or when such an element is created.'''
-  value = kernel.handle_instruction(children.pop())
+  value = kernel.handle_instruction(children[-1])
   ident = kernel.handle_instruction(children[0])
-  subscripts = [kernel.handle_instruction(child) for child in children[1:]]
+  subscripts = [kernel.handle_instruction(child) for child in children[1:-1]]
   subscripts = ''.join(['[{}]'.format(repr(subscript)) for subscript in subscripts])
   target = ident.get()
   exec('target{ss} = {value}'.format(ss=subscripts, value=repr(value)))
