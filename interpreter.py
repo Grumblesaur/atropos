@@ -9,6 +9,9 @@ from function import Function
 from lark import Tree
 from lark import Token
 
+from test_interpreter import get_test_cases
+from test_interpreter import Skip
+
 class Interpreter(object):
   def __init__(self, grammar_file_name, debug=False):
     with open(grammar_file_name, 'r') as grammar_file:
@@ -28,23 +31,6 @@ class Interpreter(object):
     return kernel.handle_instruction(tree, user, server)
 
 
-def get_test_cases(filename, no_expected=False):
-  '''test cases file pointed to by filename must have the following properties:
-    * lines are either blank or contain a test case
-    * test cases consist of three things in the following order:
-      * the command to be executed by the dicelang interpreter
-      * the exact sequence of characters '===>' without quotes
-      * the value in Python to which the command should resolve'''
-  test_cases = [ ]
-  prepare = lambda s: s if no_expected else eval
-  with open(filename, 'r') as f:
-    for line in f:
-      line = line.strip()
-      if line:
-        command, expected = map(lambda s: s.strip(), line.split('===>'))
-        test_cases.append((command, prepare(expected)))
-  return test_cases 
-
 def main(*args):
   args = list(args)
   no_expected = '--no-test' in args
@@ -62,10 +48,12 @@ def main(*args):
     actual = interpreter.execute(command, 'Tester', 'Test Server')
     if no_expected:
       print(command, '===>', actual)
-    else:
+    elif expected is not Skip
       if actual != expected:
         print('actual = {}\n expected = {}'.format(actual, expected))
       assert actual == expected
+    else:
+      assert True
   return 0
 
 if __name__ == '__main__':
