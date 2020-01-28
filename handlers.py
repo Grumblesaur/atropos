@@ -16,6 +16,8 @@ def binary_operation(children):
   return tuple(out)
 
 def handle_function(children):
+  '''Produces a function object from the function syntax
+  and returns that function object to be called later.'''
   code = children.pop()
   params = [child.value for child in children]
   out = Function(code, *params)
@@ -23,6 +25,10 @@ def handle_function(children):
   return out
 
 def handle_function_call(children, scoping_data):
+  '''Attempts to call the evaluated first element as a function,
+  with all following elements as arguments. Scoping data is passed
+  to push the function's parameters on the call stack. If the first
+  element isn't a function, this is going to blow up.'''
   function = kernel.handle_instruction(children[0])
   arguments = map(kernel.handle_instruction, children[1:])
   return function(scoping_data, *arguments)
