@@ -4,6 +4,7 @@ import pytest
 from undefined import Undefined
 from function import Function
 
+Skip = object
 def get_test_cases(filename):
   '''test cases file pointed to by filename must have the following properties:
     * lines are either blank or contain a test case
@@ -17,7 +18,8 @@ def get_test_cases(filename):
       line = line.strip()
       if line:
         command, expected = map(lambda s: s.strip(), line.split('===>'))
-        test_cases.append((command, eval(expected)))
+        expected = Skip if expected == '__NO_TEST_CASE__' else eval(expected)
+        test_cases.append((command, expected))
   return test_cases 
 
 class TestInterpreter:
@@ -28,6 +30,9 @@ class TestInterpreter:
     user = 'Tester'
     server = 'Test Server'
     actual = TestInterpreter.dicelark.execute(command, user, server)
-    assert actual == expected
+    if expected is not Skip:
+      assert actual == expected
+    else:
+      assert True
 
 

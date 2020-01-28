@@ -4,7 +4,7 @@ import kernel
 import datastore
 from identifier import Identifier
 from function import Function
-
+from function import FunctionCallException
 
 def binary_operation(children):
   '''Internal function. Evaluates the first two elements
@@ -17,8 +17,15 @@ def binary_operation(children):
 
 def handle_function(children):
   code = children.pop()
-  params = [child[0] for child in children]
-  return repr(Function(code, params))
+  params = [child.value for child in children]
+  out = Function(code, *params)
+  print(repr(out))
+  return out
+
+def handle_function_call(children, scoping_data):
+  function = kernel.handle_instruction(children[0])
+  arguments = map(kernel.handle_instruction, children[1:])
+  return function(scoping_data, *arguments)
 
 def handle_block(children, scoping_data):
   scoping_data.push_scope()

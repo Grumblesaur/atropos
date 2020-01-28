@@ -16,8 +16,10 @@ class ScopingData(object):
   def __len__(self):
     return self.depth()
   
-  def push_scope(self):
-     self.scopes.append({})
+  def push_scope(self, new_scope=None):
+    if new_scope is None:
+      new_scope = {}
+    self.scopes.append(new_scope)
   
   def pop_scope(self):
     return self.scopes.pop()

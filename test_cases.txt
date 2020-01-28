@@ -114,10 +114,13 @@ block_result = begin block_y end ===> Undefined
 block_result = begin q = (begin q = 5 end) + 1 end ===> 6
 block_result = begin q = (begin q = 5 end); q = q + (begin q = 5 end) end ===> 10
 
-() -> begin 'nullary function' end ===> __NO_TEST_CASE__
+none = () -> begin [] end ===> __NO_TEST_CASE__
+one = (first) -> begin [first] end ===> __NO_TEST_CASE__
+two = (first, second) -> begin [first, second] end  ===> __NO_TEST_CASE__
 
-(first) -> begin 'unary function' end ===> __NO_TEST_CASE__
+none() ===> []
 
-(first, second) -> begin 'binary function' end  ===> __NO_TEST_CASE__
+one(1) ===> [1]
 
+two(1, 2) ===> [1, 2]
 

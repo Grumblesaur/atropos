@@ -20,6 +20,9 @@ def handle_instruction(tree, user='', server=''):
   elif tree.data == 'function':
     out = handlers.handle_function(tree.children)
   
+  elif tree.data == 'function_call':
+    out = handlers.handle_function_call(tree.children, scoping_data)
+  
   elif tree.data == 'expression':
     out = handle_instruction(tree.children[0])
   

@@ -12,12 +12,15 @@ assignment: identifier_set
 
 block: "begin" expression (";" expression)* "end"
 
-function: "(" ( PARAM ("," PARAM)* )? ")" "->" block
+function: "(" (PARAM ("," PARAM)* )? ")" "->" block
+
+function_call: expression "(" (expression ("," expression)* )? ")"
 
 expression: assignment
           | deletion
           | block
           | function
+          | function_call
           | bool_or
 
 bool_or: bool_or "or" bool_xor -> logical_or
