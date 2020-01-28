@@ -21,7 +21,6 @@ def handle_function(children):
   code = children.pop()
   params = [child.value for child in children]
   out = Function(code, *params)
-  print(repr(out))
   return out
 
 def handle_function_call(children, scoping_data):

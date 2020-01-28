@@ -39,11 +39,10 @@ def main(*args):
   test_cases = get_test_cases(filename)
   interpreter = Interpreter('grammar.lark')
   for command, expected in test_cases:
-    print(command)
     actual = interpreter.execute(command, 'Tester', 'Test Server')
     if expected is not Skip:
-      if actual != expected:
-        print('actual = {}\n expected = {}'.format(actual, expected))
+      data = (command, actual, expected)
+      print('{} ===> actual = {} :: expected = {}'.format(*data))
       assert actual == expected
     else:
       assert True
