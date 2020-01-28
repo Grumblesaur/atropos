@@ -1,4 +1,7 @@
 from undefined   import Undefined
+from function import SyntaxToken
+from function import SyntaxTree
+from function import Function
 
 class _DataStore(object):
   '''Internal class for saving, loading, accessing, and mutating
