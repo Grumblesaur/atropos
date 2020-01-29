@@ -14,7 +14,8 @@ def handle_instruction(tree, user='', server=''):
   
   elif tree.data == 'block':
     out = handlers.handle_block(tree.children, scoping_data)
-  
+  elif tree.data == 'short_body':
+    out = handlers.handle_block(tree.children, scoping_data)  
   elif tree.data == 'function':
     out = handlers.handle_function(tree.children)
   

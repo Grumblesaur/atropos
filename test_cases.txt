@@ -117,6 +117,8 @@ block_result = begin q = (begin q = 5 end); q = q + (begin q = 5 end) end ===> 1
 none = () -> begin [] end ===> __NO_TEST_CASE__
 one = (first) -> begin [first] end ===> __NO_TEST_CASE__
 two = (first, second) -> begin [first, second] end  ===> __NO_TEST_CASE__
+add = (left, right) -> left + right ===> __NO_TEST_CASE__
+add(6, 8) ===> 14
 
 none() ===> []
 

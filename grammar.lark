@@ -12,7 +12,7 @@ assignment: identifier_set
 
 block: "begin" expression (";" expression)* "end"
 
-function: "(" (PARAM ("," PARAM)* )? ")" "->" block
+function: "(" (PARAM ("," PARAM)* )? ")" "->" [block | short_body]
 
 function_call: expression "(" (expression ("," expression)* )? ")"
 
@@ -22,6 +22,8 @@ expression: assignment
           | function
           | function_call
           | repeat
+
+short_body: expression
 
 repeat: repeat "^" bool_or -> repetition
       | bool_or

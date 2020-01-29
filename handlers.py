@@ -33,6 +33,12 @@ def handle_function_call(children, scoping_data):
   arguments = map(kernel.handle_instruction, children[1:])
   return function(scoping_data, *arguments)
 
+def handle_short_body(children, scoping_data):
+  scoping_data.push_scope()
+  out = kernel.handle_instruction(children[0])
+  scoping_data.pop_scope()
+  return out
+
 def handle_block(children, scoping_data):
   scoping_data.push_scope()
   tail = children[-1]
