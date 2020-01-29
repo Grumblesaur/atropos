@@ -37,9 +37,11 @@ class Function(object):
     if len(self.params) != len(args):
       raise FunctionCallException(FunctionCallException.length_error)
     arguments_scope = dict(zip(self.params, args))
+    scoping_data.push_frame()
     scoping_data.push_scope(arguments_scope)
     out = kernel.handle_instruction(self.code)
     scoping_data.pop_scope()
+    scoping_data.pop_frame()
     return out
  
 class FunctionCallException(Exception):

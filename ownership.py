@@ -13,10 +13,10 @@ class ScopingData(object):
   
   def push_frame(self):
     self.frame_id += 1
-    self.frames[frame_id] = [ ]
+    self.frames[self.frame_id] = [ ]
   
   def pop_frame(self):
-    out = self.frames.pop()
+    out = self.frames.pop(self.frame_id)
     self.frame_id -= 1
     return out
   
