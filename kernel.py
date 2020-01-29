@@ -10,7 +10,7 @@ def handle_instruction(tree, user='', server=''):
   global scoping_data
   if tree.data == 'start':
     scoping_data = ownership.ScopingData(user, server)
-    out = handle_instruction(tree.children[0])
+    out = [handle_instruction(child) for child in tree.children][-1]
   
   elif tree.data == 'block':
     out = handlers.handle_block(tree.children, scoping_data)

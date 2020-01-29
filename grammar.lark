@@ -1,4 +1,4 @@
-start: expression
+start: expression (";" expression)* (";")?
 
 identifier_get: identifier
 identifier_set: identifier "=" expression
@@ -10,7 +10,7 @@ deletion: "del" identifier                       -> delete_variable
 assignment: identifier_set
           | identifier_set_subscript
 
-block: "begin" expression (";" expression)* "end"
+block: "begin" expression (";" expression)* (";") "end"
 
 function: "(" (PARAM ("," PARAM)* )? ")" "->" [block | short_body]
 
@@ -111,13 +111,13 @@ number_literal: NUMBER
 
 string_literal: STRING
 
-list_literal: "[" expression ("," expression)* "]"              -> populated_list
+list_literal: "[" expression ("," expression)* "," "]"          -> populated_list
             | "[" "]"                                           -> empty_list
             | "[" expression "to" expression "]"                -> range_list
             | "[" expression "to" expression "by" expression "]"-> range_list_stepped
 
-dict_literal: "{" key_value_pair ("," key_value_pair)* "}" -> populated_dict
-            | "{" "}"                                      -> empty_dict
+dict_literal: "{" key_value_pair ("," key_value_pair)* "," "}" -> populated_dict
+            | "{" "}"                                          -> empty_dict
 
 key_value_pair: expression ":" expression
 
