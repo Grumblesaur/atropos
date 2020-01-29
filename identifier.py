@@ -1,5 +1,7 @@
 import datastore
+from ownership import NotLocal
 from undefined import Undefined
+
 class Identifier(object):
   '''Internal class for storing the information of
   an identifier prior to its evaluation.'''
@@ -33,7 +35,7 @@ class Identifier(object):
     elif self.mode == 'scoped':
       if self.scoping_data:
         lookup = self.scoping_data.get(self.name)
-      else:
+      if not self.scoping_data or lookup is NotLocal:
         lookup = datastore.public.get(self.name)
       out = lookup if lookup is not None else Undefined
     return out
@@ -47,7 +49,7 @@ class Identifier(object):
     elif self.mode == 'scoped':
       if self.scoping_data:
         put = self.scoping_data.put(self.name, value)
-      else:
+      if not self.scoping_data or put is NotLocal:
         put = datastore.public.put(self.name, value)
       out = put
     return out
@@ -61,7 +63,7 @@ class Identifier(object):
     elif self.mode == 'scoped':
       if self.scoping_data:
         drop = self.scoping_data.drop(self.name)
-      else:
+      if not self.scoping_data or drop is NotLocal:
         drop = datastore.public.drop(self.name)
       out = drop if drop is not None else Undefined
     return out
