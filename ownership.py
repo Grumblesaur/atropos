@@ -89,8 +89,8 @@ class ScopingData(object):
     create it at the innermost anonymous scope.
     
     For scopes within stack frames, this attempts to emplace a value at a key
-    from the outermost scope inward. If the key is not found, it will create it
-    at the innermost anonymous scope.
+    from the outermost scope of the stack frame inward. If the key is not found,
+    it will create it at the innermost scope of the stack frame.
     
     If there is no current scope whatsoever, it will return the NotLocal
     object to indicate that a global variable emplacement is necessary.'''
@@ -123,7 +123,7 @@ class ScopingData(object):
     the innermost anonymous scope outward and return that value.
     
     For scopes within stack frames, this attempts to delete a value at a key
-    from the innermost scope outward and return that value.
+    from the innermost scope of the stack frame outward and return that value.
     
     If there is no current scope whatsoever, it will return the NotLocal object
     to indicate that a global variable deletion is necessary.'''
