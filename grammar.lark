@@ -99,11 +99,12 @@ power: power "**" reduction -> exponent
      | power "%%" reduction -> logarithm
      | reduction
 
-reduction: "&" slice -> sum_or_join
-         | "#" slice -> length
-         | "@" slice -> average
+reduction: "&"  slice -> sum_or_join
+         | "#"  slice -> length
+         | "@"  slice -> average
          | "!<" slice -> minimum
          | "!>" slice -> maximum
+         | "|"  slice -> flatten
          | slice
 
 slice: slice ("["            ":"             (":")?           "]") -> whole_slice

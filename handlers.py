@@ -1,5 +1,5 @@
 import math
-import rolls
+import util
 import kernel
 import datastore
 from collections.abc import Iterable
@@ -364,6 +364,10 @@ def handle_extrema(children, min_or_max):
     operand = [operand]
   return min(operand) if min_or_max == 'minimum' else max(operand)
 
+def handle_flatten(children):
+  operand = kernel.handle_instruction(children[0])
+  return util.flatten(operand)
+
 def handle_dice(node_type, children):
   '''Evaluates its operands and generates a random number
   in a manner akin to rolling dice:
@@ -386,7 +390,7 @@ def handle_dice(node_type, children):
   sides  = kernel.handle_instruction(children[1])
   count  = kernel.handle_instruction(children[2]) if len(children) > 2 else None
   as_sum = result_type == 'scalar'
-  return rolls.kernel(dice, sides, count, mode=keep_mode, return_sum=as_sum) 
+  return util.roll(dice, sides, count, mode=keep_mode, return_sum=as_sum) 
 
 def handle_slices(slice_type, children):
   v = kernel.handle_instruction(children[0])

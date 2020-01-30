@@ -161,7 +161,9 @@ def handle_instruction(tree, user='', server=''):
     out = handlers.handle_average(tree.children)
   elif tree.data in ('minimum', 'maximum'):
     out = handlers.handle_extrema(tree.children, tree.data)
-  
+  elif tree.data == 'flatten':
+    out = handlers.handle_flatten(tree.children)
+   
   elif tree.data == 'slice':
     out = handle_instruction(tree.children[0])
   elif "_slice" in tree.data:
