@@ -102,8 +102,8 @@ power: power "**" reduction -> exponent
 reduction: "&" slice -> sum_or_join
          | "#" slice -> length
          | "@" slice -> average
-         | "|" slice -> minimum
-         | "!" slice -> maximum
+         | "!<" slice -> minimum
+         | "!>" slice -> maximum
          | slice
 
 slice: slice ("["            ":"             (":")?           "]") -> whole_slice
