@@ -101,10 +101,11 @@ power: power "**" reduction -> exponent
 
 reduction: "&"  slice -> sum_or_join
          | "#"  slice -> length
-         | "@"  slice -> average
+         | "@"  slice -> selection
          | "!<" slice -> minimum
          | "!>" slice -> maximum
          | "|"  slice -> flatten
+         | "?"  slice -> stats
          | slice
 
 slice: slice ("["            ":"             (":")?           "]") -> whole_slice

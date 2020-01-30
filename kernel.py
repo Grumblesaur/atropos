@@ -157,12 +157,14 @@ def handle_instruction(tree, user='', server=''):
     out = handlers.handle_sum_or_join(tree.children)
   elif tree.data == 'length':
     out = handlers.handle_length(tree.children)
-  elif tree.data == 'average':
-    out = handlers.handle_average(tree.children)
+  elif tree.data == 'selection':
+    out = handlers.handle_selection(tree.children)
   elif tree.data in ('minimum', 'maximum'):
     out = handlers.handle_extrema(tree.children, tree.data)
   elif tree.data == 'flatten':
     out = handlers.handle_flatten(tree.children)
+  elif tree.data == 'stats':
+    out = handlers.handle_stats(tree.children)
    
   elif tree.data == 'slice':
     out = handle_instruction(tree.children[0])

@@ -1,4 +1,6 @@
 import math
+import statistics
+import random
 import util
 import kernel
 import datastore
@@ -350,13 +352,9 @@ def handle_length(children):
     out = 0
   return out
 
-def handle_average(children):
+def handle_selection(children):
   operand = kernel.handle_instruction(children[0])
-  if isinstance(operand, (float, int)):
-    operand = [operand]
-  elif isinstance(operand, dict):
-    operand = operand.values()
-  return sum(operand) / len(operand)
+  return random.choice(operand)
 
 def handle_extrema(children, min_or_max):
   operand = kernel.handle_instruction(children[0])
@@ -367,6 +365,26 @@ def handle_extrema(children, min_or_max):
 def handle_flatten(children):
   operand = kernel.handle_instruction(children[0])
   return util.flatten(operand)
+
+def handle_stats(children):
+  operand = kernel.handle_instruction(children[0])
+  out = { }
+  if isinstance(operand, (float, int)):
+    operand = [operand]
+  elif isinstance(operand, dict):
+    operand = operand.values()
+  out['average'] = statistics.mean(operand)
+  out['minimum'] = min(operand)
+  out['median' ] = statistics.median(operand)
+  out['maximum'] = max(operand)
+  out['size'   ] = len(operand)
+  out['sum'    ] = sum(operand)
+  out['stddev' ] = statistics.pstdev(operand, out['average'])
+  lower = [value for value in operand if value < out['median']]
+  upper = [value for value in operand if value > out['median']]
+  out['q1'] = statistics.median(lower)
+  out['q3'] = statistics.median(upper)
+  return out
 
 def handle_dice(node_type, children):
   '''Evaluates its operands and generates a random number
