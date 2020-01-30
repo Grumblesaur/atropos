@@ -192,4 +192,5 @@ if False then 'zip' ===> Undefined
 my result = Undefined if else 'no' ===> 'no'
 my result = 'yes' if else 'no' ===> 'yes'
 
+`1`+`1` ===> 2
 
