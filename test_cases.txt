@@ -166,3 +166,8 @@ if True then 'zip' else 'zap' ===> 'zip'
 if False then 'zip' else 'zap' ===> 'zap'
 if True then 'zip' ===> 'zip'
 if False then 'zip' ===> Undefined
+
+'yes' if True else 'no' ===> 'yes'
+'yes' if False else 'no' ===> 'no'
+
+

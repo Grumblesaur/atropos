@@ -56,8 +56,18 @@ def handle_instruction(tree, user='', server=''):
   elif tree.data == 'identifier_set':
     out = handlers.handle_identifier_set(tree.children)
   elif tree.data == 'identifier_set_subscript':
-    return handlers.handle_identifier_set_subscript(tree.children)
-    
+    out = handlers.handle_identifier_set_subscript(tree.children)
+  
+  elif tree.data == 'if_expr':
+    out = handle_instruction(tree.children[0])
+  elif tree.data == 'inline_if':
+    out = handlers.handle_inline_if(tree.children)
+   
+  elif tree.data == 'repeat':
+    out = handle_instruction(tree.children[0])
+  elif tree.data == 'repetition':
+    out = handlers.handle_repetition(tree.children)
+  
   elif tree.data == 'bool_or':
     out = handle_instruction(tree.children[0])
   elif tree.data == 'logical_or':
@@ -163,11 +173,6 @@ def handle_instruction(tree, user='', server=''):
     out = handle_instruction(tree.children[0])
   elif 'scalar_die' in tree.data or 'vector_die' in tree.data:
     out = handlers.handle_dice(tree.data, tree.children)
-  
-  elif tree.data == 'repeat':
-    out = handle_instruction(tree.children[0])
-  elif tree.data == 'repetition':
-    out = handlers.handle_repetition(tree.children)
   
   elif tree.data == 'atom':
     out = handle_instruction(tree.children[0])

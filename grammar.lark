@@ -25,18 +25,21 @@ do_while_loop: "do" [block | short_body] "while" expression
 conditional: "if" expression "then" [block | short_body] -> if
            | "if" expression "then" [block | short_body] "else" [block | short_body] -> if_else
 
+short_body: expression
+
 expression: assignment
           | deletion
           | block
           | function
           | function_call
-          | repeat
           | for_loop
           | while_loop
           | do_while_loop
           | conditional
+          | if_expr
 
-short_body: expression
+if_expr: repeat "if" repeat "else" if_expr -> inline_if
+       | repeat
 
 repeat: repeat "^" bool_or -> repetition
       | bool_or

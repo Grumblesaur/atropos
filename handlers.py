@@ -149,6 +149,21 @@ def handle_identifier_set_subscript(children):
   exec('target{ss} = {value}'.format(ss=subscripts, value=repr(value)))
   return value
 
+def handle_inline_if(children):
+  condition = kernel.handle_instruction(children[1])
+  if condition:
+    out = kernel.handle_instruction(children[0])
+  else:
+    out = kernel.handle_instruction(children[2])
+  return out
+
+def handle_repetition(children):
+  times = kernel.handle_instruction(children[1])
+  out = [ ]
+  for time in range(times):
+    out.append(kernel.handle_instruction(children[0]))
+  return out
+
 def handle_logical_or(children):
   '''Evaluate operands and return their logical disjunction.'''
   left, right = binary_operation(children)
@@ -354,13 +369,6 @@ def handle_dice(node_type, children):
   count  = kernel.handle_instruction(children[2]) if len(children) > 2 else None
   as_sum = result_type == 'scalar'
   return rolls.kernel(dice, sides, count, mode=keep_mode, return_sum=as_sum) 
-
-def handle_repetition(children):
-  times = kernel.handle_instruction(children[1])
-  out = [ ]
-  for time in range(times):
-    out.append(kernel.handle_instruction(children[0]))
-  return out
 
 def handle_slices(slice_type, children):
   v = kernel.handle_instruction(children[0])
