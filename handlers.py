@@ -157,6 +157,14 @@ def handle_inline_if(children):
     out = kernel.handle_instruction(children[2])
   return out
 
+def handle_inline_if_binary(children):
+  condition = kernel.handle_instruction(children[0])
+  if condition:
+    out = condition
+  else:
+    out = kernel.handle_instruction(children[1])
+  return out
+
 def handle_repetition(children):
   times = kernel.handle_instruction(children[1])
   out = [ ]

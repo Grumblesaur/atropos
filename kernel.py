@@ -62,6 +62,8 @@ def handle_instruction(tree, user='', server=''):
     out = handle_instruction(tree.children[0])
   elif tree.data == 'inline_if':
     out = handlers.handle_inline_if(tree.children)
+  elif tree.data == 'inline_if_binary':
+    out = handlers.handle_inline_if_binary(tree.children)
    
   elif tree.data == 'repeat':
     out = handle_instruction(tree.children[0])

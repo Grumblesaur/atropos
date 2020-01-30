@@ -39,6 +39,7 @@ expression: assignment
           | if_expr
 
 if_expr: repeat "if" repeat "else" if_expr -> inline_if
+       | repeat "if"        "else" if_expr -> inline_if_binary
        | repeat
 
 repeat: repeat "^" bool_or -> repetition
