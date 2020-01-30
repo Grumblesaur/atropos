@@ -102,27 +102,10 @@ def handle_instruction(tree, user='', server=''):
     kids = tree.children
     is_  = len(kids) == 1
     out = kids[0].value if is_ else '{} {}'.format(kids[0].value, kids[1].value)
-  
-  elif tree.data == 'greater_than':
-    out = handlers.handle_greater_than(tree.children)
-  elif tree.data == 'greater_equal':
-    out = handlers.handle_greater_equal(tree.children)
-  elif tree.data == 'equal':
-    out = handlers.handle_equal(tree.children)
-  elif tree.data == 'not_equal':
-    out = handlers.handle_not_equal(tree.children)
-  elif tree.data == 'less_equal':
-    out = handlers.handle_less_equal(tree.children)
-  elif tree.data == 'less_than':
-    out = handlers.handle_less_than(tree.children)
   elif tree.data == 'present':
     out = handlers.handle_present(tree.children)
   elif tree.data == 'absent':
     out = handlers.handle_present(tree.children, negate=True)
-  elif tree.data == 'identical':
-    out = handlers.handle_identity(tree.children)
-  elif tree.data == 'different':
-    out = handlers.handle_identity(tree.children, negate=True)
   
   elif tree.data == 'shift':
     out = handle_instruction(tree.children[0])

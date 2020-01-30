@@ -39,6 +39,11 @@
 6 > 5 > 4 > 2 ===> True
 6 < 4 < 6 ===> False
 
+'strings' in ['list', 'of', 'strings'] ===> True
+'strings' in [1, 2, 3, 4, 5, 6, 7, 12] ===> False
+'strings' not in [1, 2, 3, 4, 5, 6, 7] ===> True
+'strings' not in ['list', 'of', 'strings'] ===> False
+
 1 and 0 ===> 0
 1 and 1 ===> 1
 0 and 1 ===> 0

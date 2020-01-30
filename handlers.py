@@ -224,44 +224,9 @@ def handle_comp_obj(children):
     out = True
   return out
 
-def handle_greater_than(children):
-  '''Evaluate operands and return True if left > right else False.'''
-  left, right = binary_operation(children)
-  return left > right
-
-def handle_greater_equal(children):
-  '''Evaluate operands and return True if left >= right else False.'''
-  left, right = binary_operation(children)
-  return left >= right
-
-def handle_equal(children):
-  '''Evaluate operands and return True if they are equal else False.'''
-  left, right = binary_operation(children)
-  return left == right
-
-def handle_not_equal(children):
-  '''Evaluate operands and return True if they are inequal else False.'''
-  left, right = binary_operation(children)
-  return left != right
-
-def handle_less_equal(children):
-  '''Evaluate operands and return True if left <= right else False.'''
-  left, right = binary_operation(children)
-  return left <= right
-
-def handle_less_than(children):
-  '''Evaluate operands and return True if left < right else False.'''
-  left, right = binary_operation(children)
-  return left < right 
-
 def handle_present(children, negate=False):
   element, collection = binary_operation(children)
   out = element in collection
-  return out if not negate else not out
-
-def handle_identity(children, negate=False):
-  left, right = binary_operation(children)
-  out = left is right
   return out if not negate else not out
 
 def handle_left_shift(children):

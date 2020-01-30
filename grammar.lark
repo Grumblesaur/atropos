@@ -71,20 +71,10 @@ math_comp: GT | GE | EQ | NE | LE | LT
 obj_comp: IS | IS NOT
 
 comp: shift (math_comp shift)+ -> comp_math
-    | shift (obj_comp shift)+ -> comp_obj
+    | shift (obj_comp shift)+  -> comp_obj
+    | shift "in" shift         -> present
+    | shift "not" "in" shift   -> absent
     | shift
-
-//comp: shift ">"  shift       -> greater_than
-//    | shift ">=" shift       -> greater_equal
-//    | shift "==" shift       -> equal
-//    | shift "!=" shift       -> not_equal
-//    | shift "<=" shift       -> less_equal
-//    | shift "<"  shift       -> less_than
-//    | shift "in" shift       -> present
-//    | shift "not" "in" shift -> absent
-//    | shift "is" shift       -> identical
-//    | shift "is" "not" shift -> different
-//    | shift
 
 shift: shift "<<" arithm -> left_shift
      | shift ">>" arithm -> right_shift
