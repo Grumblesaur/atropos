@@ -1,5 +1,14 @@
 import random
 
+def iterable_repetition(iterable, repetitions):
+  times = abs(repetitions)
+  sign  = repetitions / times
+  if sign == 1:
+    out = iterable * times
+  else:
+    out = (iterable[::-1]) * times
+  return out
+
 def roll(dice, sides, count=0, mode='all', return_sum=True):
   results = [random.randint(1, sides) for die in range(dice)]
   if mode == 'lowest':

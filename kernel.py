@@ -165,6 +165,10 @@ def handle_instruction(tree, user='', server=''):
     out = handlers.handle_flatten(tree.children)
   elif tree.data == 'stats':
     out = handlers.handle_stats(tree.children)
+  elif tree.data == 'sort':
+    out = handlers.handle_sort(tree.children)
+  elif tree.data == 'shuffle':
+    out = handlers.handle_shuffle(tree.children)
    
   elif tree.data == 'slice':
     out = handle_instruction(tree.children[0])

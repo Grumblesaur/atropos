@@ -106,6 +106,8 @@ reduction: "&"  reduction -> sum_or_join
          | "!>" reduction -> maximum
          | "|"  reduction -> flatten
          | "?"  reduction -> stats
+         | "<>" reduction -> sort
+         | "><" reduction -> shuffle
          | slice
 
 slice: slice ("["            ":"             (":")?           "]") -> whole_slice

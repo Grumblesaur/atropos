@@ -287,7 +287,13 @@ def handle_multiplication(children):
   the value of the iterable operand repeated a number of times
   equal to the integral operand.'''
   multiplier, multiplicand = binary_operation(children)
-  return multiplier * multiplicand
+  if isinstance(multiplier, (list, str)) and isinstance(multiplicand, (int,float)):
+    out = util.iterable_repetition(multiplier, multiplicand)
+  elif isinstance(multiplier, (int, float)) and isinstance(multiplicand, (list, str)):
+    out = util.iterable_repetition(multiplicand, multiplier)
+  else:
+    out = multiplier * multiplicand
+  return out
 
 def handle_division(children):
   '''Evaluates its operands and returns the quotient of
@@ -310,7 +316,12 @@ def handle_floor_division(children):
 
 def handle_negation(children):
   '''Evaluates its operand and returns its arithmetic inverse.'''
-  return -kernel.handle_instruction(children[0])
+  operand = kernel.handle_instruction(children[0])
+  if isinstance(operand, list):
+    out = operand[::-1]
+  else:
+    out = -operand
+  return out
 
 def handle_absolute_value(children):
   '''Evaluates its operand and returns the arithmetic inverse
@@ -389,6 +400,14 @@ def handle_stats(children):
   out['q1'] = statistics.median(lower)
   out['q3'] = statistics.median(upper)
   return out
+
+def handle_sort(children):
+  return sorted(kernel.handle_instruction(children[0]))
+
+def handle_shuffle(children):
+  operand = kernel.handle_instruction(children[0])[:]
+  random.shuffle(operand)
+  return operand
 
 def handle_dice(node_type, children):
   '''Evaluates its operands and generates a random number
