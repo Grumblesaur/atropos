@@ -36,6 +36,8 @@
 5 < 9 ===> True
 8 >= 8 ===> True
 4 <= 4.5 ===> True
+6 > 5 > 4 > 2 ===> True
+6 < 4 < 6 ===> False
 
 1 and 0 ===> 0
 1 and 1 ===> 1
@@ -86,6 +88,7 @@ v = []    ===> []
 my v = v  ===> []
 x is not my x ===> False
 v is my v ===> True
+x is my x is x ===> True
 del v ===> []
 del my v ===> []
 del my x ===> 1

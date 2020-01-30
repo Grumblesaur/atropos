@@ -57,17 +57,34 @@ bool_and: bool_and "and" bool_not -> logical_and
 bool_not: "not" bool_not -> logical_not
         | comp
 
-comp: shift ">"  shift       -> greater_than
-    | shift ">=" shift       -> greater_equal
-    | shift "==" shift       -> equal
-    | shift "!=" shift       -> not_equal
-    | shift "<=" shift       -> less_equal
-    | shift "<"  shift       -> less_than
-    | shift "in" shift       -> present
-    | shift "not" "in" shift -> absent
-    | shift "is" shift       -> identical
-    | shift "is" "not" shift -> different
+GT:  ">"
+GE:  ">="
+EQ:  "=="
+NE:  "!="
+LE:  "<="
+LT:  "<"
+
+IS:  "is"
+NOT: "not"
+
+math_comp: GT | GE | EQ | NE | LE | LT
+obj_comp: IS | IS NOT
+
+comp: shift (math_comp shift)+ -> comp_math
+    | shift (obj_comp shift)+ -> comp_obj
     | shift
+
+//comp: shift ">"  shift       -> greater_than
+//    | shift ">=" shift       -> greater_equal
+//    | shift "==" shift       -> equal
+//    | shift "!=" shift       -> not_equal
+//    | shift "<=" shift       -> less_equal
+//    | shift "<"  shift       -> less_than
+//    | shift "in" shift       -> present
+//    | shift "not" "in" shift -> absent
+//    | shift "is" shift       -> identical
+//    | shift "is" "not" shift -> different
+//    | shift
 
 shift: shift "<<" arithm -> left_shift
      | shift ">>" arithm -> right_shift

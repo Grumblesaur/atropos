@@ -92,6 +92,17 @@ def handle_instruction(tree, user='', server=''):
   
   elif tree.data == 'comp':
     out = handle_instruction(tree.children[0])
+  elif tree.data == 'comp_math':
+    out = handlers.handle_comp_math(tree.children)
+  elif tree.data == 'comp_obj':
+    out = handlers.handle_comp_obj(tree.children)
+  elif tree.data == 'math_comp':
+    out = tree.children[0].value
+  elif tree.data == 'obj_comp':
+    kids = tree.children
+    is_  = len(kids) == 1
+    out = kids[0].value if is_ else '{} {}'.format(kids[0].value, kids[1].value)
+  
   elif tree.data == 'greater_than':
     out = handlers.handle_greater_than(tree.children)
   elif tree.data == 'greater_equal':

@@ -193,6 +193,37 @@ def handle_logical_not(children):
   '''Evaluate operand and return the inverse of its boolean conversion.'''
   return not bool(kernel.handle_instruction(children[0]))
 
+def handle_comp_math(children):
+  out = False
+  comparisons = [kernel.handle_instruction(child) for child in children]
+  operations = {
+    '==' : lambda l, r: l == r,
+    '!=' : lambda l, r: l != r,
+    '>=' : lambda l, r: l >= r,
+    '<=' : lambda l, r: l <= r,
+    '>'  : lambda l, r: l > r,
+    '<'  : lambda l, r: l < r
+  }
+  for i in range(0, len(children)-2, 2):
+    left, op, right = comparisons[i:i+3]
+    if not operations[op](left, right):
+      break
+  else:
+    out = True
+  return out
+
+def handle_comp_obj(children):
+  out = False
+  comparisons = [kernel.handle_instruction(child) for child in children]
+  operations = {'is' : lambda l, r: l is r, 'is not' : lambda l, r: l is not r}
+  for i in range(0, len(children)-2, 2):
+    left, op, right = comparisons[i:i+3]
+    if not operations[op](left, right):
+      break
+  else:
+    out = True
+  return out
+
 def handle_greater_than(children):
   '''Evaluate operands and return True if left > right else False.'''
   left, right = binary_operation(children)
