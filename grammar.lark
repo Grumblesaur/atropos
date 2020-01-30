@@ -68,7 +68,7 @@ IS:  "is"
 NOT: "not"
 
 math_comp: GT | GE | EQ | NE | LE | LT
-obj_comp: IS | IS NOT
+obj_comp:  IS | IS NOT
 
 comp: shift (math_comp shift)+ -> comp_math
     | shift (obj_comp shift)+  -> comp_obj
@@ -139,9 +139,9 @@ atom: number_literal
     | "(" expression ")" -> priority
 
 undefined_literal: UNDEFINED
-number_literal: NUMBER
-string_literal: STRING
-boolean_literal: TRUE | FALSE
+number_literal:    NUMBER
+string_literal:    STRING
+boolean_literal:   TRUE | FALSE
 list_literal: "[" expression ("," expression)* (",")? "]"  -> populated_list
     | "[" "]"                                              -> empty_list
     | "[" expression "to" expression "]"                   -> range_list
@@ -157,13 +157,13 @@ identifier: scoped_identifier
           | server_identifier
           | global_identifier
 
-scoped_identifier :          IDENT
+scoped_identifier:           IDENT
 private_identifier: "my"     IDENT
-server_identifier : "our"    IDENT
-global_identifier : "global" IDENT
+server_identifier:  "our"    IDENT
+global_identifier:  "global" IDENT
 
-TRUE:  "True"
-FALSE: "False"
+TRUE:      "True"
+FALSE:     "False"
 UNDEFINED: "Undefined"
 
 IDENT: /[a-zA-Z_]+[a-zA-Z0-9_]*/
@@ -173,5 +173,5 @@ STRING: /("(?!"").*?(?<!\\)(\\\\)*?"|'(?!'').*?(?<!\\)(\\\\)*?')/i
 %import common.NUMBER -> NUMBER
 %import common.WS
 %ignore WS
-
+%ignore "`"
 
