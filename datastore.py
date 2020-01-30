@@ -1,3 +1,4 @@
+from collections.abc import Iterable
 from undefined   import Undefined
 from function import SyntaxToken
 from function import SyntaxTree
@@ -35,6 +36,7 @@ class _DataStore(object):
   def save(self):
     with open(self.storage_file_name, 'w') as f:
       f.write(repr(self.variables))
+  
 
 class _OwnedDataStore(_DataStore):
   def get(self, owner_tag, key, default=Undefined):
@@ -53,8 +55,11 @@ class _OwnedDataStore(_DataStore):
     return value
   
   def drop(self, owner_tag, key):
-    out = self.variables[owner_tag][key].copy()
-    del self.variables[key]
+    target = self.variables[owner_tag][key]
+    if isinstance(target, Iterable):
+      target = target.copy()
+    out = target
+    del self.variables[owner_tag][key]
     return out
 
 private = _OwnedDataStore('vars/private')

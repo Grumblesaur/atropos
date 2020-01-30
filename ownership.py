@@ -55,6 +55,9 @@ class ScopingData(object):
         raise StackException('Cannot get scope from empty stack frame!')
       else:
         raise StackException('Cannot get scope from global stack frame!')
+    except KeyError:
+      scope = self.anonymous_scopes[-1]
+    return scope
   
   def get(self, key):
     '''For anonymous scopes (e.g. block expressions not inside a function)
@@ -74,7 +77,7 @@ class ScopingData(object):
           if key in scope:
             out = scope[key]
             break
-      else:
+      if not self.anonymous_scopes or out is None:
         out = frame
     else:
       for scope in reversed(frame):
@@ -134,7 +137,8 @@ class ScopingData(object):
         for scope in reversed(self.anonymous_scopes):
           if key in scope:
             out = scope[key]
-      else:
+            break
+      if not self.anonymous_scopes or out is None:
         out = frame
     else:
       for scope in reversed(frame):

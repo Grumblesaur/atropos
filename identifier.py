@@ -2,6 +2,12 @@ import datastore
 from ownership import NotLocal
 from undefined import Undefined
 
+class StorageError(Exception):
+  pass
+
+def error(mode):
+  raise StorageError('Unknown identifier type: {}'.format(repr(mode)))
+
 class Identifier(object):
   '''Internal class for storing the information of
   an identifier prior to its evaluation.'''
@@ -11,7 +17,7 @@ class Identifier(object):
       name: the name of this identifier.
       mode: the scoping method to use to look up a variable's value
       scoping_data: an object of ScopingData type'''
-    assert mode in ('private', 'server', 'scoped')
+    assert mode in ('private', 'server', 'scoped', 'global')
     self.name = name
     self.mode = mode
     self.scoping_data = scoping_data
@@ -38,6 +44,10 @@ class Identifier(object):
       if not self.scoping_data or lookup is NotLocal:
         lookup = datastore.public.get(self.name)
       out = lookup if lookup is not None else Undefined
+    elif self.mode == 'global':
+      out = datastore.public.get(self.name)
+    else:
+      error()
     return out
   
   def put(self, value):
@@ -52,6 +62,10 @@ class Identifier(object):
       if not self.scoping_data or put is NotLocal:
         put = datastore.public.put(self.name, value)
       out = put
+    elif self.mode == 'global':
+      out = datastore.public.put(self.name, value)
+    else:
+      error()
     return out
 
   def drop(self):
@@ -66,6 +80,10 @@ class Identifier(object):
       if not self.scoping_data or drop is NotLocal:
         drop = datastore.public.drop(self.name)
       out = drop if drop is not None else Undefined
+    elif self.mode == 'global':
+      out = datastore.public.drop(self.name)
+    else:
+      error()
     return out
 
 

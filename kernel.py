@@ -5,6 +5,11 @@ import ownership
 from undefined import Undefined
 
 scoping_data = None
+identifier_types = (
+  'scoped_identifier',
+  'private_identifier',
+  'server_identifier',
+  'global_identifier')
 
 def handle_instruction(tree, user='', server=''):
   global scoping_data
@@ -21,6 +26,13 @@ def handle_instruction(tree, user='', server=''):
   
   elif tree.data == 'function_call':
     out = handlers.handle_function_call(tree.children, scoping_data)
+  
+  elif tree.data == 'for_loop':
+    out = handlers.handle_for_loop(tree.children, scoping_data)
+  elif tree.data == 'while_loop':
+    out = handlers.handle_while_loop(tree.children, scoping_data)
+  elif tree.data == 'do_while_loop':
+    out = handlers.handle_do_while_loop(tree.children, scoping_data)
   
   elif tree.data == 'expression':
     out = handle_instruction(tree.children[0])
@@ -73,6 +85,14 @@ def handle_instruction(tree, user='', server=''):
     out = handlers.handle_less_equal(tree.children)
   elif tree.data == 'less_than':
     out = handlers.handle_less_than(tree.children)
+  elif tree.data == 'present':
+    out = handlers.handle_present(tree.children)
+  elif tree.data == 'absent':
+    out = handlers.handle_present(tree.children, negate=True)
+  elif tree.data == 'identical':
+    out = handlers.handle_identity(tree.children)
+  elif tree.data == 'different':
+    out = handlers.handle_identity(tree.children, negate=True)
   
   elif tree.data == 'shift':
     out = handle_instruction(tree.children[0])
@@ -115,10 +135,12 @@ def handle_instruction(tree, user='', server=''):
   elif tree.data == 'logarithm':
     out = handlers.handle_logarithm(tree.children)
   
-  elif tree.data == 'ampersand':
+  elif tree.data == 'reduction':
     out = handle_instruction(tree.children[0])
   elif tree.data == 'sum_or_join':
     out = handlers.handle_sum_or_join(tree.children)
+  elif tree.data == 'length':
+    out = handlers.handle_length(tree.children)
   
   elif tree.data == 'slice':
     out = handle_instruction(tree.children[0])
@@ -164,7 +186,7 @@ def handle_instruction(tree, user='', server=''):
     out = handlers.handle_dict_literal(None)
   elif tree.data == 'identifier':
     out = handle_instruction(tree.children[0])
-  elif tree.data in ['scoped_identifier', 'private_identifier', 'server_identifier']:
+  elif tree.data in identifier_types:
     out = handlers.handle_identifiers(tree.data, tree.children, scoping_data)
   elif tree.data == 'undefined_literal':
     out = Undefined

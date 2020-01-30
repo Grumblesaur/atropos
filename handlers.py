@@ -33,6 +33,41 @@ def handle_function_call(children, scoping_data):
   arguments = map(kernel.handle_instruction, children[1:])
   return function(scoping_data, *arguments)
 
+def handle_for_loop(children, scoping_data):
+  iterator    = kernel.handle_instruction(children[0])
+  iterable    = kernel.handle_instruction(children[1])
+  name, start = iterator.name, iterable[0] if len(iterable) else None
+  if start is None:
+    finished = False
+  else:
+    scoping_data.push_scope()
+    for element in iterable:
+      scoping_data.get_scope()[name] = element
+      kernel.handle_instruction(children[2])
+    scoping_data.pop_scope()
+    finished = True
+  return finished
+
+def handle_while_loop(children, scoping_data):
+  scoping_data.push_scope()
+  executed = 0
+  while kernel.handle_instruction(children[0]):
+    kernel.handle_instruction(children[1])
+    executed += 1
+  scoping_data.pop_scope()
+  return executed
+
+def handle_do_while_loop(children, scoping_data):
+  scoping_data.push_scope()
+  executed = 1
+  kernel.handle_instruction(children[0])
+  while kernel.handle_instruction(children[1]):
+    kernel.handle_instruction(children[0])
+    executed += 1
+  scoping_data.pop_scope()
+  return executed
+
+
 def handle_short_body(children, scoping_data):
   scoping_data.push_scope()
   out = kernel.handle_instruction(children[0])
@@ -149,6 +184,16 @@ def handle_less_than(children):
   left, right = binary_operation(children)
   return left < right 
 
+def handle_present(children, negate=False):
+  element, collection = binary_operation(children)
+  out = element in collection
+  return out if not negate else not out
+
+def handle_identity(children, negate=False):
+  left, right = binary_operation(children)
+  out = left is right
+  return out if not negate else not out
+
 def handle_left_shift(children):
   '''Evaluate operands and bitwise shift the left operand
   towards its big end by the value of the right operand,
@@ -258,6 +303,16 @@ def handle_sum_or_join(children):
     out = 0
   else:
     out = operand
+  return out
+
+def handle_length(children):
+  operand = kernel.handle_instruction(children[0])
+  if isinstance(operand, Iterable):
+    out = len(operand)
+  elif isinstance(operand, Function):
+    out = len(operand.params)
+  else:
+    out = 0
   return out
 
 def handle_dice(node_type, children):

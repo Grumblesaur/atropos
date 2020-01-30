@@ -81,6 +81,15 @@ x ===> 1
 my y ===> 2
 our z ===> 3
 
+my x = x  ===> 1
+v = []    ===> []
+my v = v  ===> []
+x is not my x ===> False
+v is my v ===> True
+del v ===> []
+del my v ===> []
+del my x ===> 1
+
 "double quoted string" ===> 'double quoted string'
 'single quoted string' ===> 'single quoted string'
 
@@ -140,3 +149,17 @@ v[:4:] ===> [0,1,2,3]
 v[::-1] ===> list(range(10))[::-1]
 
 v[1:][0] ===> 1
+
+my p = [] ===> []
+for x in [0 to 10] do my p = my p + [x] ===> True
+my p ===> [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+f = (for x in [] do 'nothing at all') ===> False
+
+while my p do my p = my p[1:] ===> 10
+my p = [] ===> []
+do begin my p = my p + [4d6h3] end while #my p < 6 ===> 6
+
+zz = 0 ===> 0
+do begin global zz = global zz + 1 end while global zz < 3 ===> 3
+
+
