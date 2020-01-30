@@ -406,8 +406,14 @@ def handle_sort(children):
 
 def handle_shuffle(children):
   operand = kernel.handle_instruction(children[0])[:]
-  random.shuffle(operand)
-  return operand
+  if isinstance(operand, str):
+    operand = list(operand)
+    random.shuffle(operand)
+    out = ''.join(operand)
+  else:
+    random.shuffle(operand)
+    out = operand
+  return out
 
 def handle_dice(node_type, children):
   '''Evaluates its operands and generates a random number
