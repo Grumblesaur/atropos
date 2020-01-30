@@ -354,6 +354,10 @@ def handle_length(children):
 
 def handle_selection(children):
   operand = kernel.handle_instruction(children[0])
+  if isinstance(operand, (float, int)):
+    operand = [operand]
+  if isinstance(operand, dict):
+    operand = [[key, value] for key, value in operand.items()]
   return random.choice(operand)
 
 def handle_extrema(children, min_or_max):

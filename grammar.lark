@@ -99,13 +99,13 @@ power: power "**" reduction -> exponent
      | power "%%" reduction -> logarithm
      | reduction
 
-reduction: "&"  slice -> sum_or_join
-         | "#"  slice -> length
-         | "@"  slice -> selection
-         | "!<" slice -> minimum
-         | "!>" slice -> maximum
-         | "|"  slice -> flatten
-         | "?"  slice -> stats
+reduction: "&"  reduction -> sum_or_join
+         | "#"  reduction -> length
+         | "@"  reduction -> selection
+         | "!<" reduction -> minimum
+         | "!>" reduction -> maximum
+         | "|"  reduction -> flatten
+         | "?"  reduction -> stats
          | slice
 
 slice: slice ("["            ":"             (":")?           "]") -> whole_slice
