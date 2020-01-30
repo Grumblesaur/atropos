@@ -11,6 +11,9 @@ identifier_types = (
   'server_identifier',
   'global_identifier')
 
+class LoopBreak(Exception):
+  pass
+
 def handle_instruction(tree, user='', server=''):
   global scoping_data
   if tree.data == 'start':
@@ -154,6 +157,10 @@ def handle_instruction(tree, user='', server=''):
     out = handlers.handle_sum_or_join(tree.children)
   elif tree.data == 'length':
     out = handlers.handle_length(tree.children)
+  elif tree.data == 'average':
+    out = handlers.handle_average(tree.children)
+  elif tree.data in ('minimum', 'maximum'):
+    out = handlers.handle_extrema(tree.children, tree.data)
   
   elif tree.data == 'slice':
     out = handle_instruction(tree.children[0])
@@ -201,7 +208,6 @@ def handle_instruction(tree, user='', server=''):
   elif tree.data == 'identifier_get':
     ident = handle_instruction(tree.children[0])
     out = ident.get()
-  
   else:
     print(tree.data, tree.children)
     out = '__UNIMPLEMENTED__'

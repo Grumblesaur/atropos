@@ -350,6 +350,20 @@ def handle_length(children):
     out = 0
   return out
 
+def handle_average(children):
+  operand = kernel.handle_instruction(children[0])
+  if isinstance(operand, (float, int)):
+    operand = [operand]
+  elif isinstance(operand, dict):
+    operand = operand.values()
+  return sum(operand) / len(operand)
+
+def handle_extrema(children, min_or_max):
+  operand = kernel.handle_instruction(children[0])
+  if not isinstance(operand, Iterable):
+    operand = [operand]
+  return min(operand) if min_or_max == 'minimum' else max(operand)
+
 def handle_dice(node_type, children):
   '''Evaluates its operands and generates a random number
   in a manner akin to rolling dice:
