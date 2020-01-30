@@ -22,6 +22,9 @@ while_loop: "while" expression "do" [block | short_body]
 
 do_while_loop: "do" [block | short_body] "while" expression
 
+conditional: "if" expression "then" [block | short_body] -> if
+           | "if" expression "then" [block | short_body] "else" [block | short_body] -> if_else
+
 expression: assignment
           | deletion
           | block
@@ -31,6 +34,7 @@ expression: assignment
           | for_loop
           | while_loop
           | do_while_loop
+          | conditional
 
 short_body: expression
 

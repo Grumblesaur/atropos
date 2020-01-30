@@ -162,4 +162,7 @@ do begin my p = my p + [4d6h3] end while #my p < 6 ===> 6
 zz = 0 ===> 0
 do begin global zz = global zz + 1 end while global zz < 3 ===> 3
 
-
+if True then 'zip' else 'zap' ===> 'zip'
+if False then 'zip' else 'zap' ===> 'zap'
+if True then 'zip' ===> 'zip'
+if False then 'zip' ===> Undefined

@@ -3,6 +3,7 @@ import rolls
 import kernel
 import datastore
 from collections.abc import Iterable
+from undefined import Undefined
 from identifier import Identifier
 from function import Function
 from function import FunctionCallException
@@ -67,6 +68,21 @@ def handle_do_while_loop(children, scoping_data):
   scoping_data.pop_scope()
   return executed
 
+def handle_if(children, scoping_data):
+  executed = Undefined
+  scoping_data.push_scope()
+  if kernel.handle_instruction(children[0]):
+    executed = kernel.handle_instruction(children[1])
+  scoping_data.pop_scope()
+  return executed
+
+def handle_if_else(children, scoping_data):
+  scoping_data.push_scope()
+  if kernel.handle_instruction(children[0]):
+    out = kernel.handle_instruction(children[1])
+  else:
+    out = kernel.handle_instruction(children[2])
+  return out
 
 def handle_short_body(children, scoping_data):
   scoping_data.push_scope()
