@@ -175,8 +175,8 @@ STRING: /("(?!"").*?(?<!\\)(\\\\)*?"|'(?!'').*?(?<!\\)(\\\\)*?')/i
 %import common.NEWLINE
 %ignore WS
 %ignore "`"
-COMMENT_INLINE: "~"    /(.)*/ NEWLINE+
-COMMENT_BLOCK:  "~[" ( /(.)*/ NEWLINE+ )* "]~" // XXX: This doesn't work.
+COMMENT_INLINE: /\~[^(\n|\r\n|\r)]+/
+COMMENT_BLOCK:  /\~\[(.|\n|\r\n|\r)+\]\~/
 %ignore COMMENT_INLINE
-%ignore COMMENT_BLOCK                          // XXX: This doesn't work.
+%ignore COMMENT_BLOCK
 
