@@ -172,6 +172,11 @@ STRING: /("(?!"").*?(?<!\\)(\\\\)*?"|'(?!'').*?(?<!\\)(\\\\)*?')/i
 
 %import common.NUMBER -> NUMBER
 %import common.WS
+%import common.NEWLINE
 %ignore WS
 %ignore "`"
+COMMENT_INLINE: "~"    /(.)*/ NEWLINE+
+COMMENT_BLOCK:  "~[" ( /(.)*/ NEWLINE+ )* "]~" // XXX: This doesn't work.
+%ignore COMMENT_INLINE
+%ignore COMMENT_BLOCK                          // XXX: This doesn't work.
 
