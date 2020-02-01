@@ -1,6 +1,6 @@
-import datastore
-from ownership import NotLocal
-from undefined import Undefined
+from . import datastore
+from .ownership import NotLocal
+from .undefined import Undefined
 
 class StorageError(Exception):
   pass

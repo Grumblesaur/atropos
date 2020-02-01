@@ -1,8 +1,8 @@
 #!/usr/bin/env python3
-import interpreter
+from ..dicelang import interpreter
 import pytest
-from undefined import Undefined
-from function import Function
+from ..dicelang.undefined import Undefined
+from ..dicelang.function  import Function
 
 Skip = object
 def get_test_cases(filename):
@@ -23,9 +23,9 @@ def get_test_cases(filename):
   return test_cases 
 
 class TestInterpreter:
-  dicelark = interpreter.Interpreter('grammar.lark')
+  dicelark = interpreter.Interpreter('../dicelang/grammar.lark')
   
-  @pytest.mark.parametrize("command, expected", get_test_cases('test_cases.txt'))
+  @pytest.mark.parametrize("command, expected", get_test_cases('../data/lines.txt'))
   def test_execute(self, command, expected):
     user = 'Tester'
     server = 'Test Server'

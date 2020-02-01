@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 
-import interpreter
+from dicelang import interpreter
 def main(*args):
   m = interpreter.Interpreter('grammar.lark')
   files = [ ]

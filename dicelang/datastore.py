@@ -1,8 +1,8 @@
 from collections.abc import Iterable
-from undefined   import Undefined
-from function import SyntaxToken
-from function import SyntaxTree
-from function import Function
+from .undefined import Undefined
+from .function  import SyntaxToken
+from .function  import SyntaxTree
+from .function  import Function
 
 class _DataStore(object):
   '''Internal class for saving, loading, accessing, and mutating
@@ -62,11 +62,17 @@ class _OwnedDataStore(_DataStore):
     del self.variables[owner_tag][key]
     return out
 
-private = _OwnedDataStore('vars/private')
-server  = _OwnedDataStore('vars/server')
-public  = _DataStore('vars/public')
+private = None
+server  = None
+public  = None
 
-def save_all():
+
+def configure(private_path, server_path, public_path):
+  private = _OwnedDataStore(private_path)
+  server  = _OwnedDataStore(server_path)
+  public  = _DataStore(public_path)
+
+def save():
   private.save()
   server.save()
   public.save()

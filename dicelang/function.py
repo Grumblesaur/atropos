@@ -1,5 +1,5 @@
 import lark
-import kernel
+from . import kernel
 
 class SyntaxToken(object):
   def __init__(self, lark_token):

@@ -1,12 +1,11 @@
 #!/usr/bin/env python3
 
-from interpreter import Interpreter
-import readline
+from dicelang import interpreter
 from lark.exceptions import UnexpectedToken, UnexpectedCharacters 
 
 running = True
 
-dicelark = Interpreter("grammar.lark")
+dicelark = interpreter.Interpreter("grammar.lark")
 user = "Tester"
 server = "Test Server"
 

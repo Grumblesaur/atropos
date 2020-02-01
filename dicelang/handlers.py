@@ -1,14 +1,15 @@
 import math
 import statistics
 import random
-import util
-import kernel
-import datastore
 from collections.abc import Iterable
-from undefined import Undefined
-from identifier import Identifier
-from function import Function
-from function import FunctionCallException
+
+from . import util
+from . import kernel
+from . import datastore
+from .undefined import Undefined
+from .identifier import Identifier
+from .function import Function
+from .function import FunctionCallException
 
 def binary_operation(children):
   '''Internal function. Evaluates the first two elements

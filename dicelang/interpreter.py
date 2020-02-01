@@ -1,13 +1,14 @@
 #!/usr/bin/env python3
 import sys
-from lark import Lark
 
-import kernel
-import datastore
-from undefined import Undefined
-from function import Function
+from lark import Lark
 from lark import Tree
 from lark import Token
+
+from . import kernel
+from . import datastore
+from .undefined import Undefined
+from .function  import Function
 
 class Interpreter(object):
   def __init__(self, grammar_file_name, debug=False):

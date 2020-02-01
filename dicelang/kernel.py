@@ -1,8 +1,8 @@
 import lark
-import handlers
-import datastore
-import ownership
-from undefined import Undefined
+from . import handlers
+from . import datastore
+from . import ownership
+from .undefined import Undefined
 
 scoping_data = None
 identifier_types = (
