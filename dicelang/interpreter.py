@@ -29,8 +29,8 @@ class Interpreter(object):
     return kernel.handle_instruction(tree, user, server)
 
 def main(*args):
-  from test_interpreter import get_test_cases
-  from test_interpreter import Skip
+  from testing.test_interpreter import get_test_cases
+  from testing.test_interpreter import Skip
   try:
     filename = args[1]
   except IndexError:

@@ -38,7 +38,7 @@ def handle_instruction(tree, user='', server=''):
     out = handlers.handle_do_while_loop(tree.children, scoping_data)
   
   elif tree.data == 'conditional':
-    out = kernel.handle_instruction(tree.children[0])
+    out = handle_instruction(tree.children[0])
   elif tree.data == 'if':
     out = handlers.handle_if(tree.children, scoping_data)
   elif tree.data == 'if_else':
