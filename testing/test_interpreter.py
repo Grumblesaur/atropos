@@ -23,9 +23,9 @@ def get_test_cases(filename):
   return test_cases 
 
 class TestInterpreter:
-  dicelark = interpreter.Interpreter('../dicelang/grammar.lark')
+  dicelark = interpreter.Interpreter('dicelang/grammar.lark')
   
-  @pytest.mark.parametrize("command, expected", get_test_cases('../data/lines.txt'))
+  @pytest.mark.parametrize("command, expected", get_test_cases('data/lines.txt'))
   def test_execute(self, command, expected):
     user = 'Tester'
     server = 'Test Server'
