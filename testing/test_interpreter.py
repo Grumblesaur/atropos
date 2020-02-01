@@ -1,8 +1,8 @@
 #!/usr/bin/env python3
-from ..dicelang import interpreter
+from dicelang import interpreter
 import pytest
-from ..dicelang.undefined import Undefined
-from ..dicelang.function  import Function
+from dicelang.undefined import Undefined
+from dicelang.function  import Function
 
 Skip = object
 def get_test_cases(filename):
