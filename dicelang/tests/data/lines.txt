@@ -1,0 +1,196 @@
+1; 2; 3; ===> 3
+1 ===> 1
+1.5 ===> 1.5
+
+2 ** 4 ===> 16
+2 %% 8 ===> 3.0
+
+1+1 ===> 2
+1-1 ===> 0
+2*2 ===> 4
+1+1-1 ===> 1
+1*1 ===> 1
+2**2 ===> 4
+2**3 ===> 8
+4/2 ===> 2
+5/2 ===> 2.5
+5//2 ===> 2
+
+-4 ===> -4
++-2 ===> 2
+
+(((0))) ===> 0
+(1 * (1 + (1 / 1))) ===> 2.0
+
+-10 - -9 ===> -1
+
+6$9 ===> 69
+1 << 4 ===> 16
+10 >> 2 ===> 2
+
+6 == 10 - 4 ===> True
+7 != 7.1 ===> True
+9 > 5 ===> True
+5 > 9 ===> False
+9 < 5 ===> False
+5 < 9 ===> True
+8 >= 8 ===> True
+4 <= 4.5 ===> True
+6 > 5 > 4 > 2 ===> True
+6 < 4 < 6 ===> False
+
+'strings' in ['list', 'of', 'strings'] ===> True
+'strings' in [1, 2, 3, 4, 5, 6, 7, 12] ===> False
+'strings' not in [1, 2, 3, 4, 5, 6, 7] ===> True
+'strings' not in ['list', 'of', 'strings'] ===> False
+
+1 and 0 ===> 0
+1 and 1 ===> 1
+0 and 1 ===> 0
+0 and 0 ===> 0
+
+not 1 ===> False
+not 0 ===> True
+
+0 or 1 ===> 1
+1 or 0 ===> 1
+0 or 0 ===> 0
+1 or 1 ===> 1
+
+4 xor 0 ===> True
+0 xor 4 ===> True
+4 xor 4 ===> False
+0 xor 0 ===> False
+
+True ===> True
+False ===> False
+
+[ ] ===> []
+[7] ===> [7]
+[7] * 5 ===> [7, 7, 7, 7, 7]
+[1] - [1] ===> []
+[1] + [1] ===> [1,1]
+[1,2,3,4] - [1,3] ===> [2,4]
+[1,2,3,4] - [2,5] ===> [1, 3, 4]
+[1,2,3,4] - [5,6] ===> [1, 2, 3, 4]
+[0 to 10] ===> [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+[0 to 10 by 2] ===> [0, 2, 4, 6, 8]
+
+x ===> Undefined
+my y ===> Undefined
+our z ===> Undefined
+
+x = 1 ===> 1
+my y = 2 ===> 2
+our z = 3 ===> 3
+
+x ===> 1
+my y ===> 2
+our z ===> 3
+
+my x = x  ===> 1
+v = []    ===> []
+my v = v  ===> []
+x is not my x ===> False
+v is my v ===> True
+x is my x is x ===> True
+del v ===> []
+del my v ===> []
+del my x ===> 1
+
+"double quoted string" ===> 'double quoted string'
+'single quoted string' ===> 'single quoted string'
+
+{} ===> {}
+{'x' : 4} ===> {'x' : 4}
+d = {6 : 6.5, 'p' : "q"} ===> {6 : 6.5, 'p' : 'q'}
+d['p'] ===> 'q'
+
+[1,2,3][0] ===> 1
+[[[True]]][0][0][0] ===> True
+
+nested = {'first' : {'second' : Undefined}} ===> {'first' : {'second' : Undefined}}
+nested['new'] = {} ===> {}
+nested ===> {'first' : {'second' : Undefined}, 'new' : {}}
+nested['first']['second'] ===> Undefined
+nested['first']['second'] = 'm' ===> 'm'
+nested ===> {'first' : {'second' : 'm'}, 'new' : {}}
+
+x ===> 1
+del x ===> 1
+x ===> Undefined
+
+our box = {'a' : {'a' : {'a' : 1} } } ===> {'a' : {'a' : {'a' : 1}}}
+our box ===> {'a' : {'a' : {'a' : 1}}}
+our box['a']['a']['a'] ===> 1
+del our box['a']['a']['a'] ===> 1
+our box ===> {'a' : {'a' : {} }}
+
+begin block_x = 1; block_y = 2; block_x + block_y end ===> 3
+block_result = begin block_y end ===> Undefined
+
+block_result = begin q = (begin q = 5 end) + 1 end ===> 6
+block_result = begin q = (begin q = 5 end); q = q + (begin q = 5 end) end ===> 10
+
+none = () -> begin [] end ===> __NO_TEST_CASE__
+one = (first) -> begin [first] end ===> __NO_TEST_CASE__
+two = (first, second) -> begin [first, second] end  ===> __NO_TEST_CASE__
+add = (left, right) -> left + right ===> __NO_TEST_CASE__
+add(6, 8) ===> 14
+
+none() ===> []
+
+one(1) ===> [1]
+
+two(1, 2) ===> [1, 2]
+
+4d6h3^6 ===> __NO_TEST_CASE__
+"test"^6 ===> ["test"] * 6
+
+&[0 to 10][3:6] ===> 12
+@[1 to 7] ===> __NO_TEST_CASE__
+!<[1 to 7] ===> 1
+!>[1 to 7] ===> 6
+#[1 to 7] ===> 6
+|[1, [2, [3], [4], 5], [6], 7] ===> [1, 2, 3, 4, 5, 6, 7]
+?[1 to 11] ===> {'average':5.5,'minimum':1,'median':5.5,'maximum':10,'size':10,'sum':55,'stddev':2.8722813232690143,'q1':3,'q3':8}
+
+><[1,2,3,4,5,6,7] ===> __NO_TEST_CASE__
+<>[1,3,5,7,2,4,6] ===> [1,2,3,4,5,6,7]
+-<>[1,3,5,7,2,4,6] ===> [7,6,5,4,3,2,1]
+-3 * 'abc' ===> 'cbacbacba'
+
+v = [0 to 10] ===> list(range(10))
+v[0:4] ===> [0, 1, 2, 3]
+v[0:4:2] ===> [0, 2]
+v[1:] ===> list(range(1, 10))
+v[:1] ===> [0]
+v[:4:] ===> [0,1,2,3]
+v[::-1] ===> list(range(10))[::-1]
+
+v[1:][0] ===> 1
+
+my p = [] ===> []
+for x in [0 to 10] do my p = my p + [x] ===> True
+my p ===> [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+f = (for x in [] do 'nothing at all') ===> False
+
+while my p do my p = my p[1:] ===> 10
+my p = [] ===> []
+do begin my p = my p + [4d6h3] end while #my p < 6 ===> 6
+
+zz = 0 ===> 0
+do begin global zz = global zz + 1 end while global zz < 3 ===> 3
+
+if True then 'zip' else 'zap' ===> 'zip'
+if False then 'zip' else 'zap' ===> 'zap'
+if True then 'zip' ===> 'zip'
+if False then 'zip' ===> Undefined
+
+'yes' if True else 'no' ===> 'yes'
+'yes' if False else 'no' ===> 'no'
+my result = Undefined if else 'no' ===> 'no'
+my result = 'yes' if else 'no' ===> 'yes'
+
+`1`+`1` ===> 2
+

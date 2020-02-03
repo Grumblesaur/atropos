@@ -1,0 +1,11 @@
+x = [1 to 100];
+~[ Here
+   be a
+   block
+   comment. ]~
+?x
+
+===>
+
+__NO_TEST_CASE__
+
