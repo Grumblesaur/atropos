@@ -35,7 +35,7 @@ class Function(object):
 
   def __call__(self, scoping_data, *args):
     if len(self.params) != len(args):
-      raise FunctionCallException(FunctionCallException.length_error)
+      raise FunctionCallException.length_error
     arguments_scope = dict(zip(self.params, args))
     scoping_data.push_frame()
     scoping_data.push_scope(arguments_scope)
@@ -45,7 +45,7 @@ class Function(object):
     return out
  
 class FunctionCallException(Exception):
-  length_error = 'Function formal parameters mismatch arguments in length.'
-  pass
+  length_error = FunctionCallException(
+    'Function formal parameters mismatch arguments in length.')
  
 
