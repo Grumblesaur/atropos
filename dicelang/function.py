@@ -1,5 +1,4 @@
 import lark
-from . import kernel
 
 class SyntaxToken(object):
   def __init__(self, lark_token):
@@ -23,9 +22,10 @@ class SyntaxTree(object):
     return 'SyntaxTree({}, {})'.format(repr(self.data), repr(self.children))
 
 class Function(object):
-  def __init__(self, lark_tree, *param_names):
+  def __init__(self, call_handler, lark_tree, *param_names):
     self.code = SyntaxTree(lark_tree)
     self.params = param_names
+    self.call_handler = call_handler
   
   def __repr__(self):
     return 'Function({}, {})'.format(repr(self.code), repr(self.params))
@@ -39,7 +39,7 @@ class Function(object):
     arguments_scope = dict(zip(self.params, args))
     scoping_data.push_frame()
     scoping_data.push_scope(arguments_scope)
-    out = kernel.handle_instruction(self.code)
+    out = self.call_handler(self.code)
     scoping_data.pop_scope()
     scoping_data.pop_frame()
     return out

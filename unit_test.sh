@@ -1,0 +1,2 @@
+cd dicelang/tests
+pytest

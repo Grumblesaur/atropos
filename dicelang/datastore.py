@@ -1,15 +1,18 @@
 from collections.abc import Iterable
-from .undefined import Undefined
-from .function  import SyntaxToken
-from .function  import SyntaxTree
-from .function  import Function
+
+# The following imports are not used by name in this file, but are
+# necessary for enabling `eval` to work correctly. Do not let
+# PyCharm "optimize" them out.
+from dicelang.undefined import Undefined
+from dicelang.function  import SyntaxToken
+from dicelang.function  import SyntaxTree
+from dicelang.function  import Function
 
 class _DataStore(object):
-  '''Internal class for saving, loading, accessing, and mutating
-  standing variables during the use of the chat bot.'''
   def __init__(self, storage_file_name):
+    """Internal class for saving, loading, accessing, and mutating
+    standing variables during the use of the chat bot."""
     self.storage_file_name = storage_file_name
-        
     with open(self.storage_file_name, 'r') as f:
       storage_text = f.read()
     try:
@@ -66,8 +69,15 @@ private = None
 server  = None
 public  = None
 
+names = ('private', 'server', 'public')
 
-def configure(private_path, server_path, public_path):
+def configure(
+    private_path='vars/private',
+    server_path='vars/server',
+    public_path='vars/public'):
+  global private
+  global server
+  global public
   private = _OwnedDataStore(private_path)
   server  = _OwnedDataStore(server_path)
   public  = _DataStore(public_path)

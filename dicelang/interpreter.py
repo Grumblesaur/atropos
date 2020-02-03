@@ -1,57 +1,36 @@
 #!/usr/bin/env python3
-import sys
-
+import os
+import pytest
 from lark import Lark
-from lark import Tree
-from lark import Token
+from dicelang import kernel
+from dicelang import grammar
+from dicelang import datastore
 
-from . import kernel
-from . import datastore
-from .undefined import Undefined
-from .function  import Function
+default_path = 'vars'
 
 class Interpreter(object):
-  def __init__(self, grammar_file_name, debug=False):
-    with open(grammar_file_name, 'r') as grammar_file:
-      grammar = grammar_file.read()
-    if not grammar:
-      raise ValueError('grammar file renamed or missing!')
-    self.parser = Lark(grammar, start='start', parser='earley')
-    self.debug  = debug
-  
+  def __init__(self):
+    self.parser = Lark(grammar.raw_text, start='start', parser='earley')
+    try:
+      vars_directory = os.environ['DICELANG_DATASTORE']
+      paths = ['{}/{}'.format(vars_directory, name) for name in datastore.names]
+    except KeyError:
+      if not os.path.isdir(default_path):
+        os.mkdir(default_path)
+      else:
+        for filename in datastore.names:
+          path = '{}/{}'.format(default_path, filename)
+          if not os.path.isfile(path):
+            os.mknod(path)
+      paths = ()
+    datastore.configure(*paths)
+    
   def execute(self, command, user, server):
     tree = self.parser.parse(command)
-    if self.debug:
-      print(tree, '\n')
     return self.interpret(tree, user, server)
     
-  def interpret(self, tree, user, server):
+  @staticmethod
+  def interpret(tree, user, server):
     return kernel.handle_instruction(tree, user, server)
 
-def main(*args):
-  from testing.test_interpreter import get_test_cases
-  from testing.test_interpreter import Skip
-  try:
-    filename = args[1]
-  except IndexError:
-    print('No filename provided!')
-    return 1
-  test_cases = get_test_cases(filename)
-  interpreter = Interpreter('grammar.lark')
-  for command, expected in test_cases:
-    actual = interpreter.execute(command, 'Tester', 'Test Server')
-    msg = '{} ===> actual = {}'.format(command, actual)
-    check_msg = msg + (' :: expected = {}'.format(expected))
-    if expected is not Skip:
-      data = (command, actual, expected)
-      print(check_msg)
-      assert actual == expected
-    else:
-      print(msg)
-      assert True
-  return 0
 
-if __name__ == '__main__':
-  exit_code = main(*sys.argv)
-  sys.exit(exit_code)
-  
