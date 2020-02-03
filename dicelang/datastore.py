@@ -41,8 +41,15 @@ class _DataStore(object):
     with open(self.storage_file_name, 'w') as f:
       f.write(repr(self.variables))
   
+  def backup(self):
+    with open(self.storage_file_name + '.bak', 'w') as f:
+      f.write(repr(self.variables))
+  
 
 class _OwnedDataStore(_DataStore):
+  '''Specialization of _DataStore where keys are associated by
+  some other key specifying ownership, such as a username or
+  server handle.'''
   def get(self, owner_tag, key, default=Undefined):
     try:
       out = self.variables[owner_tag][key]
@@ -68,6 +75,11 @@ class _OwnedDataStore(_DataStore):
 
 class Persistence(object):
   def __init__(self):
+    '''Data persistence manager for tracking the three main datastores
+    for use with dicelang's host chatbot. This manager will attempt to
+    save variables in the directory specified by the environment variable
+    DICELANG_DATASTORE if it exists, or will create a new datastore
+    directory in place called `vars`.'''
     filenames = 'private server public'.split()
     try:
       vars_directory = os.environ['DICELANG_DATASTORE']
@@ -85,10 +97,14 @@ class Persistence(object):
     self.server  = _OwnedDataStore(server_path)
     self.public  = _DataStore(public_path)
 
-  def save():
-    private.save()
-    server.save()
-    public.save()
-
-persistence = Persistence()
+  def save(self):
+    self.private.save()
+    self.server.save()
+    self.public.save()
+  
+  def backup(self):
+    self.save()
+    self.private.backup()
+    self.server.backup()
+    self.public.backup()
 
