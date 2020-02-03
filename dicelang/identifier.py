@@ -1,4 +1,4 @@
-from . import datastore
+from dicelang.datastore import persistence
 from .ownership import NotLocal
 from .undefined import Undefined
 
@@ -33,55 +33,55 @@ class Identifier(object):
     return self.name
   
   def get(self):
-    '''Retrieves the identifier's value from the appropriate datastore.'''
+    '''Retrieves the identifier's value from the appropriate persistence.'''
     if self.mode == 'private':
-      out = datastore.private.get(self.scoping_data.user, self.name)
+      out = persistence.private.get(self.scoping_data.user, self.name)
     elif self.mode == 'server':
-      out = datastore.server.get(self.scoping_data.server, self.name)
+      out = persistence.server.get(self.scoping_data.server, self.name)
     elif self.mode == 'scoped':
       if self.scoping_data:
         lookup = self.scoping_data.get(self.name)
       if not self.scoping_data or lookup is NotLocal:
-        lookup = datastore.public.get(self.name)
+        lookup = persistence.public.get(self.name)
       out = lookup if lookup is not None else Undefined
     elif self.mode == 'global':
-      out = datastore.public.get(self.name)
+      out = persistence.public.get(self.name)
     else:
       error()
     return out
   
   def put(self, value):
-    '''Stores the identifier's value in the appropriate datastore.'''
+    '''Stores the identifier's value in the appropriate persistence.'''
     if self.mode == 'private':
-      out = datastore.private.put(self.scoping_data.user, self.name, value)
+      out = persistence.private.put(self.scoping_data.user, self.name, value)
     elif self.mode == 'server':
-      out = datastore.server.put(self.scoping_data.server, self.name, value)
+      out = persistence.server.put(self.scoping_data.server, self.name, value)
     elif self.mode == 'scoped':
       if self.scoping_data:
         put = self.scoping_data.put(self.name, value)
       if not self.scoping_data or put is NotLocal:
-        put = datastore.public.put(self.name, value)
+        put = persistence.public.put(self.name, value)
       out = put
     elif self.mode == 'global':
-      out = datastore.public.put(self.name, value)
+      out = persistence.public.put(self.name, value)
     else:
       error()
     return out
 
   def drop(self):
-    '''Removes the identifier from the appropriate datastore.'''
+    '''Removes the identifier from the appropriate persistence.'''
     if self.mode == 'private':
-      out = datastore.private.drop(self.scoping_data.user, self.name)
+      out = persistence.private.drop(self.scoping_data.user, self.name)
     elif self.mode == 'server':
-      out = datastore.server.drop(self.scoping_data.server, self.name)
+      out = persistence.server.drop(self.scoping_data.server, self.name)
     elif self.mode == 'scoped':
       if self.scoping_data:
         drop = self.scoping_data.drop(self.name)
       if not self.scoping_data or drop is NotLocal:
-        drop = datastore.public.drop(self.name)
+        drop = persistence.public.drop(self.name)
       out = drop if drop is not None else Undefined
     elif self.mode == 'global':
-      out = datastore.public.drop(self.name)
+      out = persistence.public.drop(self.name)
     else:
       error()
     return out

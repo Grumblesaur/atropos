@@ -1,3 +1,4 @@
+import os
 from collections.abc import Iterable
 
 # The following imports are not used by name in this file, but are
@@ -65,26 +66,29 @@ class _OwnedDataStore(_DataStore):
     del self.variables[owner_tag][key]
     return out
 
-private = None
-server  = None
-public  = None
+class Persistence(object):
+  def __init__(self):
+    filenames = 'private server public'.split()
+    try:
+      vars_directory = os.environ['DICELANG_DATASTORE']
+    except KeyError:
+      vars_directory = 'vars'
+    paths = ['{}/{}'.format(vars_directory, name) for name in filenames]
+    if not os.path.isdir(vars_directory):
+      os.mkdir(vars_directory)
+    for path in paths:
+      if not os.path.isfile(path):
+        os.mknod(path)
+    private_path, server_path, public_path = paths
+    
+    self.private = _OwnedDataStore(private_path)
+    self.server  = _OwnedDataStore(server_path)
+    self.public  = _DataStore(public_path)
 
-names = ('private', 'server', 'public')
+  def save():
+    private.save()
+    server.save()
+    public.save()
 
-def configure(
-    private_path='vars/private',
-    server_path='vars/server',
-    public_path='vars/public'):
-  global private
-  global server
-  global public
-  private = _OwnedDataStore(private_path)
-  server  = _OwnedDataStore(server_path)
-  public  = _DataStore(public_path)
-
-def save():
-  private.save()
-  server.save()
-  public.save()
-
+persistence = Persistence()
 
