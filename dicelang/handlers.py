@@ -35,6 +35,12 @@ def handle_function_call(children, scoping_data):
   return function(scoping_data, *arguments)
 
 def handle_for_loop(children, scoping_data):
+  '''Executes the code child (a block or short_body in the grammar)
+  once for each element of the iterable. At each iteration, the iterator
+  is set to the current value of the iterable. As the for loop is itself
+  an expression, it will return a value: True if it had elements in the
+  iterable, and False otherwise. This allows a user to check if a for loop
+  executed as intended or not.'''
   iterator    = kernel.handle_instruction(children[0])
   iterable    = kernel.handle_instruction(children[1])
   name, start = iterator.name, iterable[0] if len(iterable) else None
@@ -50,6 +56,10 @@ def handle_for_loop(children, scoping_data):
   return finished
 
 def handle_while_loop(children, scoping_data):
+  '''Executes the code child repeatedly until or unless the conditional
+  expression evaluates to a "falsy" value. As the while loop is itself an
+  expression, it will return a value: the number of times its body was
+  executed, minimum 0.'''
   scoping_data.push_scope()
   executed = 0
   while kernel.handle_instruction(children[0]):
@@ -59,6 +69,10 @@ def handle_while_loop(children, scoping_data):
   return executed
 
 def handle_do_while_loop(children, scoping_data):
+  '''Executes the code child repeatedly until the conditional expression
+  evaluates to a "falsy" value. As the do-while loop is itself an expression,
+  it will return a value: the number of times its body was executed,
+  minimum 1.'''
   scoping_data.push_scope()
   executed = 1
   kernel.handle_instruction(children[0])
@@ -69,6 +83,10 @@ def handle_do_while_loop(children, scoping_data):
   return executed
 
 def handle_if(children, scoping_data):
+  '''Executes the code child only if the conditional expression
+  evaluates to a "truthy" value. As the if-clause is itself an
+  expression, it will return a value: the value which its code child
+  evaluates to if it was executed, else Undefined.'''
   executed = Undefined
   scoping_data.push_scope()
   if kernel.handle_instruction(children[0]):
@@ -77,6 +95,11 @@ def handle_if(children, scoping_data):
   return executed
 
 def handle_if_else(children, scoping_data):
+  '''Executes the code child of the if-clause if the conditional
+  expression evaluates to a "truthy" value, otherwise the code
+  child of the else-clause. As the if-else construct is itself an
+  expression, it will return a value: the value of whichever clause's
+  child was evaluated.'''
   scoping_data.push_scope()
   if kernel.handle_instruction(children[0]):
     out = kernel.handle_instruction(children[1])
@@ -85,12 +108,20 @@ def handle_if_else(children, scoping_data):
   return out
 
 def handle_short_body(children, scoping_data):
+  '''This handles a grammatical construct that allows compound
+  expressions like for, if, while, and functions to accept a code
+  body that is a single expression rather than a block. This wraps
+  an ordinary expression in a scope and delays its evaluation.'''
   scoping_data.push_scope()
   out = kernel.handle_instruction(children[0])
   scoping_data.pop_scope()
   return out
 
 def handle_block(children, scoping_data):
+  '''A block is a grammatical construct for providing code to
+  compound expressions, like for, if, while, and functions. A
+  block is enclosed by a scope on the current stack frame, and
+  as an expression evaluates to its last ;-separated expression.'''
   scoping_data.push_scope()
   tail = children[-1]
   for child in children[:-1]:
@@ -150,6 +181,8 @@ def handle_identifier_set_subscript(children):
   return value
 
 def handle_inline_if(children):
+  '''This is a shorthand for simple if-else constructs, resembling
+  the inline-if of python. Its behavior is the same.'''
   condition = kernel.handle_instruction(children[1])
   if condition:
     out = kernel.handle_instruction(children[0])
@@ -158,6 +191,9 @@ def handle_inline_if(children):
   return out
 
 def handle_inline_if_binary(children):
+  '''This is a two-operand inline-if. The first operand is evaluated.
+  If it evaluates to a truthy value, it is returned. If it does not,
+  the second operand is evaluated and returned instead.'''
   condition = kernel.handle_instruction(children[0])
   if condition:
     out = condition
@@ -166,6 +202,11 @@ def handle_inline_if_binary(children):
   return out
 
 def handle_repetition(children):
+  '''This is a shorthand for for-loop constructions which need no
+  iterator. The left operand is some expression, and the right operand
+  is some number. The expression is evaluated `number` of times, with
+  each new evaluation being added to a list. This list is the return
+  value of the expression.'''
   times = kernel.handle_instruction(children[1])
   out = [ ]
   for time in range(times):
@@ -194,6 +235,11 @@ def handle_logical_not(children):
   return not bool(kernel.handle_instruction(children[0]))
 
 def handle_comp_math(children):
+  '''All mathematical comparisons may be chained. All the operands are
+  evaluated, and their values are used incrementally to check their veracity.
+  In short, ``` val1 opA val2 opB val3 ``` is the same as
+  ```val1 opA val2 and val2 opB val3 ```. This construct will short-circuit on
+  the first comparison to return False, or else return True.'''
   out = False
   comparisons = [kernel.handle_instruction(child) for child in children]
   operations = {
@@ -213,6 +259,8 @@ def handle_comp_math(children):
   return out
 
 def handle_comp_obj(children):
+  '''Works similarly to the mathematical version, but is strictly for the
+  operations `is` and `is not`.'''
   out = False
   comparisons = [kernel.handle_instruction(child) for child in children]
   operations = {'is' : lambda l, r: l is r, 'is not' : lambda l, r: l is not r}
@@ -225,6 +273,8 @@ def handle_comp_obj(children):
   return out
 
 def handle_present(children, negate=False):
+  '''Returns True if the left operand is present in the right operand,
+  as an element or substring, or else False.'''
   element, collection = binary_operation(children)
   out = element in collection
   return out if not negate else not out
@@ -256,7 +306,6 @@ def handle_subtraction(children):
   will be removed from the left operand, and the resulting
   new iterable is returned.'''
   minuend, subtrahend = binary_operation(children)
-  
   try:
     result = minuend - subtrahend
   except TypeError as e:
@@ -340,6 +389,8 @@ def handle_logarithm(children):
   return math.log(antilogarithm, base)
 
 def handle_sum_or_join(children):
+  '''Evaluates its operand, and then elementwise sums (if numeric) or
+  joins/catenates (if iterable), and returns the sum/catenation.'''
   operand = kernel.handle_instruction(children[0])
   if isinstance(operand, Iterable) and operand:
     out = operand[0]
@@ -352,6 +403,8 @@ def handle_sum_or_join(children):
   return out
 
 def handle_length(children):
+  '''Evaluates its operand and returns its length if iterable,
+  its parameter count if a function, or else 0.'''
   operand = kernel.handle_instruction(children[0])
   if isinstance(operand, Iterable):
     out = len(operand)
@@ -362,6 +415,8 @@ def handle_length(children):
   return out
 
 def handle_selection(children):
+  '''Evaluates its operand and returns a random element if
+  str or list, a random key-value pair if dict, or else the operand.'''
   operand = kernel.handle_instruction(children[0])
   if isinstance(operand, (float, int)):
     operand = [operand]
@@ -370,16 +425,21 @@ def handle_selection(children):
   return random.choice(operand)
 
 def handle_extrema(children, min_or_max):
+  '''Handles finding the lexicographically highest or lowest value
+  in an interable, or for some scalar operand, the operand itself.'''
   operand = kernel.handle_instruction(children[0])
   if not isinstance(operand, Iterable):
     operand = [operand]
   return min(operand) if min_or_max == 'minimum' else max(operand)
 
 def handle_flatten(children):
+  '''Flattens a multiply-nested list into a single list containing all
+  the nested sub-elements on one level.'''
   operand = kernel.handle_instruction(children[0])
   return util.flatten(operand)
 
 def handle_stats(children):
+  '''Returns a numeric summary of a list of numbers.'''
   operand = kernel.handle_instruction(children[0])
   out = { }
   if isinstance(operand, (float, int)):
@@ -400,9 +460,11 @@ def handle_stats(children):
   return out
 
 def handle_sort(children):
+  '''Takes a list, copies it, and returns the copy sorted.'''
   return sorted(kernel.handle_instruction(children[0]))
 
 def handle_shuffle(children):
+  '''Takes a list, copies it, and returns the copy shuffled.'''
   operand = kernel.handle_instruction(children[0])[:]
   if isinstance(operand, str):
     operand = list(operand)
@@ -438,6 +500,8 @@ def handle_dice(node_type, children):
   return util.roll(dice, sides, count, mode=keep_mode, return_sum=as_sum) 
 
 def handle_slices(slice_type, children):
+  '''This handles the slicing of lists and dicts to an
+  arbitrary depth of nesting.'''
   v = kernel.handle_instruction(children[0])
   slice_args = [kernel.handle_instruction(child) for child in children[1:]]
   if slice_type == 'whole_slice':
