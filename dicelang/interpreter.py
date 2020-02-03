@@ -11,13 +11,13 @@ default_path = 'vars'
 class Interpreter(object):
   def __init__(self):
     self.parser = Lark(grammar.raw_text, start='start', parser='earley')
-    
+    self.datastore = datastore.Persistence()
+  
   def execute(self, command, user, server):
     tree = self.parser.parse(command)
     return self.interpret(tree, user, server)
     
-  @staticmethod
-  def interpret(tree, user, server):
-    return kernel.handle_instruction(tree, user, server)
+  def interpret(self, tree, user, server):
+    return kernel.handle_instruction(tree, user, server, self.datastore)
 
 

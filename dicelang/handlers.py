@@ -3,10 +3,10 @@ import statistics
 import random
 from collections.abc import Iterable
 
-from . import kernel, util
-from .undefined import Undefined
-from .identifier import Identifier
-from .function import Function
+from dicelang import kernel, util
+from dicelang.undefined import Undefined
+from dicelang.identifier import Identifier
+from dicelang.function import Function
 
 def binary_operation(children):
   '''Internal function. Evaluates the first two elements
@@ -99,12 +99,12 @@ def handle_block(children, scoping_data):
   scoping_data.pop_scope()
   return out
 
-def handle_identifiers(tree_data, children, scoping_data):
+def handle_identifiers(tree_data, children, scoping_data, persistence):
   '''Passes an Identifier object back to the interpreter
   when an identifier token is reached.'''
   ownership, _ = tree_data.split('_')
   name = children[0].value
-  out = Identifier(name, scoping_data, ownership)
+  out = Identifier(name, scoping_data, ownership, persistence)
   return out
 
 def handle_delete_variable(children):

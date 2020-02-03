@@ -1,7 +1,8 @@
-from . import handlers, ownership
-from .undefined import Undefined
+from dicelang import handlers, ownership
+from dicelang.undefined import Undefined
 
 scoping_data = None
+datastore = None
 identifier_types = (
   'scoped_identifier',
   'private_identifier',
@@ -11,10 +12,12 @@ identifier_types = (
 class LoopBreak(Exception):
   pass
 
-def handle_instruction(tree, user='', server=''):
+def handle_instruction(tree, user='', server='', persistence=None):
   global scoping_data
+  global datastore
   if tree.data == 'start':
     scoping_data = ownership.ScopingData(user, server)
+    datastore = persistence
     out = [handle_instruction(child) for child in tree.children][-1]
   
   elif tree.data == 'block':
@@ -207,7 +210,7 @@ def handle_instruction(tree, user='', server=''):
   elif tree.data == 'identifier':
     out = handle_instruction(tree.children[0])
   elif tree.data in identifier_types:
-    out = handlers.handle_identifiers(tree.data, tree.children, scoping_data)
+    out = handlers.handle_identifiers(tree.data, tree.children, scoping_data, datastore)
   elif tree.data == 'undefined_literal':
     out = Undefined
   elif tree.data == 'identifier_get':
@@ -219,7 +222,7 @@ def handle_instruction(tree, user='', server=''):
   
   if tree.data == 'start':
     scoping_data = None
-   
+    datastore = None
   return out
 
 
