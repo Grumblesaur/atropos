@@ -460,8 +460,21 @@ def handle_stats(children):
   return out
 
 def handle_sort(children):
-  '''Takes a list, copies it, and returns the copy sorted.'''
-  return sorted(kernel.handle_instruction(children[0]))
+  '''Evaluates its operand and sorts it if it's a list,
+  sorts its values if its a dict, sorts its constituent
+  characters and joins them if it's a string, and does
+  nothing otherwise. The sorted-or-left-alone value is
+  returned without mutating the original.'''
+  operand = kernel.handle_instructions(children[0])
+  if isinstance(operand, basestring):
+    out = ''.join(sorted(operand))
+  elif isinstance(operand, (int, float)):
+    out = operand
+  elif isinstance(operand, dict):
+    out = sorted(operand.values())
+  else:
+    out = sorted(operand)
+  return out
 
 def handle_shuffle(children):
   '''Takes a list, copies it, and returns the copy shuffled.'''
