@@ -2,6 +2,7 @@
 
 import sys
 import time
+import atexit
 import asyncio
 import discord
 import commands
@@ -65,7 +66,9 @@ async def on_message(msg):
   elif last.should_back_up():
     interpreter.datastore.backup()
     last.backed_up()
-  
+
+atexit.register(interpreter.datastore.save)
+
 if __name__ == '__main__':
   import auth
   print('atropos initialized')
