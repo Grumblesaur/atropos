@@ -26,10 +26,7 @@ def handle_instruction(tree, user='', server='', persistence=None):
     out = handlers.handle_block(tree.children, scoping_data)  
   elif tree.data == 'function':
     out = handlers.handle_function(tree.children)
-  
-  elif tree.data == 'function_call':
-    out = handlers.handle_function_call(tree.children, scoping_data)
-  
+ 
   elif tree.data == 'for_loop':
     out = handlers.handle_for_loop(tree.children, scoping_data)
   elif tree.data == 'while_loop':
@@ -184,6 +181,11 @@ def handle_instruction(tree, user='', server='', persistence=None):
     out = handle_instruction(tree.children[0])
   elif 'scalar_die' in tree.data or 'vector_die' in tree.data:
     out = handlers.handle_dice(tree.data, tree.children)
+
+  elif tree.data == 'call_or_atom':
+    out = handle_instruction(tree.children[0])
+  elif tree.data == 'function_call':
+    out = handlers.handle_function_call(tree.children, scoping_data)
   
   elif tree.data == 'atom':
     out = handle_instruction(tree.children[0])

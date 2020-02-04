@@ -15,8 +15,6 @@ block: "begin" expression (";" expression)* (";")? "end"
 
 function: "(" (PARAM ("," PARAM)* )? ")" "->" [block | short_body]
 
-function_call: expression "(" (expression ("," expression)* )? ")"
-
 for_loop: "for" identifier "in" expression "do" [block | short_body]
 
 while_loop: "while" expression "do" [block | short_body]
@@ -32,7 +30,6 @@ expression: assignment
           | deletion
           | block
           | function
-          | function_call
           | for_loop
           | while_loop
           | do_while_loop
@@ -122,13 +119,16 @@ slice: slice ("["            ":"             (":")?           "]") -> whole_slic
      | slice ("[" expression "]")                                  -> not_a_slice
      | die
 
-die: die "d" atom          -> scalar_die_all
-   | die "d" atom "h" atom -> scalar_die_highest
-   | die "d" atom "l" atom -> scalar_die_lowest
-   | die "r" atom          -> vector_die_all
-   | die "r" atom "h" atom -> vector_die_highest
-   | die "r" atom "l" atom -> vector_die_lowest
-   | atom
+die: die "d" call_or_atom                   -> scalar_die_all
+   | die "d" call_or_atom "h" call_or_atom -> scalar_die_highest
+   | die "d" call_or_atom "l" call_or_atom -> scalar_die_lowest
+   | die "r" call_or_atom                   -> vector_die_all
+   | die "r" call_or_atom "h" call_or_atom -> vector_die_highest
+   | die "r" call_or_atom "l" call_or_atom -> vector_die_lowest
+   | call_or_atom
+
+call_or_atom: atom "(" (expression ("," expression)* )? ")" -> function_call
+            | atom
 
 atom: number_literal
     | boolean_literal

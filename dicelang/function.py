@@ -1,5 +1,12 @@
 import lark
 
+
+class FunctionCallException(Exception):
+  pass
+
+length_error = FunctionCallException(
+  'Function formal parameters mismatch arguments in length.')
+ 
 class SyntaxToken(object):
   def __init__(self, lark_token):
     self.type = lark_token.type
@@ -35,7 +42,7 @@ class Function(object):
 
   def __call__(self, scoping_data, *args):
     if len(self.params) != len(args):
-      raise FunctionCallException.length_error
+      raise length_error
     arguments_scope = dict(zip(self.params, args))
     scoping_data.push_frame()
     scoping_data.push_scope(arguments_scope)
@@ -44,8 +51,5 @@ class Function(object):
     scoping_data.pop_frame()
     return out
  
-class FunctionCallException(Exception):
-  length_error = FunctionCallException(
-    'Function formal parameters mismatch arguments in length.')
- 
+
 
