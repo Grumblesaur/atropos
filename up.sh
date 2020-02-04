@@ -1,5 +1,5 @@
 source env/bin/activate
-export DICELANG_DATASTORE='~/.atropos_vars'
+export DICELANG_DATASTORE="/home/$USER/.atropos_vars"
 while true; do
   python3 atropos.py
   echo "Atropos stopped with exit code $?. Respawning in 3..."
