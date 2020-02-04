@@ -465,7 +465,7 @@ def handle_sort(children):
   characters and joins them if it's a string, and does
   nothing otherwise. The sorted-or-left-alone value is
   returned without mutating the original.'''
-  operand = kernel.handle_instructions(children[0])
+  operand = kernel.handle_instruction(children[0])
   if isinstance(operand, basestring):
     out = ''.join(sorted(operand))
   elif isinstance(operand, (int, float)):
