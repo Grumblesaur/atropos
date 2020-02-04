@@ -44,7 +44,7 @@ class SyntaxTree(object):
 class Function(object):
   @staticmethod
   def make(lark_tree, param_names):
-    return Function(SyntaxTree(lark_tree), param_names)
+    return Function(SyntaxTree.make(lark_tree), param_names)
   
   def __init__(self, syntax_tree, param_names):
     self.code = syntax_tree
