@@ -16,10 +16,7 @@ class _DataStore(object):
     self.storage_file_name = storage_file_name
     with open(self.storage_file_name, 'r') as f:
       storage_text = f.read()
-    try:
-      self.variables = eval(storage_text)
-    except Exception as e:
-      self.variables = {}
+    self.variables = eval(storage_text)
     
   def get(self, key, default=Undefined):
     try:
@@ -39,6 +36,7 @@ class _DataStore(object):
   
   def save(self):
     with open(self.storage_file_name, 'w') as f:
+      print(repr(self.variables))
       f.write(repr(self.variables))
   
   def backup(self):

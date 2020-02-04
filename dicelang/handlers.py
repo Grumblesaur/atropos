@@ -22,7 +22,7 @@ def handle_function(children):
   and returns that function object to be called later.'''
   code = children[-1]
   params = [child.value for child in children[:-1]]
-  out = Function(kernel.handle_instruction, code, *params)
+  out = Function.make(code, params)
   return out
 
 def handle_function_call(children, scoping_data):
