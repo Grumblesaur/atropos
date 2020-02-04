@@ -1,4 +1,4 @@
-source env/bin/activate
+source ./env/bin/activate
 export DICELANG_DATASTORE="/home/$USER/.atropos_vars"
 while true; do
   python3 atropos.py
