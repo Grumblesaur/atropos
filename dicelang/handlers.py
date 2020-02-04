@@ -466,7 +466,7 @@ def handle_sort(children):
   nothing otherwise. The sorted-or-left-alone value is
   returned without mutating the original.'''
   operand = kernel.handle_instruction(children[0])
-  if isinstance(operand, basestring):
+  if isinstance(operand, str):
     out = ''.join(sorted(operand))
   elif isinstance(operand, (int, float)):
     out = operand
