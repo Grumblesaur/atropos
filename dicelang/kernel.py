@@ -181,7 +181,12 @@ def handle_instruction(tree, user='', server='', persistence=None):
     out = handle_instruction(tree.children[0])
   elif 'scalar_die' in tree.data or 'vector_die' in tree.data:
     out = handlers.handle_dice(tree.data, tree.children)
-
+  
+  elif tree.data == 'plugin_op':
+    out = handle_instruction(tree.children[0])
+  elif tree.data == 'plugin_call':
+    out = handlers.handle_plugin_call(tree.children)
+  
   elif tree.data == 'call_or_atom':
     out = handle_instruction(tree.children[0])
   elif tree.data == 'function_call':

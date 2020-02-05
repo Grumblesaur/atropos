@@ -7,6 +7,7 @@ from dicelang import kernel, util
 from dicelang.undefined import Undefined
 from dicelang.identifier import Identifier
 from dicelang.function import Function
+from dicelang import plugins
 
 def binary_operation(children):
   '''Internal function. Evaluates the first two elements
@@ -487,6 +488,11 @@ def handle_shuffle(children):
     random.shuffle(operand)
     out = operand
   return out
+
+def handle_plugin_call(children):
+  plugin_alias, argument = binary_operation(children)
+  operation = plugins.lookup(plugin_alias)
+  return operation(argument)
 
 def handle_dice(node_type, children):
   '''Evaluates its operands and generates a random number

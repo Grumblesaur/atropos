@@ -125,7 +125,10 @@ die: die "d" call_or_atom                   -> scalar_die_all
    | die "r" call_or_atom                   -> vector_die_all
    | die "r" call_or_atom "h" call_or_atom -> vector_die_highest
    | die "r" call_or_atom "l" call_or_atom -> vector_die_lowest
-   | call_or_atom
+   | plugin_op
+
+plugin_op: call_or_atom "::" plugin_op -> plugin_call
+         | call_or_atom
 
 call_or_atom: atom "(" (expression ("," expression)* )? ")" -> function_call
             | atom

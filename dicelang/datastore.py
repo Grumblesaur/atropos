@@ -16,7 +16,10 @@ class _DataStore(object):
     self.storage_file_name = storage_file_name
     with open(self.storage_file_name, 'r') as f:
       storage_text = f.read()
-    self.variables = eval(storage_text)
+    try:
+      self.variables = eval(storage_text)
+    except SyntaxError:
+      self.variables = {}
     
   def get(self, key, default=Undefined):
     try:
