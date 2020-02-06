@@ -11,5 +11,5 @@ class BotTokenRetriever(object):
   def get_token(self):
     return self.bot_token
 
-bot_token = BotTokenRetreiver().get_token()
+bot_token = BotTokenRetriever().get_token()
 
