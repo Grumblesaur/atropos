@@ -12,6 +12,9 @@ from dicelang import plugins
 
 LOOP_TIMEOUT = 12
 
+class LoopTimeout(Exception):
+  pass
+
 def binary_operation(children):
   '''Internal function. Evaluates the first two elements
   of a list of lark Tree objects and returns the results
@@ -67,9 +70,12 @@ def handle_while_loop(children, scoping_data):
   scoping_data.push_scope()
   executed = 0
   timeout = time.time() + LOOP_TIMEOUT
-  while kernel.handle_instruction(children[0]) and time.time() < timeout:
+  while kernel.handle_instruction(children[0]):
     kernel.handle_instruction(children[1])
     executed += 1
+    if time.time() > timeout:
+      e = '`while` loop iterated {} times without terminating.'
+      raise LoopTimeout(e.format(executed))
   scoping_data.pop_scope()
   return executed
 
@@ -82,9 +88,12 @@ def handle_do_while_loop(children, scoping_data):
   executed = 1
   timeout = time.time() + LOOP_TIMEOUT
   kernel.handle_instruction(children[0])
-  while kernel.handle_instruction(children[1]) and time.time() < timeout:
+  while kernel.handle_instruction(children[1]):
     kernel.handle_instruction(children[0])
     executed += 1
+    if time.time() > timeout:
+      e = '`do-while` loop iterated {} times without terminating.'
+      raise LoopTimeout(e.format(executed))
   scoping_data.pop_scope()
   return executed
 

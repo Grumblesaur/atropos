@@ -53,8 +53,11 @@ async def on_message(msg):
   if response == commands.ResponseType.NONE:
     pass
   elif response == commands.ResponseType.DICE:
-    result = interpreter.execute(command, user_id, server_id)
-    reply = '{} rolled:\n  {}'.format(user_name, result)
+    try:
+      result = interpreter.execute(command, user_id, server_id)
+      reply = '{} rolled:\n  {}'.format(user_name, result)
+    except Exception as e:
+      reply = '{} got error:\n {}'.format(user_name, str(e))
     await msg.channel.send(reply)
   else:
     pass
