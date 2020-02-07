@@ -8,18 +8,23 @@ calculator would.
 ## Quickstart
 
 If you're a newbie user, or you just need to know how to roll dice, here's a
-quick guide to a few common operations you can do:
+quick guide to a few common operations you'll be using. If you want Atropos
+to see your message, make sure to start it with `+roll`. If that collides with
+a command in use by some other bot or application on your server, you can
+prefix your messages with `+atropos roll` instead.
 
 Roll dice (Examples)
 ```
-  1d20    ~ rolls a single 20-sided die
-  4d6     ~ rolls four 6-sided dice, and sums their outcomes
-  7d8h4   ~ rolls seven 8-sided dice, keeps the highest four, and sums them
-  10d3l5  ~ rolls ten 3-sided dice, keeps the lowest five, and sums them
-          ~ You aren't limited to the kinds of dice you find in a game shop --
-          ~ any number of sides greater than 0 will work correctly. If you need
-          ~ to roll 3d763, you can do that.
+  +roll 1d20    ~ rolls a single 20-sided die
+  +roll 4d6     ~ rolls four 6-sided dice, and sums their outcomes
+  +roll 7d8h4   ~ rolls seven 8-sided dice, keeps the highest four, and sums them
+  +roll 10d3l5  ~ rolls ten 3-sided dice, keeps the lowest five, and sums them
+                ~ You aren't limited to the kinds of dice you find in a game shop --
+                ~ any number of sides greater than 0 will work correctly. If you need
+                ~ to roll 3d763, you can do that.
 ```
+
+For the rest of the examples, I'm going to leave off the `+roll` prefix.
 
 Multiply and divide (Examples)
 ```
