@@ -297,22 +297,25 @@ def handle_present(children, negate=False):
 def handle_left_shift(children):
   '''Evaluate operands and bitwise shift the left operand
   towards its big end by the value of the right operand,
-  then return that value.'''
+  then return that value. Special cases defined for other
+  type combinations in util.shift.'''
   number, displacement = binary_operation(children)
-  return number << displacement
+  return util.shift(number, displacement)
 
 def handle_right_shift(children):
   '''Evaluate operands and bitwise shift the left operand
   towards its little end by the value of the right operand,
-  then return that value.'''
+  then return that value. Special cases defined for other type
+  combinations in util.shift'''
   number, displacement = binary_operation(children)
-  return number >> displacement
+  return util.shift(number, displacement, left_shift=False)
 
 def handle_addition(children):
   '''Evaluates its operands and returns their sum. For
-  strings, this concatenates from left to right.'''
+  strings, this concatenates from left to right. Special cases
+  defined in util.addition.'''
   augend, addend = binary_operation(children)
-  return augend + addend
+  return util.addition(left, right)
 
 def handle_subtraction(children):
   '''Evaluates its operands and returns their difference,
@@ -324,7 +327,7 @@ def handle_subtraction(children):
   try:
     result = minuend - subtrahend
   except TypeError as e:
-    result = minuend
+    result = minuend[:]
     try:
       for x in subtrahend:
         if x in minuend:
