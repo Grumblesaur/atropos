@@ -7,7 +7,7 @@ class Result(object):
     self.is_error = is_error
   
   def __bool__(self):
-    return not is_error
+    return not self.is_error
 
 def handle_dicelang_command(command, user_id, username, server_id):
   is_error = True
