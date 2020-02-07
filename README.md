@@ -5,6 +5,20 @@ heavily from the behaviors of Python, but uses a lot of syntactic sugar or
 shorthand to make things quicker to type than a Python REPL or a scientific
 calculator would.
 
+## Questions
+
+If you're confused about how something works, need to report a bug, or have
+an idea for a new feature, you can open an issue on Atropos' Github repository,
+which if you're not viewing the code there already, is here:
+
+<https://github.com/Grumblesaur/atropos>
+
+If you're shy, or don't want to make a Github account, you can email me at
+james.f.murphy.one@gmail.com
+and I can answer your question or add your issue or feature request to the
+project myself. If you're having a problem, please have your error message
+and the input that caused it ready!
+
 ## Quickstart
 
 If you're a newbie user, or you just need to know how to roll dice, here's a
