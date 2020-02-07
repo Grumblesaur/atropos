@@ -39,7 +39,8 @@ async def on_message(msg):
   if response == commands.ResponseType.NONE:
     pass
   elif response == commands.ResponseType.DICE:
-    result = handle_dicelang_command(command, user_id, user_name, server_id)
+    args = (interpreter, command, user_id, user_name, server_id)
+    result = handle_dicelang_command(*args)
     if result:
       fmt = '{} rolled:\n```{}```'
     else:
