@@ -6,39 +6,25 @@ import atexit
 import asyncio
 import discord
 import commands
+from message_handlers import handle_dicelang_command
 from dicelang.interpreter import Interpreter
+from save_tracker import SaveTracker
 
+
+# Principal objects.
 client = discord.Client(max_messages=128)
-interpreter = Interpreter()
-
-class SaveTracker(object):
-  def __init__(self, save_interval=300, backup_interval=1800):
-    start_time = time.time()
-    self.message_at = start_time 
-    self.save_at    = start_time
-    self.backup_at  = start_time
-    
-    self.save_interval   = save_interval
-    self.backup_interval = backup_interval
-    
-  def update(self):
-    self.message_at = time.time()
-  
-  def should_save(self):
-    return time.time() - self.save_at > self.save_interval
-  
-  def saved(self):
-    self.save_at = time.time()
-  
-  def should_back_up(self):
-    return time.time() - self.backup_at > self.backup_interval
-  
-  def backed_up(self):
-    t = time.time()
-    self.backup_at = t
-    self.save_at   = t
-  
 last = SaveTracker()
+interpreter = Interpreter()
+ 
+
+def handle_saves_and_backups(dl_interpreter, s_tracker):
+  s_tracker.update()
+  if s_tracker.should_back_up():
+    dl_interpreter.datastore.backup()
+    s_tracker.backed_up()
+  elif s_tracker.should_save():
+    dl_interpreter.datastore.save()
+    dl_interpreter.saved()
 
 @client.event
 async def on_message(msg):
@@ -53,22 +39,17 @@ async def on_message(msg):
   if response == commands.ResponseType.NONE:
     pass
   elif response == commands.ResponseType.DICE:
-    try:
-      result = interpreter.execute(command, user_id, server_id)
-      reply = '{} rolled:\n  {}'.format(user_name, result)
-    except Exception as e:
-      reply = '{} got error:\n {}'.format(user_name, str(e))
+    result = handle_dicelang_command(command, user_id, user_name, server_id)
+    if result:
+      fmt = '{} rolled:\n```{}```'
+    else:
+      fmt = '{} received error:\n```{}```'
+    reply = fmt.format(user_name, result.value)
     await msg.channel.send(reply)
   else:
     pass
   
-  last.update()
-  if last.should_save():
-    interpreter.datastore.save()
-    last.saved()
-  elif last.should_back_up():
-    interpreter.datastore.backup()
-    last.backed_up()
+  handle_saves_and_backups(interpreter, last)
 
 atexit.register(interpreter.datastore.save)
 
