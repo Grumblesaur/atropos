@@ -7,6 +7,7 @@ import asyncio
 import discord
 import commands
 from message_handlers import handle_dicelang_command
+from message_handlers import handle_view_command
 from dicelang.interpreter import Interpreter
 from save_tracker import SaveTracker
 

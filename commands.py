@@ -17,10 +17,10 @@ def scan(message_text):
     response = ResponseType.DICE
   elif view:
     command = message_text.replace(view.group(0),'')
-    all_      = bool(re.search('all([ \t]+vars)?'))
-    globals_  = bool(re.search('(globals|vars)'))
-    shareds_  = bool(re.search('(shareds|our[ \t]+vars)'))
-    privates_ = bool(re.search('(privates|my[ \t]+vars)'))
+    all_      = bool(re.search('all([ \t]+vars)?', command))
+    globals_  = bool(re.search('(globals|vars)', command))
+    shareds_  = bool(re.search('(shareds|our[ \t]+vars)', command))
+    privates_ = bool(re.search('(privates|my[ \t]+vars)', command))
     response = ResponseType.VIEW_ALL
     if privates_:
       response = ResponseType.VIEW_PRIVATES

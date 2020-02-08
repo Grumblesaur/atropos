@@ -26,29 +26,33 @@ def handle_dicelang_command(lang, command, user_id, username, server_id):
     value = '(Non-Lark error){}: {}'.format(e.__class__.__name__, e)
   return Result(is_error, value)
   
-def handle_view_command(lang, response_type, userid, serverid):
+def handle_view_command(lang, response_type, user_id, server_id):
   global_names = shared_names = private_names = [ ]
+  global_datastore  = lang.datastore.public
+  shared_datastore  = lang.datastore.server
+  private_datastore = lang.datastore.private
+  
   if response_type == ResponseType.VIEW_ALL:
-    global_names  = lang.datastore.public.keys()
-    shared_names  = lang.datastore.server[server_id].keys()
-    private_names = lang.datastore.private[user_id].keys()
+    global_names  = global_datastore.variables.keys()
+    shared_names  = shared_datastore.variables[server_id].keys()
+    private_names = private_datastore.variables[user_id].keys()
   elif response_type == ResponseType.VIEW_GLOBALS:
-    global_names  = lang.datastore.public.keys()
+    global_names  = global_datastore.variables.keys()
   elif response_type == ResponseType.VIEW_SHAREDS:
-    shared_names = lang.datastore.server[server_id].keys()
+    shared_names = server_datastore.variables[server_id].keys()
   elif response_type == ResponseType.VIEW_PRIVATES:
-    private_names = lang.datastore.private[user_id].keys()
+    private_names = private_datastore.variables[user_id].keys()
   
   global_text = '  '.join(sorted(global_names))
   shared_text = '  '.join(sorted(shared_names))
   private_text = '  '.join(sorted(private_names))
   
-  output = ''
+  output = 'Variables:'
   if global_text:
-    output += " GLOBALS:\n   {}".format(global_text)
+    output += "\n  GLOBALS:\n    {}".format(global_text)
   if shared_text:
-    output += " SHAREDS:\n   {}".format(shared_text)
+    output += "\n  SHAREDS:\n    {}".format(shared_text)
   if private_text:
-    output += " SHAREDS:\n   {}".format(private_text)
+    output += "\n  PRIVATES:\n    {}".format(private_text)
   return output
 
