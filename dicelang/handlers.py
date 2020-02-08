@@ -315,7 +315,7 @@ def handle_addition(children):
   strings, this concatenates from left to right. Special cases
   defined in util.addition.'''
   augend, addend = binary_operation(children)
-  return util.addition(left, right)
+  return util.addition(augend, addend)
 
 def handle_subtraction(children):
   '''Evaluates its operands and returns their difference,
@@ -510,6 +510,13 @@ def handle_plugin_call(children):
   plugin_alias, argument = binary_operation(children)
   operation = plugins.lookup(plugin_alias)
   return operation(argument)
+
+def handle_apply(scoping_data, children):
+  function, iterable = binary_operation(children)
+  out = [ ]
+  for item in iterable:
+    out.append(function(scoping_data, item))
+  return out
 
 def handle_dice(node_type, children):
   '''Evaluates its operands and generates a random number

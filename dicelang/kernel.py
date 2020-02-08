@@ -177,6 +177,11 @@ def handle_instruction(tree, user='', server='', persistence=None):
   elif tree.data == 'subscript_access':
     out = handlers.handle_subscript_access(tree.children)
   
+  elif tree.data == 'application':
+    out = handle_instruction(tree.children[0])
+  elif tree.data == 'apply':
+    out = handlers.handle_apply(scoping_data, tree.children)
+  
   elif tree.data == 'die':
     out = handle_instruction(tree.children[0])
   elif 'scalar_die' in tree.data or 'vector_die' in tree.data:

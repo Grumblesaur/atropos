@@ -117,7 +117,10 @@ slice: slice ("["            ":"             (":")?           "]") -> whole_slic
      | slice ("["            ":" expression   ":"  expression "]") -> stop_step_slice
      | slice ("["            ":"              ":"  expression "]") -> step_slice
      | slice ("[" expression "]")                                  -> not_a_slice
-     | die
+     | application
+
+application: die "-:" application -> apply
+           | die
 
 die: die "d" call_or_atom                   -> scalar_die_all
    | die "d" call_or_atom "h" call_or_atom -> scalar_die_highest

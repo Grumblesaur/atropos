@@ -71,4 +71,9 @@ def flatten(items, seqtypes=(list, tuple)):
       items[i:i+1] = items[i]
   return items
 
+def log(msg):
+  with open('out.txt', 'a') as f:
+    f.write('{}\n'.format(msg))
+
+
 
