@@ -18,12 +18,9 @@ last = SaveTracker()
 interpreter = Interpreter()
  
 
-def handle_saves_and_backups(dl_interpreter, s_tracker):
+def handle_saves(dl_interpreter, s_tracker):
   s_tracker.update()
-  if s_tracker.should_back_up():
-    dl_interpreter.datastore.backup()
-    s_tracker.backed_up()
-  elif s_tracker.should_save():
+  if s_tracker.should_save():
     dl_interpreter.datastore.save()
     dl_interpreter.saved()
 
@@ -58,7 +55,7 @@ async def on_message(msg):
     await msg.channel.send(reply)
     pass
   
-  handle_saves_and_backups(interpreter, last)
+  handle_saves(interpreter, last)
 
 atexit.register(interpreter.datastore.save)
 

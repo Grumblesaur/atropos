@@ -18,15 +18,15 @@ def scan(message_text):
   elif view:
     command = message_text.replace(view.group(0),'')
     all_      = bool(re.search('all([ \t]+vars)?', command))
-    globals_  = bool(re.search('(global(s)?|vars)', command))
+    globals_  = bool(re.search('(global(s)?|(global[ \t]+)?vars)', command))
     shareds_  = bool(re.search('(shared(s)?|our[ \t]+vars)', command))
     privates_ = bool(re.search('(private(s)?|my[ \t]+vars)', command))
     response = ResponseType.VIEW_ALL
     if privates_:
       response = ResponseType.VIEW_PRIVATES
-    if shareds_:
+    elif shareds_:
       response = ResponseType.VIEW_SHAREDS
-    if globals_:
+    elif globals_:
       response = ResponseType.VIEW_GLOBALS
   else:
     command = ''

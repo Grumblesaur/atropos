@@ -32,6 +32,8 @@ def handle_view_command(lang, response_type, user_id, server_id):
   shared_datastore  = lang.datastore.server
   private_datastore = lang.datastore.private
   
+  print(shared_datastore.variables[server_id])
+  
   if response_type == ResponseType.VIEW_ALL:
     global_names  = global_datastore.variables.keys()
     shared_names  = shared_datastore.variables[server_id].keys()
