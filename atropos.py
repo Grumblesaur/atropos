@@ -47,7 +47,14 @@ async def on_message(msg):
       fmt = '{} received error:\n```{}```'
     reply = fmt.format(user_name, result.value)
     await msg.channel.send(reply)
-  else:
+  elif response in (
+      commands.ResponseType.VIEW_GLOBALS,
+      commands.ResponseType.VIEW_SHAREDS,
+      commands.ResponseType.VIEW_PRIVATES,
+      commands.ResponseType.VIEW_ALL):
+    result = handle_view_command(interpreter, response, user_id, server_id)
+    reply = '{} requested to view:\n```{}```'.format(user_name, result)
+    await msg.channel.send(reply)
     pass
   
   handle_saves_and_backups(interpreter, last)
