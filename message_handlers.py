@@ -39,7 +39,7 @@ def handle_view_command(lang, response_type, user_id, server_id):
   elif response_type == ResponseType.VIEW_GLOBALS:
     global_names  = global_datastore.variables.keys()
   elif response_type == ResponseType.VIEW_SHAREDS:
-    shared_names = server_datastore.variables[server_id].keys()
+    shared_names = shared_datastore.variables[server_id].keys()
   elif response_type == ResponseType.VIEW_PRIVATES:
     private_names = private_datastore.variables[user_id].keys()
   

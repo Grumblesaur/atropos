@@ -18,9 +18,9 @@ def scan(message_text):
   elif view:
     command = message_text.replace(view.group(0),'')
     all_      = bool(re.search('all([ \t]+vars)?', command))
-    globals_  = bool(re.search('(globals|vars)', command))
-    shareds_  = bool(re.search('(shareds|our[ \t]+vars)', command))
-    privates_ = bool(re.search('(privates|my[ \t]+vars)', command))
+    globals_  = bool(re.search('(global(s)?|vars)', command))
+    shareds_  = bool(re.search('(shared(s)?|our[ \t]+vars)', command))
+    privates_ = bool(re.search('(private(s)?|my[ \t]+vars)', command))
     response = ResponseType.VIEW_ALL
     if privates_:
       response = ResponseType.VIEW_PRIVATES
