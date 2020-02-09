@@ -53,7 +53,10 @@ async def on_message(msg):
     result = handle_view_command(interpreter, response, user_id, server_id)
     reply = '{} requested to view:\n```{}```'.format(user_name, result)
     await msg.channel.send(reply)
-    pass
+  elif response == commands.ResponseType.HELP:
+    await msg.channel.send('{} requested general help. README:\n {}'.format(
+      user_name,
+      'https://github.com/Grumblesaur/atropos/blob/master/README.md'))
   
   handle_saves(interpreter, last)
 
