@@ -229,9 +229,15 @@ def handle_repetition(children):
   return out
 
 def handle_logical_or(children):
-  '''Evaluate operands and return their logical disjunction.'''
-  left, right = binary_operation(children)
-  return left or right
+  '''Evaluates the left operand. If the left value is truthy,
+  it is returned. Otherwise, the right operand is evaluated
+  and returned.'''
+  left = kernel.handle_instruction(children[0])
+  if left:
+    out = left
+  else:
+    out = kernel.handle_instruction(children[1])
+  return out
 
 def handle_logical_xor(children):
   '''Evaluate operands, then return them according to
@@ -241,9 +247,19 @@ def handle_logical_xor(children):
   return (left or right) and not (left and right)
 
 def handle_logical_and(children):
-  '''Evaluate operands and return their logical conjunction.'''
-  left, right = binary_operation(children)
-  return left and right
+  '''Evaluate its left operand. If the left operand is truthy,
+  the right operand is evaluated as well, which is returned if
+  it is also truthy. Otherwise, the first falsy value (left to
+  right) is returned.'''
+  left = kernel.handle_instruction(children[0])
+  if left:
+    out = left
+    right = kernel.handle_instruction(children[1])
+    if right:
+      out = right
+  else:
+    out = left
+  return out
 
 def handle_logical_not(children):
   '''Evaluate operand and return the inverse of its boolean conversion.'''

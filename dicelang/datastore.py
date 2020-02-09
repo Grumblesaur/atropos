@@ -19,7 +19,7 @@ class _DataStore(object):
     try:
       with open(self.storage_file_name, 'r') as f:
         for line in f:
-          k_repr, v_repr = line.strip().split(_DataStore.separator)
+          k_repr, v_repr = line.strip().lsplit(_DataStore.separator, 1)
           key = eval(k_repr)
           value = eval(k_repr)
           self.variables[key] = value
@@ -79,7 +79,7 @@ class _OwnedDataStore(_DataStore):
       try:
         with open(filename, 'r') as f:
           for line in f:
-            k_repr, v_repr = line.strip().split(_DataStore.separator)
+            k_repr, v_repr = line.strip().lsplit(_DataStore.separator, 1)
             key = eval(k_repr)
             value = eval(v_repr)
             self.variables[owner][key] = value
