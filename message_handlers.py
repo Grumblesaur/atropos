@@ -23,7 +23,9 @@ def handle_dicelang_command(lang, command, user_id, username, server_id):
   except (ParseError, LexError, GrammarError) as e:
     value = '{}: {}'.format(e.__class__.__name__, e)
   except Exception as e:
-    value = '(Non-Lark error){}: {}'.format(e.__class__.__name__, e)
+    value = '(Non-Lark error) {}: {}'.format(e.__class__.__name__, e)
+    print(value)
+    raise e
   return Result(is_error, value)
   
 def handle_view_command(lang, response_type, user_id, server_id):

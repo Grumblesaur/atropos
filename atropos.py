@@ -22,7 +22,7 @@ def handle_saves(dl_interpreter, s_tracker):
   s_tracker.update()
   if s_tracker.should_save():
     dl_interpreter.datastore.save()
-    dl_interpreter.saved()
+    s_tracker.saved()
 
 @client.event
 async def on_message(msg):

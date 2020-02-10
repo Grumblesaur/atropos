@@ -11,10 +11,13 @@ class ResponseType(enum.Enum):
   HELP          = 6
 
 def scan(message_text):
-  pattern = '(\+{kw}|\+atropos[ \t]+{kw}'
-  roll  = re.match(pattern.format(kw='roll'), message_text)
-  view  = re.match(pattern.format(kw='view'), message_text)
-  help_ = re.match(pattern.format(kw='help'), message_text)
+  base_pattern = "(\+(atropos[ \t]+)?{kw})"
+  roll_pattern = base_pattern.format(kw='roll')
+  view_pattern = base_pattern.format(kw='view')
+  help_pattern = base_pattern.format(kw='help')
+  roll  = re.match(roll_pattern, message_text)
+  view  = re.match(view_pattern, message_text)
+  help_ = re.match(help_pattern, message_text)
   if roll:
     response, command = roll_response(roll, message_text)
   elif view:
@@ -34,9 +37,9 @@ def roll_response(match_obj, text):
 def view_response(match_obj, text):
   c = text.replace(match_obj.group(0), '')
   all_ = bool(re.search('all([ \t]+vars)?', c))
-  glob = bool(re.search('(global(s)?|global[ \t]+)?vars)', c))
-  shar = bool(re.search('shared(s)?|our[ \t]+vars)', c))
-  priv = bool(re.search('private(s)?|my [ \t]+vars)', c))
+  glob = bool(re.search('(global(s)?|(global)?[ \t]+vars)', c))
+  shar = bool(re.search('(shared(s)?|our[ \t]+vars)', c))
+  priv = bool(re.search('(private(s)?|my [ \t]+vars)', c))
   if all_:
     r = ResponseType.VIEW_ALL
   elif glob:
@@ -45,6 +48,8 @@ def view_response(match_obj, text):
     r = ResponseType.VIEW_SHAREDS
   elif priv:
     r = ResponseType.VIEW_PRIVATES
+  else:
+    r = ResponseType.NONE
   return (r, c)
   
 def help_response(match_obj, text):

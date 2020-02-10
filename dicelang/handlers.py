@@ -149,7 +149,7 @@ def handle_identifiers(tree_data, children, scoping_data, persistence):
   '''Passes an Identifier object back to the interpreter
   when an identifier token is reached.'''
   ownership, _ = tree_data.split('_')
-  name = children[0].value
+  name = children[-1].value
   out = Identifier(name, scoping_data, ownership, persistence)
   return out
 

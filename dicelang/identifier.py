@@ -48,6 +48,7 @@ class Identifier(object):
       out = self.persistence.public.get(self.name)
     else:
       error()
+    print(self.persistence.public.variables)
     return out
   
   def put(self, value):

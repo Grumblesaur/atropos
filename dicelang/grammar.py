@@ -164,14 +164,18 @@ identifier: scoped_identifier
           | server_identifier
           | global_identifier
 
-scoped_identifier:           IDENT
-private_identifier: "my"     IDENT
-server_identifier:  "our"    IDENT
-global_identifier:  "global" IDENT
+scoped_identifier:              IDENT
+private_identifier:   KW_MY     IDENT
+server_identifier:    KW_OUR    IDENT
+global_identifier.2:  KW_GLOBAL IDENT
 
 TRUE:      "True"
 FALSE:     "False"
 UNDEFINED: "Undefined"
+
+KW_GLOBAL: "global"
+KW_OUR:    "our"
+KW_MY:     "my"
 
 IDENT: /[a-zA-Z_]+[a-zA-Z0-9_]*/
 PARAM: /[a-zA-Z_]+[a-zA-Z0-9_]*/
