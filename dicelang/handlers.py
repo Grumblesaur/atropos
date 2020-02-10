@@ -195,6 +195,15 @@ def handle_identifier_set_subscript(children):
   exec('target{ss} = {value}'.format(ss=subscripts, value=repr(value)))
   return value
 
+def handle_setattr(children):
+  value = kernel.handle_instruction(children[-1])
+  ident = kernel.handle_instruction(children[0])
+  attribute_chain = [kernel.handle_instruction(child) for child in children[1:-1]]
+  subscripts = ''.join(['[{}]'.format(repr(attr.name)) for attr in attribute_chain])
+  target = ident.get()
+  exec('target{ss} = {value}'.format(ss=subscripts, value=repr(value)))
+  return value
+
 def handle_inline_if(children):
   '''This is a shorthand for simple if-else constructs, resembling
   the inline-if of python. Its behavior is the same.'''
@@ -253,10 +262,7 @@ def handle_logical_and(children):
   right) is returned.'''
   left = kernel.handle_instruction(children[0])
   if left:
-    out = left
-    right = kernel.handle_instruction(children[1])
-    if right:
-      out = right
+    out = kernel.handle_instruction(children[1])
   else:
     out = left
   return out
@@ -580,14 +586,17 @@ def handle_slices(slice_type, children):
   elif slice_type == 'step_slice':
     out = v[::slice_args[0]]
   elif slice_type == 'not_a_slice':
-    out = handle_subscript_access(children)
+    iterable, index = binary_operation(children)
+    out = iterable[index]
   return out
 
-def handle_subscript_access(children):
-  '''Evaluates its operands, and iteratively indexes/subscripts the
-  first operand with the rest of the operands from left to right.'''
-  iterable, index = binary_operation(children)
-  return iterable[index]
+def handle_getattr(children):
+  obj = kernel.handle_instruction(children[0])
+  attribute_chain = [kernel.handle_instruction(child) for child in children[1:]]
+  out = obj
+  for attr in attribute_chain:
+    out = out[attr.name]
+  return out
 
 def handle_list_literal(children):
   '''Evaluates its components and inserts them into a list,
