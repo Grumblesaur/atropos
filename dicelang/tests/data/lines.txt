@@ -195,3 +195,12 @@ my result = 'yes' if else 'no' ===> 'yes'
 `1`+`1` ===> 2
 
 ((m) -> m ** 2) -: [0 to 5] ===> [x ** 2 for x in range(5)]
+
+obj = {'x' : 1, 'q' : 2} ===> {'x' : 1, 'q' : 2}
+obj.x == obj['x'] ===> True
+obj.q == obj['q'] ===> True
+obj.x = 6 ===> 6
+obj.x ===> 6
+obj.inner = {'x' : 3} ===> {'x' : 3}
+obj.inner.x ===> 3
+

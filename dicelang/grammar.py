@@ -10,6 +10,7 @@ deletion: "del" identifier                       -> delete_variable
 
 assignment: identifier_set
           | identifier_set_subscript
+          | identifier ("." identifier)+ "=" expression -> setattr
 
 block: "begin" expression (";" expression)* (";")? "end"
 
@@ -134,7 +135,10 @@ plugin_op: call_or_atom "::" plugin_op -> plugin_call
          | call_or_atom
 
 call_or_atom: atom "(" (expression ("," expression)* )? ")" -> function_call
-            | atom
+            | get_attribute
+
+get_attribute: atom ("." identifier)+ -> getattr
+             | atom
 
 atom: number_literal
     | boolean_literal

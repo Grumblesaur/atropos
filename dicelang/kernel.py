@@ -57,6 +57,8 @@ def handle_instruction(tree, user='', server='', persistence=None):
     out = handlers.handle_identifier_set(tree.children)
   elif tree.data == 'identifier_set_subscript':
     out = handlers.handle_identifier_set_subscript(tree.children)
+  elif tree.data == 'setattr':
+    out = handlers.handle_setattr(tree.children)
   
   elif tree.data == 'if_expr':
     out = handle_instruction(tree.children[0])
@@ -172,11 +174,6 @@ def handle_instruction(tree, user='', server='', persistence=None):
   elif "_slice" in tree.data:
     out = handlers.handle_slices(tree.data, tree.children)
   
-  elif tree.data == 'access':
-    out = handle_instruction(tree.children[0])
-  elif tree.data == 'subscript_access':
-    out = handlers.handle_subscript_access(tree.children)
-  
   elif tree.data == 'application':
     out = handle_instruction(tree.children[0])
   elif tree.data == 'apply':
@@ -196,6 +193,11 @@ def handle_instruction(tree, user='', server='', persistence=None):
     out = handle_instruction(tree.children[0])
   elif tree.data == 'function_call':
     out = handlers.handle_function_call(tree.children, scoping_data)
+  
+  elif tree.data == 'get_attribute':
+    out = handle_instruction(tree.children[0])
+  elif tree.data == 'getattr':
+    out = handlers.handle_getattr(tree.children)
   
   elif tree.data == 'atom':
     out = handle_instruction(tree.children[0])
