@@ -17,7 +17,7 @@ def handle_dicelang_command(lang, command, user_id, username, server_id):
     value = lang.execute(command, user_id, server_id)
     is_error = False
   except (UnexpectedCharacters, UnexpectedToken, UnexpectedInput) as e:
-    value = e.get_context(command, 5)
+    value = e.get_context(command, 10)
   except UnexpectedEOF as e:
     value = str(e).split('.')[0] + '.'
   except (ParseError, LexError, GrammarError) as e:

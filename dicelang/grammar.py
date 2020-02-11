@@ -123,12 +123,12 @@ slice: slice ("["            ":"             (":")?           "]") -> whole_slic
 application: die "-:" application -> apply
            | die
 
-die: die "d" call_or_atom                   -> scalar_die_all
-   | die "d" call_or_atom "h" call_or_atom -> scalar_die_highest
-   | die "d" call_or_atom "l" call_or_atom -> scalar_die_lowest
-   | die "r" call_or_atom                   -> vector_die_all
-   | die "r" call_or_atom "h" call_or_atom -> vector_die_highest
-   | die "r" call_or_atom "l" call_or_atom -> vector_die_lowest
+die: die "d" plugin_op               -> scalar_die_all
+   | die "d" plugin_op "h" plugin_op -> scalar_die_highest
+   | die "d" plugin_op "l" plugin_op -> scalar_die_lowest
+   | die "r" plugin_op               -> vector_die_all
+   | die "r" plugin_op "h" plugin_op -> vector_die_highest
+   | die "r" plugin_op "l" plugin_op -> vector_die_lowest
    | plugin_op
 
 plugin_op: call_or_atom "::" plugin_op -> plugin_call
