@@ -37,7 +37,7 @@ def roll_response(match_obj, text):
 def view_response(match_obj, text):
   c = text.replace(match_obj.group(0), '')
   all_ = bool(re.search('all([ \t]+vars)?', c))
-  glob = bool(re.search('(global(s)?|(global)?[ \t]+vars)', c))
+  glob = bool(re.search('(global(s)?([ \t]vars)?)', c))
   shar = bool(re.search('(shared(s)?|our[ \t]+vars)', c))
   priv = bool(re.search('(private(s)?|my [ \t]+vars)', c))
   if all_:
