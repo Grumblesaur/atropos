@@ -1,5 +1,5 @@
 import lark
-import grammar
+from dicelang import grammar
 from dicelang.bridge import get_function_call_handler
 from dicelang.bridge import get_decompiler
 
@@ -31,7 +31,9 @@ class Function(object):
     return '{}'.format(self.source)
   
   def file_repr(self):
-    return 'Function({})'.format(repr(self.source))
+    flat_source = self.source.replace('\n', ' ')
+    flat_source = flat_source.replace('\t', ' ')
+    return 'Function({})'.format(repr(flat_source))
 
   def __call__(self, scoping_data, *args):
     if len(self.params) != len(args):

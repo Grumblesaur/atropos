@@ -17,15 +17,20 @@ class _DataStore(object):
     try:
       with open(self.storage_file_name, 'r') as f:
         for line in f:
-          k_repr, v_repr = line.strip().split(_DataStore.separator, 1)
-          key = eval(k_repr)
-          value = eval(v_repr)
-          self.variables[key] = value
+          try:
+            k_repr, v_repr = line.strip().split(_DataStore.separator, 1)
+            key = eval(k_repr)
+            value = eval(v_repr)
+            self.variables[key] = value
+          except Exception as e:
+            print('Bad var when loading "{}": {}'.format(
+              self.storage_file_name, e))
     except SyntaxError as e:
       print(e)
     except IOError as e:
       with open(self.storage_file_name, 'w') as f:
         pass
+      
     
   def get(self, key, default=Undefined):
     try:
@@ -81,10 +86,14 @@ class _OwnedDataStore(_DataStore):
       try:
         with open(filename, 'r') as f:
           for line in f:
-            k_repr, v_repr = line.strip().split(_DataStore.separator, 1)
-            key = eval(k_repr)
-            value = eval(v_repr)
-            self.variables[owner][key] = value
+            try:
+              k_repr, v_repr = line.strip().split(_DataStore.separator, 1)
+              key = eval(k_repr)
+              value = eval(v_repr)
+              self.variables[owner][key] = value
+            except Exception as e:
+              print('Bad var when loading "{}": {}'.format(
+                filename, e))
       except SyntaxError as e:
         print(e)
       except IOError as e:

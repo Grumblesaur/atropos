@@ -253,12 +253,11 @@ def decompile(tree):
   if tree.data == 'start':
     out = '; '.join([decompile(child) for child in tree.children])
   elif tree.data == 'block':
-    block = "begin\n{exprs}end"
+    block = "begin\n{exprs}\nend"
     expressions = [ ]
     for child in tree.children:
       expressions.append(decompile(child))
-    block.format(exprs=';\n\t'.join(expressions))
-    out = block
+    out = block.format(exprs='\t'+(';\n\t'.join(expressions)))
   elif tree.data == 'function':
     function = '({params}) -> {code}'
     code = decompile(tree.children[-1])
@@ -267,7 +266,7 @@ def decompile(tree):
   
   elif tree.data == 'for_loop':
     for_loop = 'for {iterator} in {expression} do {code}'
-    iterator = tree.children[0].value
+    iterator = decompile(tree.children[0])
     expression = decompile(tree.children[1])
     code = decompile(tree.children[2])
     out = for_loop.format(iterator=iterator, expression=expression, code=code)
@@ -277,7 +276,8 @@ def decompile(tree):
     out = while_loop.format(expression=expression, code=code)
   elif tree.data == 'do_while_loop':
     do_while_loop = 'do {code} while {expression}'
-    code, expression = binop_decompile(tree.children)
+    code = decompile(tree.children[0])
+    expression = decompile(tree.children[1])
     out = do_while_loop.format(expression=expression, code=code)
   
   elif tree.data == 'conditional':
@@ -316,19 +316,24 @@ def decompile(tree):
     out = passthrough(tree.children)
   elif tree.data == 'setattr':
     set_attr = '{identifier_chain} = {expression}'
-    identifier_chain = '.'.join([decompile(child) for child in tree.children[:-1]])
+    identifier_chain = '.'.join(
+      [decompile(child) for child in tree.children[:-1]])
     expression = decompile(tree.children[-1])
-    out = set_attr(identifier_chain=identifier_chain, expression=expression)
+    out = set_attr.format(
+      identifier_chain=identifier_chain,
+      expression=expression)
+  
   elif tree.data == 'identifier_set':
     identifier_set = '{identifier} = {expression}'
     ident, expr = binop_decompile(tree.children)
-    out = identifier_set(identifier=ident, expression=expr)
+    out = identifier_set.format(identifier=ident, expression=expr)
   elif tree.data == 'identifier_set_subscript':
     identifier_set_subscript = '{identifier}{subscripts} = {expression}'
     identifier = decompile(tree.children[0])
-    subscripts = ''.join(['[{}]'.format(decompile(child)) for child in children[1:-1]])
+    subscripts = ''.join(
+      ['[{}]'.format(decompile(child)) for child in children[1:-1]])
     expression = decompile(tree.children[-1])
-    out = identifier_set_subscript(
+    out = identifier_set_subscript.format(
       identifier=identifier,
       subscritps=subscripts,
       expression=expression)
@@ -342,7 +347,10 @@ def decompile(tree):
     if_expr = decompile(tree.children[0])
     condition = decompile(tree.children[1])
     else_expr = decompile(tree.children[2])
-    out = inline_if(if_expr=if_expr, condition=condition, else_expr=else_expr)
+    out = inline_if.format(
+      if_expr=if_expr,
+      condition=condition,
+      else_expr=else_expr)
   elif tree.data == 'inline_if_binary':
     inline_if_binary = '{if_expr} if else {else_expr}'
     if_expr, else_expr = binop_decompile(tree.children)
@@ -356,27 +364,38 @@ def decompile(tree):
     out = repetition.format(left=left, right=right)
   
   elif tree.data == 'bool_or':
+    out = passthrough(tree.children)
+  elif tree.data == 'logical_or':
     bool_or = '{left} or {right}'
     left, right = binop_decompile(tree.children)
     out = bool_or.format(left=left, right=right)
+
   elif tree.data == 'bool_xor':
+    out = passthrough(tree.children)
+  elif tree.data == 'logical_xor':
     bool_xor = '{left} xor {right}'
     left, right = binop_decompile(tree.children)
     out = bool_xor.format(left=left, right=right)
+
   elif tree.data == 'bool_and':
+    out = passthrough(tree.children)
+  elif tree.data == 'logical_and':
     bool_and = '{left} and {right}'
     left, right = binop_decompile(tree.children)
     out = bool_and.format(left=left, right=right)
+
   elif tree.data == 'bool_not':
+    out = passthrough(tree.children)
+  elif tree.data == 'logical_not':
     bool_not = 'not {operand}'
-    operand = decompile(tree.children[0])
+    operand = decompile(tree.children[1])
     out = bool_not.format(operand=operand)
   
   elif tree.data == 'comp':
     out = passthrough(tree.children)
   elif tree.data == 'comp_math':
     operands_and_operators = [decompile(child) for child in tree.children]
-    out = ' '.format(operands_and_operators)
+    out = ' '.join(operands_and_operators)
   elif tree.data == 'math_comp':
     out = tree.children[0].value
   elif tree.data == 'comp_obj':
@@ -444,6 +463,17 @@ def decompile(tree):
     out = '-{}'.format(decompile(tree.children[0]))
   elif tree.data == 'absolute_value':
     out = '+{}'.format(decompile(tree.children[0]))
+  
+  elif tree.data == 'power':
+    out = passthrough(tree.children)
+  elif tree.data == 'exponent':
+    exponent = '{left} ** {right}'
+    left, right = binop_decompile(tree.children)
+    out = exponent.format(left=left, right=right)
+  elif tree.data == 'logarithm':
+    logarithm = '{left} %% {right}'
+    left, right = binop_decompile(tree.children)
+    out = logarithm.format(left=left, right=right)
   
   elif tree.data == 'reduction':
     out = passthrough(tree.children)
@@ -595,9 +625,8 @@ def decompile(tree):
   elif tree.data == 'empty_dict':
     out = '{}'
   elif tree.data == 'populated_dict':
-    pop_dict = '{ {key_value_pair_chain} }'
     chain = ', '.join([decompile(child) for child in tree.children])
-    out = pop_dict.format(key_value_pair_chain=chain)
+    out = '{%s}' % (chain,)
   elif tree.data == 'key_value_pair':
     kv_pair = '{key}: {value}'
     key, value = binop_decompile(tree.children)

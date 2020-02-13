@@ -53,21 +53,8 @@ bool_xor: bool_xor "xor" bool_and -> logical_xor
 bool_and: bool_and "and" bool_not -> logical_and
         | bool_not
 
-bool_not: "not" bool_not -> logical_not
+bool_not: NOT bool_not -> logical_not
         | comp
-
-GT:  ">"
-GE:  ">="
-EQ:  "=="
-NE:  "!="
-LE:  "<="
-LT:  "<"
-
-IS:  "is"
-NOT: "not"
-
-math_comp: GT | GE | EQ | NE | LE | LT
-obj_comp:  IS | IS NOT
 
 comp: shift (math_comp shift)+ -> comp_math
     | shift (obj_comp shift)+  -> comp_obj
@@ -177,13 +164,28 @@ TRUE:      "True"
 FALSE:     "False"
 UNDEFINED: "Undefined"
 
+IDENT:  /[a-zA-Z_]+[a-zA-Z0-9_]*/
+PARAM:  /[a-zA-Z_]+[a-zA-Z0-9_]*/
+STRING: /("(?!"").*?(?<!\\)(\\\\)*?"|'(?!'').*?(?<!\\)(\\\\)*?')/i
+
+GT:  ">"
+GE:  ">="
+EQ:  "=="
+NE:  "!="
+LE:  "<="
+LT:  "<"
+
 KW_GLOBAL: "global"
 KW_OUR:    "our"
 KW_MY:     "my"
 
-IDENT: /[a-zA-Z_]+[a-zA-Z0-9_]*/
-PARAM: /[a-zA-Z_]+[a-zA-Z0-9_]*/
-STRING: /("(?!"").*?(?<!\\)(\\\\)*?"|'(?!'').*?(?<!\\)(\\\\)*?')/i
+IS:  /\bis\b/
+NOT: /\bnot\b/
+
+math_comp: GT | GE | EQ | NE | LE | LT
+obj_comp:  IS | IS NOT
+
+
 
 %import common.NUMBER -> NUMBER
 %import common.WS
