@@ -5,8 +5,6 @@ from collections.abc import Iterable
 # necessary for enabling `eval` to work correctly. Do not let
 # PyCharm "optimize" them out.
 from dicelang.undefined import Undefined
-from dicelang.function  import SyntaxToken
-from dicelang.function  import SyntaxTree
 from dicelang.function  import Function
 
 class _DataStore(object):
@@ -49,10 +47,14 @@ class _DataStore(object):
     filename = self.storage_file_name if filename is None else filename
     with open(filename, 'w') as f:
       for key, value in self.variables.items():
+        if isinstance(value, Function):
+          v_repr = value.file_repr()
+        else:
+          v_repr = repr(value)
         f.write('{k}{s}{v}\n'.format(
           k=repr(key),
           s=_DataStore.separator,
-          v=repr(value)))
+          v=v_repr))
   
 class _OwnedDataStore(_DataStore):
   '''Specialization of _DataStore where keys are associated by
@@ -99,10 +101,14 @@ class _OwnedDataStore(_DataStore):
         owner)
       with open(filename, 'w') as f:
         for key, value in self.variables[owner].items():
+          if isinstance(value, Function):
+            v_repr = value.file_repr()
+          else:
+            v_repr = repr(value)
           f.write('{k}{s}{v}\n'.format(
             k=repr(key),
             s=_DataStore.separator,
-            v=repr(value)))
+            v=v_repr))
   
   def get(self, owner_tag, key, default=Undefined):
     try:
