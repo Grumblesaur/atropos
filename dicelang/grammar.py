@@ -81,8 +81,8 @@ factor: "-" factor -> negation
       | "+" factor -> absolute_value
       | power
 
-power: power "**" reduction -> exponent
-     | power "%%" reduction -> logarithm
+power: reduction "**" power     -> exponent
+     | reduction "%%" reduction -> logarithm
      | reduction
 
 reduction: "&"  reduction -> sum_or_join
