@@ -261,7 +261,7 @@ def decompile(tree):
   elif tree.data == 'function':
     function = '({params}) -> {code}'
     code = decompile(tree.children[-1])
-    params = [child.value for child in tree.children[1:-1]]
+    params = ', '.join([child.value for child in tree.children[-1]])
     out = function.format(params=params, code=code)
   
   elif tree.data == 'for_loop':
