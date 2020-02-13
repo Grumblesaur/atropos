@@ -591,7 +591,7 @@ def decompile(tree):
   elif tree.data == 'getattr':
     get_attr = '{obj}.{identifier_chain}'
     obj = decompile(tree.children[0])
-    chain = '.'.join([decompile(child) for child in children[1:]])
+    chain = '.'.join([decompile(child) for child in tree.children[1:]])
     out = get_attr.format(obj=obj, identifier_chain=chain)
   
   elif tree.data == 'atom':
