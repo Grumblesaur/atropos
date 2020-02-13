@@ -641,6 +641,8 @@ def decompile(tree):
     out = 'our {}'.format(tree.children[-1].value)
   elif tree.data == 'global_identifier':
     out = 'global {}'.format(tree.children[-1].value)
+  elif tree.data == 'priority':
+    out = '({})'.format(decompile(tree.children[0]))
   else:
     print('missed decompiling:', tree.data)
     out = '__UNIMPLEMENTED__: {}'.format(tree.data)

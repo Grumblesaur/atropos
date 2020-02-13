@@ -39,7 +39,7 @@ def view_response(match_obj, text):
   all_ = bool(re.search('all([ \t]+vars)?', c))
   glob = bool(re.search('(global(s)?([ \t]vars)?)', c))
   shar = bool(re.search('(shared(s)?|our[ \t]+vars)', c))
-  priv = bool(re.search('(private(s)?|my [ \t]+vars)', c))
+  priv = bool(re.search('(private(s)?|my[ \t]+vars)', c))
   if all_:
     r = ResponseType.VIEW_ALL
   elif glob:
