@@ -17,7 +17,7 @@ class BotIDRetriever(object):
     atropos_id_file = os.environ['ATROPOS_ID_FILE']
     with open(atropos_id_file, 'r') as f:
       bot_id = f.read().strip()
-    self.bot_id = bot_id
+    self.bot_id = int(bot_id)
   
   def get_id(self):
     return self.bot_id

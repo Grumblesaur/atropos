@@ -31,10 +31,8 @@ async def on_message(msg):
   server_id = msg.channel.id
   user_name = msg.author.display_name
   
-  # Atropos shall not answer its own messages. This
-  # prevents users who inject code via their own username
-  # from executing things as Atropos and producing unwanted
-  # files on disk.
+  # Skip scanning Atropos' own messages, since not doing so can
+  # allow for code injection.
   if user_id == auth.bot_id:
     return
   
