@@ -5,12 +5,13 @@ import time
 import atexit
 import asyncio
 import discord
+import auth
 import commands
+
 from message_handlers import handle_dicelang_command
 from message_handlers import handle_view_command
 from dicelang.interpreter import Interpreter
 from save_tracker import SaveTracker
-
 
 # Principal objects.
 client = discord.Client(max_messages=128)
@@ -29,6 +30,13 @@ async def on_message(msg):
   user_id = msg.author.id
   server_id = msg.channel.id
   user_name = msg.author.display_name
+  
+  # Atropos shall not answer its own messages. This
+  # prevents users who inject code via their own username
+  # from executing things as Atropos and producing unwanted
+  # files on disk.
+  if user_id == auth.bot_id:
+    return
   
   print('{} sent: {}'.format(user_name, msg.content))
   response, command = commands.scan(msg.content)
@@ -63,7 +71,6 @@ async def on_message(msg):
 atexit.register(interpreter.datastore.save)
 
 if __name__ == '__main__':
-  import auth
   print('atropos initialized')
   client.run(auth.bot_token)
 
