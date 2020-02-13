@@ -31,7 +31,6 @@ class _DataStore(object):
     except IOError as e:
       with open(self.storage_file_name, 'w') as f:
         pass
-      
     
   def get(self, key, default=Undefined):
     try:
@@ -45,7 +44,10 @@ class _DataStore(object):
     return value
   
   def drop(self, key):
-    out = self.variables[key]
+    target = self.variables[key]
+    if isinstance(target, Iterable) and not isinstance(target, str):
+      target = target.copy()
+    out = target
     del self.variables[key]
     return out
   
@@ -139,7 +141,7 @@ class _OwnedDataStore(_DataStore):
   
   def drop(self, owner_tag, key):
     target = self.variables[owner_tag][key]
-    if isinstance(target, Iterable):
+    if isinstance(target, Iterable) and not isinstance(target, str):
       target = target.copy()
     out = target
     del self.variables[owner_tag][key]
