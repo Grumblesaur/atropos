@@ -1,3 +1,4 @@
+import traceback
 from lark import ParseError, LexError, GrammarError
 from lark.exceptions import UnexpectedEOF
 from lark import UnexpectedToken, UnexpectedCharacters, UnexpectedInput
@@ -17,15 +18,16 @@ def handle_dicelang_command(lang, command, user_id, username, server_id):
     value = lang.execute(command, user_id, server_id)
     is_error = False
   except (UnexpectedCharacters, UnexpectedToken, UnexpectedInput) as e:
-    value = e.get_context(command, 5)
+    value = e.get_context(command, 10)
   except UnexpectedEOF as e:
     value = str(e).split('.')[0] + '.'
   except (ParseError, LexError, GrammarError) as e:
     value = '{}: {}'.format(e.__class__.__name__, e)
+  except IndexError:
+    raise
   except Exception as e:
     value = '(Non-Lark error) {}: {}'.format(e.__class__.__name__, e)
-    print(value)
-    raise e
+    traceback.print_tb(e.__traceback__)
   return Result(is_error, value)
   
 def handle_view_command(lang, response_type, user_id, server_id):

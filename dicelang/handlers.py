@@ -29,7 +29,7 @@ def handle_function(children):
   and returns that function object to be called later.'''
   code = children[-1]
   params = [child.value for child in children[:-1]]
-  out = Function.make(code, params)
+  out = Function(code, params)
   return out
 
 def handle_function_call(children, scoping_data):
@@ -269,7 +269,7 @@ def handle_logical_and(children):
 
 def handle_logical_not(children):
   '''Evaluate operand and return the inverse of its boolean conversion.'''
-  return not bool(kernel.handle_instruction(children[0]))
+  return not bool(kernel.handle_instruction(children[1]))
 
 def handle_comp_math(children):
   '''All mathematical comparisons may be chained. All the operands are

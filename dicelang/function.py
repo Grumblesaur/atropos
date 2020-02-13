@@ -1,5 +1,7 @@
 import lark
+from dicelang import grammar
 from dicelang.bridge import get_function_call_handler
+from dicelang.bridge import get_decompiler
 
 class FunctionCallException(Exception):
   pass
@@ -7,55 +9,31 @@ class FunctionCallException(Exception):
 length_error = FunctionCallException(
   'Function formal parameters mismatch arguments in length.')
  
-class SyntaxToken(object):
-  @staticmethod
-  def make(lark_token):
-    return SyntaxToken(lark_token.type, lark_token.value)
-  
-  def __init__(self, token_type, token_value):
-    self.type = token_type
-    self.value = token_value
-  
-  def __repr__(self):
-    return 'SyntaxToken({}, {})'.format(repr(self.type), repr(self.value))
-
-class SyntaxTree(object):
-  @staticmethod
-  def make(lark_tree):
-    return SyntaxTree(lark_tree.data, lark_tree.children)
-  
-  def __init__(self, tree_data, tree_children):
-    self.data = tree_data
-    self.children = []
-    for child in tree_children:
-      if isinstance(child, lark.Token):
-        out = SyntaxToken.make(child)
-      elif isinstance(child, SyntaxToken):
-        out = SyntaxToken(child.type, child.value)
-      elif isinstance(child, lark.Tree):
-        out = SyntaxTree.make(child)
-      elif isinstance(child, SyntaxTree):
-        out = SyntaxTree(child.data, child.children)
-      self.children.append(out)
-  
-  def __repr__(self):
-    return 'SyntaxTree({}, {})'.format(repr(self.data), repr(self.children))
-
 class Function(object):
-  @staticmethod
-  def make(lark_tree, param_names):
-    return Function(SyntaxTree.make(lark_tree), param_names)
+  parser = lark.Lark(grammar.raw_text, start='function', parser='earley')
   
-  def __init__(self, syntax_tree, param_names):
-    self.code = syntax_tree
-    self.params = param_names
+  def __init__(self, tree_or_source, param_names=None):
     self.call_handler = get_function_call_handler()
+    decompile = get_decompiler()
+    if param_names is None:
+      self.source = tree_or_source
+      tree = Function.parser.parse(tree_or_source)
+      self.code = tree.children[-1]
+      self.params = tree.children[0:-1]
+    else:
+      self.code = tree_or_source
+      self.params = param_names
+      self.source = '({}) -> {}'.format(
+        ', '.join(param_names),
+        decompile(tree_or_source))
   
   def __repr__(self):
-    return 'Function({}, {})'.format(repr(self.code), repr(self.params))
+    return '{}'.format(self.source)
   
-  def __str__(self):
-    return '<Function object with {} arguments>'.format(len(self.params))
+  def file_repr(self):
+    flat_source = self.source.replace('\n', ' ')
+    flat_source = flat_source.replace('\t', ' ')
+    return 'Function({})'.format(repr(flat_source))
 
   def __call__(self, scoping_data, *args):
     if len(self.params) != len(args):
@@ -68,5 +46,4 @@ class Function(object):
     scoping_data.pop_frame()
     return out
  
-
 

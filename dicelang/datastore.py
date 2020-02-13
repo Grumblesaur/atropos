@@ -5,8 +5,6 @@ from collections.abc import Iterable
 # necessary for enabling `eval` to work correctly. Do not let
 # PyCharm "optimize" them out.
 from dicelang.undefined import Undefined
-from dicelang.function  import SyntaxToken
-from dicelang.function  import SyntaxTree
 from dicelang.function  import Function
 
 class _DataStore(object):
@@ -19,15 +17,20 @@ class _DataStore(object):
     try:
       with open(self.storage_file_name, 'r') as f:
         for line in f:
-          k_repr, v_repr = line.strip().split(_DataStore.separator, 1)
-          key = eval(k_repr)
-          value = eval(v_repr)
-          self.variables[key] = value
+          try:
+            k_repr, v_repr = line.strip().split(_DataStore.separator, 1)
+            key = eval(k_repr)
+            value = eval(v_repr)
+            self.variables[key] = value
+          except Exception as e:
+            print('Bad var when loading "{}": {}'.format(
+              self.storage_file_name, e))
     except SyntaxError as e:
       print(e)
     except IOError as e:
       with open(self.storage_file_name, 'w') as f:
         pass
+      
     
   def get(self, key, default=Undefined):
     try:
@@ -49,10 +52,14 @@ class _DataStore(object):
     filename = self.storage_file_name if filename is None else filename
     with open(filename, 'w') as f:
       for key, value in self.variables.items():
+        if isinstance(value, Function):
+          v_repr = value.file_repr()
+        else:
+          v_repr = repr(value)
         f.write('{k}{s}{v}\n'.format(
           k=repr(key),
           s=_DataStore.separator,
-          v=repr(value)))
+          v=v_repr))
   
 class _OwnedDataStore(_DataStore):
   '''Specialization of _DataStore where keys are associated by
@@ -79,10 +86,14 @@ class _OwnedDataStore(_DataStore):
       try:
         with open(filename, 'r') as f:
           for line in f:
-            k_repr, v_repr = line.strip().split(_DataStore.separator, 1)
-            key = eval(k_repr)
-            value = eval(v_repr)
-            self.variables[owner][key] = value
+            try:
+              k_repr, v_repr = line.strip().split(_DataStore.separator, 1)
+              key = eval(k_repr)
+              value = eval(v_repr)
+              self.variables[owner][key] = value
+            except Exception as e:
+              print('Bad var when loading "{}": {}'.format(
+                filename, e))
       except SyntaxError as e:
         print(e)
       except IOError as e:
@@ -99,10 +110,14 @@ class _OwnedDataStore(_DataStore):
         owner)
       with open(filename, 'w') as f:
         for key, value in self.variables[owner].items():
+          if isinstance(value, Function):
+            v_repr = value.file_repr()
+          else:
+            v_repr = repr(value)
           f.write('{k}{s}{v}\n'.format(
             k=repr(key),
             s=_DataStore.separator,
-            v=repr(value)))
+            v=v_repr))
   
   def get(self, owner_tag, key, default=Undefined):
     try:
