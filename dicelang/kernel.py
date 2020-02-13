@@ -533,7 +533,7 @@ def decompile(tree):
     indexable, step = binop_decompile(tree.children)
     out = step_slice.format(indexable=indexable, step=step)
   elif tree.data == 'not_a_slice':
-    get_item = '{indexable}[index]'
+    get_item = '{indexable}[{index}]'
     indexable, index = binop_decompile(tree.children)
     out = get_item.format(indexable=indexable, index=index)
   
