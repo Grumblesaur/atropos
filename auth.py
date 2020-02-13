@@ -24,5 +24,5 @@ class BotIDRetriever(object):
 
 
 bot_token = BotTokenRetriever().get_token()
-bot_id    = BotIDRetriever().get_token()
+bot_id    = BotIDRetriever().get_id()
 

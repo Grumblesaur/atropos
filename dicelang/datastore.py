@@ -25,6 +25,7 @@ class _DataStore(object):
           except Exception as e:
             print('Bad var when loading "{}": {}'.format(
               self.storage_file_name, e))
+            print('>>> {}'.format(v_repr))
     except SyntaxError as e:
       print(e)
     except IOError as e:
@@ -94,6 +95,7 @@ class _OwnedDataStore(_DataStore):
             except Exception as e:
               print('Bad var when loading "{}": {}'.format(
                 filename, e))
+              print('>>> {}'.format(v_repr))
       except SyntaxError as e:
         print(e)
       except IOError as e:
