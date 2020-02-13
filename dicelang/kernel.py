@@ -583,7 +583,7 @@ def decompile(tree):
   elif tree.data == 'function_call':
     function_call = '{callable_handle}({arguments})'
     handle = decompile(tree.children[0])
-    arguments = ', '.join([decompile(child) for child in children[1:]])
+    arguments = ', '.join([decompile(child) for child in tree.children[1:]])
     out = function_call.format(callable_handle=handle, arguments=arguments)
   
   elif tree.data == 'get_attribute':
