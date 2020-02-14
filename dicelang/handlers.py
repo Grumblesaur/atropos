@@ -179,6 +179,17 @@ def handle_delete_element(children):
   exec('del {}'.format(val_repr))
   return out
 
+def handle_delete_attribute(children):
+  ident = kernel.handle_instruction(children[0])
+  subscripts = [kernel.handle_instruction(child) for child in children[1:]]
+  subscripts = ''.join(['[{}]'.format(repr(id_.name)) for id_ in subscripts])
+  target = ident.get()
+  val_repr = 'target{ss}'.format(ss=subscripts)
+  print('handle_delete_attribute: ', val_repr)
+  out = eval(val_repr)
+  exec('del {}'.format(val_repr))
+  return out
+
 def handle_identifier_set(children):
   '''This handles when an identifier is assigned a value,
   which is also when an identifier is created. The

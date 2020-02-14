@@ -50,6 +50,8 @@ def handle_instruction(tree, user='', server='', persistence=None):
     out = handlers.handle_delete_variable(tree.children)
   elif tree.data == 'delete_element':
     out = handlers.handle_delete_element(tree.children)
+  elif tree.data == 'delete_attribute':
+    out = handlers.handle_delete_attribute(tree.children)
   
   elif tree.data == 'assignment':
     out = handle_instruction(tree.children[0])

@@ -7,6 +7,7 @@ identifier_set_subscript: identifier ("[" expression "]")+ "=" expression
 
 deletion: "del" identifier                       -> delete_variable
         | "del" identifier ("[" expression "]")+ -> delete_element
+        | "del" identifier ("." identifier    )+ -> delete_attribute
 
 assignment: identifier_set
           | identifier_set_subscript
