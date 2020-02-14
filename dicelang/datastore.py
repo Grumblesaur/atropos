@@ -123,7 +123,6 @@ class _OwnedDataStore(_DataStore):
     try:
       out = self.variables[owner_tag][key]
     except KeyError as e:
-      print('_OwnedDataStore.get: {}'.format(e))
       if str(e) == owner_tag:
         self.variables[owner_tag] = { }
       out = default

@@ -46,7 +46,7 @@ async def on_message(msg):
     args = (interpreter, command, user_id, user_name, server_id)
     result = handle_dicelang_command(*args)
     if result:
-      fmt = '{} rolled:\n```{}```'
+      fmt = '{} rolled:\n```diff\n{}```'
     else:
       fmt = '{} received error:\n```{}```'
     reply = fmt.format(user_name, result.value)
