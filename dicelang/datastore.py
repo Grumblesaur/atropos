@@ -54,15 +54,13 @@ class _DataStore(object):
   def save(self, filename=None):
     filename = self.storage_file_name if filename is None else filename
     with open(filename, 'w') as f:
+      Function.use_serializable_function_repr(True)
       for key, value in self.variables.items():
-        if isinstance(value, Function):
-          v_repr = value.file_repr()
-        else:
-          v_repr = repr(value)
         f.write('{k}{s}{v}\n'.format(
           k=repr(key),
           s=_DataStore.separator,
-          v=v_repr))
+          v=repr(value)))
+      Function.use_serializable_function_repr(False)
   
 class _OwnedDataStore(_DataStore):
   '''Specialization of _DataStore where keys are associated by
@@ -113,15 +111,13 @@ class _OwnedDataStore(_DataStore):
         self.prefix,
         owner)
       with open(filename, 'w') as f:
+        Function.use_serializable_function_repr(True)
         for key, value in self.variables[owner].items():
-          if isinstance(value, Function):
-            v_repr = value.file_repr()
-          else:
-            v_repr = repr(value)
           f.write('{k}{s}{v}\n'.format(
             k=repr(key),
             s=_DataStore.separator,
-            v=v_repr))
+            v=repr(value)))
+        Function.use_serializable_function_repr(False)
   
   def get(self, owner_tag, key, default=Undefined):
     try:

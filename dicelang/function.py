@@ -12,6 +12,13 @@ length_error = FunctionCallException(
 class Function(object):
   parser = lark.Lark(grammar.raw_text, start='function', parser='earley')
   
+  @staticmethod
+  def use_serializable_function_repr(yes_if_true):
+    if yes_if_true:
+      Function.__repr__ = Function.file_repr
+    else:
+      Function.__repr__ = Function.normal_repr
+  
   def __init__(self, tree_or_source, param_names=None):
     self.call_handler = get_function_call_handler()
     decompile = get_decompiler()
@@ -27,7 +34,7 @@ class Function(object):
         ', '.join(param_names),
         decompile(tree_or_source))
   
-  def __repr__(self):
+  def normal_repr(self):
     return '{}'.format(self.source)
   
   def file_repr(self):
@@ -35,6 +42,8 @@ class Function(object):
     flat_source = flat_source.replace('\t', ' ')
     return 'Function({})'.format(repr(flat_source))
 
+  __repr__ = normal_repr
+  
   def __call__(self, scoping_data, *args):
     if len(self.params) != len(args):
       raise length_error
