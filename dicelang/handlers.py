@@ -175,8 +175,10 @@ def handle_delete_element(children):
   subscripts = ''.join(['[{}]'.format(repr(s)) for s in subscripts])
   target = ident.get()
   val_repr = 'target{ss}'.format(ss=subscripts)
+  Function.use_serializable_function_repr(True)
   out = eval(val_repr)
   exec('del {}'.format(val_repr))
+  Function.use_serializable_function_repr(False)
   return out
 
 def handle_delete_attribute(children):
@@ -185,9 +187,10 @@ def handle_delete_attribute(children):
   subscripts = ''.join(['[{}]'.format(repr(id_.name)) for id_ in subscripts])
   target = ident.get()
   val_repr = 'target{ss}'.format(ss=subscripts)
-  print('handle_delete_attribute: ', val_repr)
+  Function.use_serializable_function_repr(True)
   out = eval(val_repr)
   exec('del {}'.format(val_repr))
+  Function.use_serializable_function_repr(False)
   return out
 
 def handle_identifier_set(children):
@@ -204,24 +207,29 @@ def handle_identifier_set_subscript(children):
   value = kernel.handle_instruction(children[-1])
   ident = kernel.handle_instruction(children[0])
   subscripts = [kernel.handle_instruction(child) for child in children[1:-1]]
+  for s in subscripts:
+    if isinstance(s, Function):
+      error = 'Functions cannot be used as keys or indices. ({})'.format(
+        repr(s))
+      raise TypeError(error)
+  Function.use_serializable_function_repr(True)
   subscripts = ''.join(['[{}]'.format(repr(subscript)) for subscript in subscripts])
   target = ident.get()
-  Function.use_serializable_function_repr(True)
   stmt = 'target{ss} = {value}'.format(ss=subscripts, value=repr(value))
-  exec(stmt)
   Function.use_serializable_function_repr(False)
+  exec(stmt)
   return value
 
 def handle_setattr(children):
   value = kernel.handle_instruction(children[-1])
   ident = kernel.handle_instruction(children[0])
   attribute_chain = [kernel.handle_instruction(child) for child in children[1:-1]]
+  Function.use_serializable_function_repr(True)
   subscripts = ''.join(['[{}]'.format(repr(attr.name)) for attr in attribute_chain])
   target = ident.get()
-  Function.use_serializable_function_repr(True)
   stmt = 'target{ss} = {value}'.format(ss=subscripts, value=repr(value))
-  exec(stmt)
   Function.use_serializable_function_repr(False)
+  exec(stmt)
   return value
 
 def handle_inline_if(children):
@@ -607,6 +615,10 @@ def handle_slices(slice_type, children):
     out = v[::slice_args[0]]
   elif slice_type == 'not_a_slice':
     iterable, index = binary_operation(children)
+    if isinstance(index, Function):
+      error = 'Functions cannot be used as keys or indices. ({})'.format(
+        repr(index))
+      raise TypeError(error)
     out = iterable[index]
   return out
 
