@@ -50,7 +50,10 @@ def handle_for_loop(children, scoping_data):
   executed as intended or not.'''
   iterator    = kernel.handle_instruction(children[0])
   iterable    = kernel.handle_instruction(children[1])
-  name, start = iterator.name, iterable[0] if len(iterable) else None
+  name = iterator.name
+  if isinstance(iterable, dict):
+    iterable = list(iterable.keys())
+  start = iterable[0] if len(iterable) else None
   if start is None:
     finished = False
   else:
@@ -192,7 +195,10 @@ def handle_identifier_set_subscript(children):
   subscripts = [kernel.handle_instruction(child) for child in children[1:-1]]
   subscripts = ''.join(['[{}]'.format(repr(subscript)) for subscript in subscripts])
   target = ident.get()
-  exec('target{ss} = {value}'.format(ss=subscripts, value=repr(value)))
+  Function.use_serializable_function_repr(True)
+  stmt = 'target{ss} = {value}'.format(ss=subscripts, value=repr(value))
+  exec(stmt)
+  Function.use_serializable_function_repr(False)
   return value
 
 def handle_setattr(children):
@@ -201,7 +207,10 @@ def handle_setattr(children):
   attribute_chain = [kernel.handle_instruction(child) for child in children[1:-1]]
   subscripts = ''.join(['[{}]'.format(repr(attr.name)) for attr in attribute_chain])
   target = ident.get()
-  exec('target{ss} = {value}'.format(ss=subscripts, value=repr(value)))
+  Function.use_serializable_function_repr(True)
+  stmt = 'target{ss} = {value}'.format(ss=subscripts, value=repr(value))
+  exec(stmt)
+  Function.use_serializable_function_repr(False)
   return value
 
 def handle_inline_if(children):
