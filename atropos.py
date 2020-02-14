@@ -47,9 +47,10 @@ async def on_message(msg):
     result = handle_dicelang_command(*args)
     if result:
       fmt = '{} rolled:\n```diff\n{}```'
+      reply = fmt.format(user_name, repr(result.value))
     else:
       fmt = '{} received error:\n```{}```'
-    reply = fmt.format(user_name, result.value)
+      reply = fmt.format(user_name, result.value)
     await msg.channel.send(reply)
   elif response in (
       commands.ResponseType.VIEW_GLOBALS,
