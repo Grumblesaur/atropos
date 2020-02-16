@@ -7,9 +7,8 @@ import asyncio
 import discord
 import auth
 import commands
+import reply
 
-from message_handlers import handle_dicelang_command
-from message_handlers import handle_view_command
 from dicelang.interpreter import Interpreter
 from save_tracker import SaveTracker
 
@@ -17,7 +16,7 @@ from save_tracker import SaveTracker
 client = discord.Client(max_messages=128)
 last = SaveTracker()
 interpreter = Interpreter()
- 
+command_parser = commands.CmdParser() 
 
 def handle_saves(dl_interpreter, s_tracker):
   s_tracker.update()
@@ -33,39 +32,15 @@ async def on_message(msg):
   
   # Skip scanning Atropos' own messages, since not doing so can
   # allow for code injection.
-  if user_id == auth.bot_id:
+  if msg.author.id == auth.bot_id:
     return
   
   print('{} sent: {}'.format(user_name, msg.content))
-  response, command = commands.scan(msg.content)
-  print('response={}; command={}'.format(response, command))
-  
-  if response == commands.ResponseType.NONE:
-    pass
-  elif response == commands.ResponseType.DICE:
-    args = (interpreter, command, user_id, user_name, server_id)
-    result = handle_dicelang_command(*args)
-    if result:
-      fmt = '{} rolled:\n```diff\n{}```'
-      reply = fmt.format(user_name, repr(result.value))
-    else:
-      fmt = '{} received error:\n```{}```'
-      reply = fmt.format(user_name, result.value)
-    await msg.channel.send(reply)
-  elif response in (
-      commands.ResponseType.VIEW_GLOBALS,
-      commands.ResponseType.VIEW_SHAREDS,
-      commands.ResponseType.VIEW_PRIVATES,
-      commands.ResponseType.VIEW_ALL):
-    result = handle_view_command(interpreter, response, user_id, server_id)
-    reply = '{} requested to view:\n```{}```'.format(user_name, result)
-    await msg.channel.send(reply)
-  elif response == commands.ResponseType.HELP:
-    await msg.channel.send('{} requested general help. README:\n {}'.format(
-      user_name,
-      'https://github.com/Grumblesaur/atropos/blob/master/README.md'))
-  
-  handle_saves(interpreter, last)
+  result = command_parser.response_to(msg)
+  print(f'type={result.rtype}, value={result.value!r}')
+  reply_text = reply.build(interpreter, msg.author, msg.channel, result)
+  if reply_text:
+    await msg.channel.send(reply_text)
 
 atexit.register(interpreter.datastore.save)
 
