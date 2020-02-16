@@ -41,6 +41,8 @@ async def on_message(msg):
   reply_text = reply.build(interpreter, msg.author, msg.channel, result)
   if reply_text:
     await msg.channel.send(reply_text)
+  
+  handle_saves(interpreter, last)
 
 atexit.register(interpreter.datastore.save)
 
