@@ -255,32 +255,29 @@ def decompile(tree):
   if tree.data == 'start':
     out = '; '.join([decompile(child) for child in tree.children])
   elif tree.data == 'block':
-    block = "begin\n{exprs}\nend"
-    expressions = [ ]
-    for child in tree.children:
-      expressions.append(decompile(child))
-    out = block.format(exprs='\t'+(';\n\t'.join(expressions)))
+    expressions = [decompile(child) for child in tree.children]
+    exprs = '\t' + ';\n\t'.join(expressions)
+    out = f'begin\n{exprs}\nend'
+  
   elif tree.data == 'function':
     function = '({params}) -> {code}'
     code = decompile(tree.children[-1])
     params = ', '.join([child.value for child in tree.children[:-1]])
-    out = function.format(params=params, code=code)
+    out = f'({params}) -> {code}'
   
   elif tree.data == 'for_loop':
     for_loop = 'for {iterator} in {expression} do {code}'
     iterator = decompile(tree.children[0])
     expression = decompile(tree.children[1])
     code = decompile(tree.children[2])
-    out = for_loop.format(iterator=iterator, expression=expression, code=code)
+    out = f'for {iterator} in {expression} do {code}'
   elif tree.data == 'while_loop':
-    while_loop = 'while {expression} do {code}'
     expression, code = binop_decompile(tree.children)
-    out = while_loop.format(expression=expression, code=code)
+    out = f'while {expression} do {code}'
   elif tree.data == 'do_while_loop':
-    do_while_loop = 'do {code} while {expression}'
     code = decompile(tree.children[0])
     expression = decompile(tree.children[1])
-    out = do_while_loop.format(expression=expression, code=code)
+    out = f'do {code} while {expression}'
   
   elif tree.data == 'conditional':
     out = passthrough(tree.children)
@@ -306,92 +303,69 @@ def decompile(tree):
   elif tree.data == 'deletion':
     out = decompile(tree.children[0])
   elif tree.data == 'delete_variable':
-    out = 'del {identifier}'.format(identifier=tree.children[0].value)
+    ident = decompile(tree.children[0])
+    out = f'del {ident}'
   elif tree.data == 'delete_element':
-    delete_element = 'del {identifier}{subscripts}'
-    ident = tree.children[0].value
-    subscripts = ['[{}]'.format(decompile(child)) for child in tree.children[1:]]
-    out = delete_element.format(
-      identifier=ident,
-      subscripts=''.join(subscripts))
+    ident = decompile(tree.children[0])
+    subscripts = ''.join([f'[{decompile(child)}]' for child in tree.children[1:]])
+    out = f'del {ident}{subscripts}'
   elif tree.data == 'assignment':
     out = passthrough(tree.children)
   elif tree.data == 'setattr':
-    set_attr = '{identifier_chain} = {expression}'
-    identifier_chain = '.'.join(
-      [decompile(child) for child in tree.children[:-1]])
+    chain = '.'.join([decompile(child) for child in tree.children[:-1]])
     expression = decompile(tree.children[-1])
-    out = set_attr.format(
-      identifier_chain=identifier_chain,
-      expression=expression)
+    out = f'{chain} = {expression}'
   
   elif tree.data == 'identifier_set':
-    identifier_set = '{identifier} = {expression}'
     ident, expr = binop_decompile(tree.children)
-    out = identifier_set.format(identifier=ident, expression=expr)
+    out = f'{ident} = {expr}'
   elif tree.data == 'identifier_set_subscript':
-    identifier_set_subscript = '{identifier}{subscripts} = {expression}'
     identifier = decompile(tree.children[0])
-    subscripts = ''.join(
-      ['[{}]'.format(decompile(child)) for child in children[1:-1]])
+    subscripts = ''.join([f'[{decompile(child)}]' for child in tree.children[1:-1]])
     expression = decompile(tree.children[-1])
-    out = identifier_set_subscript.format(
-      identifier=identifier,
-      subscritps=subscripts,
-      expression=expression)
+    out = f'{identifier}{subscripts} = {expression}'
   elif tree.data == 'identifier_get':
     out = passthrough(tree.children)
   
   elif tree.data == 'if_expr':
     out = decompile(tree.children[0])
   elif tree.data == 'inline_if':
-    inline_if = '{if_expr} if {condition} else {else_expr}'
     if_expr = decompile(tree.children[0])
     condition = decompile(tree.children[1])
     else_expr = decompile(tree.children[2])
-    out = inline_if.format(
-      if_expr=if_expr,
-      condition=condition,
-      else_expr=else_expr)
+    out = f'{if_expr} if {condition} else {else_expr}'
   elif tree.data == 'inline_if_binary':
-    inline_if_binary = '{if_expr} if else {else_expr}'
     if_expr, else_expr = binop_decompile(tree.children)
-    out = inline_if_binary.format(if_expr=if_expr, else_expr=else_expr)
+    out = f'{if_expr} if else {else_expr}'
   
   elif tree.data == 'repeat':
     out = decompile(tree.children[0])
   elif tree.data == 'repetition':
-    repetition = '{left} ^ {right}'
     left, right = binop_decompile(tree.children)
-    out = repetition.format(left=left, right=right)
-  
+    out = f'{left} ^ {right}'
   elif tree.data == 'bool_or':
     out = passthrough(tree.children)
   elif tree.data == 'logical_or':
-    bool_or = '{left} or {right}'
     left, right = binop_decompile(tree.children)
-    out = bool_or.format(left=left, right=right)
+    out = f'{left} or {right}'
 
   elif tree.data == 'bool_xor':
     out = passthrough(tree.children)
   elif tree.data == 'logical_xor':
-    bool_xor = '{left} xor {right}'
     left, right = binop_decompile(tree.children)
-    out = bool_xor.format(left=left, right=right)
+    out = f'{left} xor {right}'
 
   elif tree.data == 'bool_and':
     out = passthrough(tree.children)
   elif tree.data == 'logical_and':
-    bool_and = '{left} and {right}'
     left, right = binop_decompile(tree.children)
-    out = bool_and.format(left=left, right=right)
+    out = f'{left} and {right}'
 
   elif tree.data == 'bool_not':
     out = passthrough(tree.children)
   elif tree.data == 'logical_not':
-    bool_not = 'not {operand}'
     operand = decompile(tree.children[1])
-    out = bool_not.format(operand=operand)
+    out = f'not {operand}'
   
   elif tree.data == 'comp':
     out = passthrough(tree.children)
@@ -401,200 +375,163 @@ def decompile(tree):
   elif tree.data == 'math_comp':
     out = tree.children[0].value
   elif tree.data == 'comp_obj':
-    operands_and_operators = [decompile(child) for child in tree.children]
-    out = ' '.format(operands_and_operators)
+    out = ' '.join([decompile(child) for child in tree.children])
   elif tree.data == 'obj_comp':
     out = "is" if len(tree.children) == 1 else "is not"
   elif tree.data == 'present':
-    present = '{left} in {right}'
     left, right = binop_decompile(tree.children)
-    out = present.format(left=left, right=right)
+    out = f'{left} in {right}'
   elif tree.data == 'absent':
-    absent = '{left} not in {right}'
     left, right = binop_decompile(tree.children)
-    out = absent.format(left=left, right=right)
-  
+    out = f'{left} not in {right}'
   elif tree.data == 'shift':
     out = passthrough(tree.children)
   elif tree.data == 'left_shift':
-    left_shift = '{left} << {right}'
     left, right = binop_decompile(tree.children)
-    out = left_shift.format(left=left, right=right)
+    out = f'{left} << {right}'
   elif tree.data == 'right_shift':
-    right_shift = '{left} >> {right}'
     left, right = binop_decompile(tree.children)
-    out = right_shift.format(left=left, right=right)
+    out = f'{left} >> {right}'
   
   elif tree.data == 'arithm':
     out = passthrough(tree.children)
   elif tree.data == 'addition':
-    addition = '{left} + {right}'
     left, right = binop_decompile(tree.children)
-    out = addition.format(left=left, right=right)
+    out = f'{left} + {right}'
   elif tree.data == 'subtraction':
-    subtraction = '{left} - {right}'
     left, right = binop_decompile(tree.children)
-    out = subtraction.format(left=left, right=right)
+    out = f'{left} - {right}'
   elif tree.data == 'catenation':
-    catenation = '{left} $ {right}'
     left, right = binop_decompile(tree.children)
-    out = catenation.format(left=left, right=right)
+    out = f'{left} $ {right}'
   
   elif tree.data == 'term':
     out = passthrough(tree.children)
   elif tree.data == 'multiplication':
-    multiplication = '{left} * {right}'
     left, right = binop_decompile(tree.children)
-    out = multiplication.format(left=left, right=right)
+    out = f'{left} * {right}'
   elif tree.data == 'division':
-    division = '{left} / {right}'
     left, right = binop_decompile(tree.children)
-    out = division.format(left=left, right=right)
+    out = f'{left} / {right}'
   elif tree.data == 'remainder':
-    remainder = '{left} % {right}'
     left, right = binop_decompile(tree.children)
-    out = remainder.format(left=left, right=right)
+    out = f'{left} % {right}'
   elif tree.data == 'floor_division':
-    floor_division = '{left} // {right}'
     left, right = binop_decompile(tree.children)
-    out = floor_division.format(left=left, right=right)
+    out = f'{left} // {right}'
   
   elif tree.data == 'factor':
     out = passthrough(tree.children)
   elif tree.data == 'negation':
-    out = '-{}'.format(decompile(tree.children[0]))
+    out = f'-{decompile(tree.children[0])}'
   elif tree.data == 'absolute_value':
-    out = '+{}'.format(decompile(tree.children[0]))
+    out = f'+{decompile(tree.children[0])}'
   
   elif tree.data == 'power':
     out = passthrough(tree.children)
   elif tree.data == 'exponent':
-    exponent = '{left} ** {right}'
     left, right = binop_decompile(tree.children)
-    out = exponent.format(left=left, right=right)
+    out = f'{left} ** {right}'
   elif tree.data == 'logarithm':
-    logarithm = '{left} %% {right}'
     left, right = binop_decompile(tree.children)
-    out = logarithm.format(left=left, right=right)
+    out = f'{left} %% {right}'
   
   elif tree.data == 'reduction':
     out = passthrough(tree.children)
   elif tree.data == 'sum_or_join':
-    out = '&{}'.format(decompile(tree.children[0]))
+    out = f'&{decompile(tree.children[0])}'
   elif tree.data == 'length':
-    out = '#{}'.format(decompile(tree.children[0]))
+    out = f'#{decompile(tree.children[0])}'
   elif tree.data == 'selection':
-    out = '@{}'.format(decompile(tree.children[0]))
+    out = f'@{decompile(tree.children[0])}'
   elif tree.data == 'minimum':
-    out = '!<{}'.format(decompile(tree.children[0]))
+    out = f'!<{decompile(tree.children[0])}'
   elif tree.data == 'maximum':
-    out = '!>{}'.format(decompile(tree.children[0]))
+    out = f'!>{decompile(tree.children[0])}'
   elif tree.data == 'flatten':
-    out = '|{}'.format(decompile(tree.children[0]))
+    out = f'|{decompile(tree.children[0])}'
   elif tree.data == 'stats':
-    out = '?{}'.format(decompile(tree.children[0]))
+    out = f'?{decompile(tree.children[0])}'
   elif tree.data == 'sort':
-    out = '<>{}'.format(decompile(tree.children[0]))
+    out = f'<>{decompile(tree.children[0])}'
   elif tree.data == 'shuffle':
-    out = '><{}'.format(decompile(tree.children[0]))
+    out = f'><{decompile(tree.children[0])}'
   
   elif tree.data == 'slice':
     out = passthrough(tree.children)
   elif tree.data == 'whole_slice':
-    out = '{indexable}[:]'.format(indexable=decompile(tree.children[0]))
+    out = f'{decompile(tree.children[0])}[:]'
   elif tree.data == 'start_slice':
-    start_slice = '{indexable}[{start}:]'
     indexable, start = binop_decompile(tree.children)
-    out = start_slice.format(indexable=indexable, start=start)
+    out = f'{indexable}[{start}:]'
   elif tree.data == 'start_step_slice':
-    start_step_slice = '{indexable}[{start}::{step}]'
     indexable, start, step = [decompile(child) for child in tree.children]
-    out = start_step_slice.format(indexable=indexable, start=start, step=step)
+    out = f'{indexable}[{start}::{step}]'
   elif tree.data == 'start_stop_slice':
-    start_stop_slice = '{indexable}[{start}:{stop}]'
     indexable, start, stop = [decompile(child) for child in tree.children]
-    out = start_stop_slice.format(indexable=indexable, start=start, stop=stop)
+    out = f'{indexable}[{start}:{stop}]'
   elif tree.data == 'fine_slice':
-    fine_slice = '{indexable}[{start}:{stop}:{step}]'
     indexable, start, stop, step = [decompile(child) for child in tree.children]
-    out = fine_slice.format(
-      indexable=indexable,
-      start=start,
-      stop=stop,
-      step=step)
+    out = f'{indexable}[{start}:{stop}:{step}]'
   elif tree.data == 'stop_slice':
-    stop_slice = '{indexable}[:{stop}]'
     indexable, stop = binop_decompile(tree.children)
-    out = stop.slice.format(indexable=indexable, stop=stop)
+    out = f'{indexable}[:{stop}]'
   elif tree.data == 'stop_step_slice':
-    stop_step_slice = '{indexable}[:{stop}:{step}]'
     indexable, stop, step = [decompile(child) for child in tree.children]
-    out = stop_step_slice.format(indexable=indexable, stop=stop, step=step)
+    out = f'{indexable}[:{stop}:{step}]'
   elif tree.data == 'step_slice':
-    step_slice = '{indexable}[::{step}]'
     indexable, step = binop_decompile(tree.children)
-    out = step_slice.format(indexable=indexable, step=step)
+    out = f'{indexable}[::{step}]'
   elif tree.data == 'not_a_slice':
-    get_item = '{indexable}[{index}]'
     indexable, index = binop_decompile(tree.children)
-    out = get_item.format(indexable=indexable, index=index)
+    out = f'{indexable}[{index}]'
   
   elif tree.data == 'application':
     out = passthrough(tree.children)
   elif tree.data == 'apply':
-    apply_operation = '{left} -: {right}'
     left, right = binop_decompile(tree.children)
-    out = apply_operation.format(left=left, right=right)
+    out = f'{left} -: {right}'
   
   elif tree.data == 'die':
     out = passthrough(tree.children)
   elif tree.data == 'scalar_die_all':
-    scalar_all = '{dice} d {sides}'
     dice, sides = binop_decompile(tree.children)
-    out = scalar_all.format(dice=dice, sides=sides)
+    out = f'{dice} d {sides}'
   elif tree.data == 'scalar_die_highest':
-    scalar_highest = '{dice} d {sides} h {keep}'
     dice, sides, keep = [decompile(child) for child in tree.children]
-    out = scalar_highest.format(dice=dice, sides=sides, keep=keep)
+    out = f'{dice} d {sides} h {keep}'
   elif tree.data == 'scalar_die_lowest':
-    scalar_lowest = '{dice} d {sides} l {keep}'
-    dice, sides, keep = [decompile(child) for child in tree.childen]
-    out = scalar_lowest.format(dice=dice, sides=sides, keep=keep)
+    dice, sides, keep = [decompile(child) for child in tree.children]
+    out = f'{dice} d {sides} l {keep}'
   elif tree.data == 'vector_die_all':
-    vector_all = '{dice} r {sides}'
     dice, sides = binop_decompile(tree.children)
-    out = vector_all.format(dice=dice, sides=sides)
+    out = f'{dice} r {sides}'
   elif tree.data == 'vector_die_highest':
-    vector_highest = '{dice} r {sides} h {keep}'
     dice, sides, keep = [decompile(child) for child in tree.children]
-    out = vector_highest.format(dice=dice, sides=sides, keep=keep)
+    out = f'{dice} r {sides} h {keep}'
   elif tree.data == 'vector_die_lowest':
-    vector_lowest = '{dice} r {sides} l {keep}'
     dice, sides, keep = [decompile(child) for child in tree.children]
-    out = vector_lowest.format(dice=dice, sides=sides, keep=keep)
+    out = f'{dice} r {sides} l {keep}'
   
   elif tree.data == 'plugin_op':
     out = passthrough(tree.children)
   elif tree.data == 'plugin_call':
-    plugin_call = '{plugin_name} :: {plugin_operand}'
     name, operand = binop_decompile(tree.children)
-    out = plugin_call.format(plugin_name=name, plugin_operand=operand)
+    out = f'{name} :: {operand}'
   
   elif tree.data == 'call_or_atom':
     out = passthrough(tree.children)
   elif tree.data == 'function_call':
-    function_call = '{callable_handle}({arguments})'
     handle = decompile(tree.children[0])
     arguments = ', '.join([decompile(child) for child in tree.children[1:]])
-    out = function_call.format(callable_handle=handle, arguments=arguments)
+    out = f'{handle}({arguments})'
   
   elif tree.data == 'get_attribute':
     out = passthrough(tree.children)
   elif tree.data == 'getattr':
-    get_attr = '{obj}.{identifier_chain}'
     obj = decompile(tree.children[0])
     chain = '.'.join([decompile(child) for child in tree.children[1:]])
-    out = get_attr.format(obj=obj, identifier_chain=chain)
+    out = f'{obj}.{chain}'
   
   elif tree.data == 'atom':
     out = passthrough(tree.children)
@@ -609,51 +546,42 @@ def decompile(tree):
   elif tree.data == 'list_literal':
     out = passthrough(tree.children)
   elif tree.data == 'populated_list':
-    pop_list = '[{expression_chain}]'
     chain = ', '.join([decompile(child) for child in tree.children])
-    out = pop_list.format(expression_chain=chain)
+    out = f'[{chain}]'
   elif tree.data == 'empty_list':
     out = '[]'
   elif tree.data == 'range_list':
-    range_list = '[{start} to {stop}]'
     start, stop = binop_decompile(tree.children)
-    out = range_list.format(start=start, stop=stop)
+    out = f'[{start} to {stop}]'
   elif tree.data == 'range_list_stepped':
-    range_list_stepped = '[{start} to {stop} by {step}]'
     start, stop, step = [decompile(child) for child in tree.children]
-    out = range_list_stepped.format(start=start, stop=stop, step=step)
+    out = f'[{start} to {stop} by {step}]'
   elif tree.data == 'dict_literal':
     out = passthrough(tree.children)
   elif tree.data == 'empty_dict':
     out = '{}'
   elif tree.data == 'populated_dict':
     chain = ', '.join([decompile(child) for child in tree.children])
-    out = '{%s}' % (chain,)
+    out = f'{{chain}}'
   elif tree.data == 'key_value_pair':
-    kv_pair = '{key}: {value}'
     key, value = binop_decompile(tree.children)
-    out = kv_pair.format(key=key, value=value)
+    out = f'{key}: {value}'
   elif tree.data == 'identifier':
     out = passthrough(tree.children)
   elif tree.data == 'scoped_identifier':
     out = tree.children[0].value
   elif tree.data == 'private_identifier':
-    out = 'my {}'.format(tree.children[-1].value)
+    out = f'my {tree.children[-1].value}'
   elif tree.data == 'server_identifier':
-    out = 'our {}'.format(tree.children[-1].value)
+    out = f'our {tree.children[-1].value}'
   elif tree.data == 'global_identifier':
-    out = 'global {}'.format(tree.children[-1].value)
+    out = f'global {tree.children[-1].value}'
   elif tree.data == 'priority':
-    out = '({})'.format(decompile(tree.children[0]))
+    out = f'({decompile(tree.children[0])})'
   else:
     print('missed decompiling:', tree.data)
-    out = '__UNIMPLEMENTED__: {}'.format(tree.data)
+    out = f'__UNIMPLEMENTED__: {tree.data}'
   
   return out
-
-
-
-
-
 
 
