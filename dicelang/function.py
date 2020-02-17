@@ -30,17 +30,16 @@ class Function(object):
     else:
       self.code = tree_or_source
       self.params = param_names
-      self.source = '({}) -> {}'.format(
-        ', '.join(param_names),
-        decompile(tree_or_source))
+      param_string = ', '.join(param_names)
+      self.source = f'({param_string}) -> {decompile(tree_or_source)}'
   
   def normal_repr(self):
-    return '{}'.format(self.source)
+    return f'{self.source}'
   
   def file_repr(self):
     flat_source = self.source.replace('\n', ' ')
     flat_source = flat_source.replace('\t', ' ')
-    return 'Function({})'.format(repr(flat_source))
+    return f'Function({flat_source!r})'
 
   __repr__ = normal_repr
   

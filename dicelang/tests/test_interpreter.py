@@ -23,7 +23,7 @@ def get_lines(filename):
 def get_files():
   cases = [ ]
   for filename in files_to_test:
-    with open('data/{}'.format(filename), 'r') as f:
+    with open(f'data/{filename}', 'r') as f:
       code, result = map(lambda s: s.strip(), f.read().split('===>'))
       print(code, result)
       result = Skip if result == '__NO_TEST_CASE__' else eval(result)

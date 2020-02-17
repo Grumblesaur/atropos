@@ -73,7 +73,7 @@ def flatten(items, seqtypes=(list, tuple)):
 
 def log(msg):
   with open('out.txt', 'a') as f:
-    f.write('{}\n'.format(msg))
+    f.write(f'{msg}\n')
 
 
 

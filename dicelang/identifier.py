@@ -5,7 +5,7 @@ class StorageError(Exception):
   pass
 
 def error(mode):
-  raise StorageError('Unknown identifier type: {}'.format(repr(mode)))
+  raise StorageError(f'Unknown identifier type: {mode!r}')
 
 class Identifier(object):
   '''Internal class for storing the information of
@@ -24,10 +24,7 @@ class Identifier(object):
   
   def __repr__(self):
     '''verbose string representation of an Identifier.'''
-    return 'Identifier({n}, {m}, {s})'.format(
-      n=repr(self.name),
-      m=repr(self.mode),
-      s=repr(self.scoping_data))
+    return f'Identifier({self.name!r}, {self.mode!r}, {self.scoping_data!r})'
   
   def __str__(self):
     return self.name

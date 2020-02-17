@@ -23,9 +23,8 @@ class _DataStore(object):
             value = eval(v_repr)
             self.variables[key] = value
           except Exception as e:
-            print('Bad var when loading "{}": {}'.format(
-              self.storage_file_name, e))
-            print('>>> {}'.format(v_repr))
+            print(f'Bad var when loading {self.storage_file_name!r}: {e}')
+            print(f'>>> {v_repr}')
     except SyntaxError as e:
       print(e)
     except IOError as e:
@@ -56,10 +55,7 @@ class _DataStore(object):
     with open(filename, 'w') as f:
       Function.use_serializable_function_repr(True)
       for key, value in self.variables.items():
-        f.write('{k}{s}{v}\n'.format(
-          k=repr(key),
-          s=_DataStore.separator,
-          v=repr(value)))
+        f.write(f'{key!r}{_DataStore.separator}{value!r}\n')
       Function.use_serializable_function_repr(False)
   
 class _OwnedDataStore(_DataStore):
@@ -93,9 +89,8 @@ class _OwnedDataStore(_DataStore):
               value = eval(v_repr)
               self.variables[owner][key] = value
             except Exception as e:
-              print('Bad var when loading "{}": {}'.format(
-                filename, e))
-              print('>>> {}'.format(v_repr))
+              print(f'Bad var when loading {filename!r}: {e}')
+              print(f'>>> {v_repr}')
       except SyntaxError as e:
         print(e)
       except IOError as e:
@@ -105,18 +100,11 @@ class _OwnedDataStore(_DataStore):
   def save(self):
     owners = self.variables.keys()
     for owner in owners:
-      filename = '{}{}{}_{}'.format(
-        self.storage_directory,
-        os.path.sep,
-        self.prefix,
-        owner)
+      filename = f'{self.storage_directory}{os.path.sep}{self.prefix}_{owner}'
       with open(filename, 'w') as f:
         Function.use_serializable_function_repr(True)
         for key, value in self.variables[owner].items():
-          f.write('{k}{s}{v}\n'.format(
-            k=repr(key),
-            s=_DataStore.separator,
-            v=repr(value)))
+          f.write(f'{key!r}{_DataStore.separator}{value!r}')
         Function.use_serializable_function_repr(False)
   
   def get(self, owner_tag, key, default=Undefined):
@@ -153,7 +141,7 @@ class Persistence(object):
       vars_directory = os.environ['DICELANG_DATASTORE']
     except KeyError:
       vars_directory = 'vars'
-    public_path = '{}{}{}'.format(vars_directory, os.path.sep, 'public')
+    public_path = f'{vars_directory}{os.path.sep}public'
     server_path = vars_directory
     private_path = vars_directory
     if not os.path.isdir(vars_directory):

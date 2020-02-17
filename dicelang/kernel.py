@@ -105,7 +105,7 @@ def handle_instruction(tree, user='', server='', persistence=None):
   elif tree.data == 'obj_comp':
     kids = tree.children
     is_  = len(kids) == 1
-    out = kids[0].value if is_ else '{} {}'.format(kids[0].value, kids[1].value)
+    out = kids[0].value if is_ else f'{kids[0].value} {kids[1].value}'
   elif tree.data == 'present':
     out = handlers.handle_present(tree.children)
   elif tree.data == 'absent':
@@ -260,13 +260,11 @@ def decompile(tree):
     out = f'begin\n{exprs}\nend'
   
   elif tree.data == 'function':
-    function = '({params}) -> {code}'
     code = decompile(tree.children[-1])
     params = ', '.join([child.value for child in tree.children[:-1]])
     out = f'({params}) -> {code}'
   
   elif tree.data == 'for_loop':
-    for_loop = 'for {iterator} in {expression} do {code}'
     iterator = decompile(tree.children[0])
     expression = decompile(tree.children[1])
     code = decompile(tree.children[2])
@@ -282,19 +280,11 @@ def decompile(tree):
   elif tree.data == 'conditional':
     out = passthrough(tree.children)
   elif tree.data == 'if':
-    if_construct = 'if {condition} then {code}'
-    condition = decompile(tree.children[0])
-    code = decompile(tree.children[1])
-    out = if_construct.format(condition=condition, code=code)
+    condition, code = binop_decompile(tree.children)
+    out = f'if {condition} then {code}'
   elif tree.data == 'if_else':
-    if_else_construct = 'if {condition} then {if_code} else {else_code}'
-    condition = decompile(tree.children[0])
-    if_code = decompile(tree.children[1])
-    else_code = decompile(tree.children[2])
-    out = if_else_construct.format(
-      condition=condition,
-      if_code=if_code,
-      else_code=else_code)
+    condition, if_code, else_code = [decompile(child) for child in tree.children]
+    out = f'if {condition} then {if_code} else {else_code}'
   
   elif tree.data == 'short_body':
     out = decompile(tree.children[0])
@@ -562,7 +552,7 @@ def decompile(tree):
     out = '{}'
   elif tree.data == 'populated_dict':
     chain = ', '.join([decompile(child) for child in tree.children])
-    out = f'{{chain}}'
+    out = '{' + f'{chain}' + '}'
   elif tree.data == 'key_value_pair':
     key, value = binop_decompile(tree.children)
     out = f'{key}: {value}'
