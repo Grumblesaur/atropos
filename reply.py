@@ -8,7 +8,7 @@ import helptext
 def _fold(names):
   return '  '.join(sorted(names))
 
-def dice_reply(interpreter, author, channel, result):
+def dice_reply(interpreter, author, channel, argument):
   context_size = max(15, len(argument) // 10)
   is_error = True
   try:
@@ -84,7 +84,7 @@ def build(interpreter, author, channel, result):
     reply = ''
   
   elif response == Response.DICE:
-    reply = dice_reply(interpreter, author, channel, result)
+    reply = dice_reply(interpreter, author, channel, argument)
   elif response == Response.DICE_HELP:
     reply = '[dice help message unimplemented]'
   
