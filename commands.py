@@ -17,12 +17,9 @@ class Response(enum.Enum):
   VIEW_SHAREDS     =  4
   VIEW_PRIVATES    =  5
   VIEW_ALL         =  6
-  HELP_HELP        =  7
-  HELP_SOURCE      =  8
-  HELP_TYPES       =  9
-  HELP_OPERATORS   = 10
-  HELP_FUNCTIONS   = 11
-  HELP_LIMITATIONS = 12
+  VIEW_HELP        =  7
+  HELP_HELP        =  8
+  HELP_KEYWORD     =  9
 
 
 class CmdParser(object):
@@ -39,14 +36,10 @@ class CmdParser(object):
         | "view" (( "global" "vars") | "globals"  ) -> view_public
         | "view" (( "our"    "vars") | "shareds"  ) -> view_shared
         | "view" (( "my"     "vars") | "privates" ) -> view_private
+        | "view"                                    -> view_help
     
-    help: "help" /function(s)?/     -> help_functions
-        | "help" /operator(s)?/     -> help_operators
-        | "help" /type(s)?/         -> help_types
-        | "help" /limitation(s)?/   -> help_limitations
-        | "help" /source/           -> help_source
-        | "help" /topic(s)/         -> help_help
-        | "help" (/(.|\n)+/)?       -> help_help
+    help: "help" (/[A-Za-z0-9_]+/)+ -> help_topic
+        | "help"                     -> help_help
     
     %import common.WS
     %ignore WS
@@ -100,18 +93,12 @@ class CmdParser(object):
       out = Result(Response.VIEW_SHAREDS)
     elif tree.data == 'view_private':
       out = Result(Response.VIEW_PRIVATES)
-    elif tree.data == 'help_functions':
-      out = Result(Response.HELP_FUNCTIONS)
-    elif tree.data == 'help_operators':
-      out = Result(Response.HELP_OPERATORS)
-    elif tree.data == 'help_types':
-      out = Result(Response.HELP_TYPES)
-    elif tree.data == 'help_limitations':
-      out = Result(Response.HELP_LIMITATIONS)
-    elif tree.data == 'help_source':
-      out = Result(Response.HELP_SOURCE)
+    elif tree.data == 'view_help':
+      out = Result(Response.VIEW_HELP)
     elif tree.data == 'help_help':
       out = Result(Response.HELP_HELP)
+    elif tree.data == 'help_topic':
+      out = Result(Response.HELP_KEYWORD, tree.children[0].value)
     else:
       out = Result(Response.ERROR, f'UNIMPLEMENTED: {tree.data}')
     return out

@@ -77,8 +77,8 @@ def handle_while_loop(children, scoping_data):
     kernel.handle_instruction(children[1])
     executed += 1
     if time.time() > timeout:
-      e = '`while` loop iterated {} times without terminating.'
-      raise LoopTimeout(e.format(executed))
+      e = f'`while` loop iterated {executed} times without terminating.'
+      raise LoopTimeout(e)
   scoping_data.pop_scope()
   return executed
 
@@ -95,8 +95,8 @@ def handle_do_while_loop(children, scoping_data):
     kernel.handle_instruction(children[0])
     executed += 1
     if time.time() > timeout:
-      e = '`do-while` loop iterated {} times without terminating.'
-      raise LoopTimeout(e.format(executed))
+      e = f'`do-while` loop iterated {executed} times without terminating.'
+      raise LoopTimeout(e)
   scoping_data.pop_scope()
   return executed
 
@@ -172,24 +172,24 @@ def handle_delete_element(children):
   arbitrary level of nesting.'''
   ident = kernel.handle_instruction(children[0])
   subscripts = [kernel.handle_instruction(child) for child in children[1:]]
-  subscripts = ''.join(['[{}]'.format(repr(s)) for s in subscripts])
+  subscripts = ''.join([f'[{s!r}]' for s in subscripts])
   target = ident.get()
-  val_repr = 'target{ss}'.format(ss=subscripts)
+  val_repr = f'target{subscripts}'
   Function.use_serializable_function_repr(True)
   out = eval(val_repr)
-  exec('del {}'.format(val_repr))
+  exec(f'del {val_repr}')
   Function.use_serializable_function_repr(False)
   return out
 
 def handle_delete_attribute(children):
   ident = kernel.handle_instruction(children[0])
   subscripts = [kernel.handle_instruction(child) for child in children[1:]]
-  subscripts = ''.join(['[{}]'.format(repr(id_.name)) for id_ in subscripts])
+  subscripts = ''.join([f'[{id_.name!r}]' for id_ in subscripts])
   target = ident.get()
-  val_repr = 'target{ss}'.format(ss=subscripts)
+  val_repr = f'target{subscripts}'
   Function.use_serializable_function_repr(True)
   out = eval(val_repr)
-  exec('del {}'.format(val_repr))
+  exec(f'del {val_repr}')
   Function.use_serializable_function_repr(False)
   return out
 
@@ -209,13 +209,12 @@ def handle_identifier_set_subscript(children):
   subscripts = [kernel.handle_instruction(child) for child in children[1:-1]]
   for s in subscripts:
     if isinstance(s, Function):
-      error = 'Functions cannot be used as keys or indices. ({})'.format(
-        repr(s))
+      error = f'Functions cannot be used as keys or indices. ({s!r})'
       raise TypeError(error)
   Function.use_serializable_function_repr(True)
-  subscripts = ''.join(['[{}]'.format(repr(subscript)) for subscript in subscripts])
+  subscripts = ''.join([f'[{subscript!r}]' for subscript in subscripts])
   target = ident.get()
-  stmt = 'target{ss} = {value}'.format(ss=subscripts, value=repr(value))
+  stmt = f'target{subscripts} = {value!r}'
   Function.use_serializable_function_repr(False)
   exec(stmt)
   return value
@@ -225,9 +224,9 @@ def handle_setattr(children):
   ident = kernel.handle_instruction(children[0])
   attribute_chain = [kernel.handle_instruction(child) for child in children[1:-1]]
   Function.use_serializable_function_repr(True)
-  subscripts = ''.join(['[{}]'.format(repr(attr.name)) for attr in attribute_chain])
+  subscripts = ''.join([f'[{attr.name!r}]' for attr in attribute_chain])
   target = ident.get()
-  stmt = 'target{ss} = {value}'.format(ss=subscripts, value=repr(value))
+  stmt = f'target{subscripts} = {value!r}'
   Function.use_serializable_function_repr(False)
   exec(stmt)
   return value
@@ -616,8 +615,7 @@ def handle_slices(slice_type, children):
   elif slice_type == 'not_a_slice':
     iterable, index = binary_operation(children)
     if isinstance(index, Function):
-      error = 'Functions cannot be used as keys or indices. ({})'.format(
-        repr(index))
+      error = f'Functions cannot be used as keys or indices. ({index!r})'
       raise TypeError(error)
     out = iterable[index]
   return out
