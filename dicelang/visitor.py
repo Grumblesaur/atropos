@@ -768,12 +768,12 @@ class Visitor(object):
 
 
   def handle_identifiers(self, identifier_type, children):
-    ownership, _ = identifier_type.split('_')
+    mode, _ = identifier_type.split('_')
     name = children[-1].value
     return Identifier(
       name,
       self.scoping_data,
-      ownership,
+      mode,
       self.public,
       self.shared,
       self.private)
