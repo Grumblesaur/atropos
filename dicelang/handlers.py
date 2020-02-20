@@ -123,6 +123,7 @@ def handle_if_else(children, scoping_data):
     out = kernel.handle_instruction(children[1])
   else:
     out = kernel.handle_instruction(children[2])
+  scoping_data.pop_scope()
   return out
 
 def handle_short_body(children, scoping_data):

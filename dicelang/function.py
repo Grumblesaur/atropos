@@ -1,7 +1,7 @@
 import lark
+from dicelang import decompiler
 from dicelang import grammar
-from dicelang.bridge import get_function_call_handler
-from dicelang.bridge import get_decompiler
+from dicelang import visitor
 
 class FunctionCallException(Exception):
   pass
@@ -20,8 +20,8 @@ class Function(object):
       Function.__repr__ = Function.normal_repr
   
   def __init__(self, tree_or_source, param_names=None):
-    self.call_handler = get_function_call_handler()
-    decompile = get_decompiler()
+    self.visitor = None
+    self.decompiler = decompiler.Decompiler()
     if param_names is None:
       self.source = tree_or_source
       tree = Function.parser.parse(tree_or_source)
@@ -43,7 +43,9 @@ class Function(object):
 
   __repr__ = normal_repr
   
-  def __call__(self, scoping_data, *args):
+  def __call__(self, scoping_data, visitor, *args):
+    if self.visitor is None:
+      self.visitor = visitor
     if len(self.params) != len(args):
       raise length_error
     arguments_scope = dict(zip(self.params, args))

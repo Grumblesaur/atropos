@@ -7,7 +7,7 @@ from collections.abc import Iterable
 from dicelang.undefined import Undefined
 from dicelang.function  import Function
 
-class _DataStore(object):
+class DataStore(object):
   separator = '?sep?'
   def __init__(self, storage_file_name):
     """Internal class for saving, loading, accessing, and mutating
@@ -58,7 +58,7 @@ class _DataStore(object):
         f.write(f'{key!r}{_DataStore.separator}{value!r}\n')
       Function.use_serializable_function_repr(False)
   
-class _OwnedDataStore(_DataStore):
+class OwnedDataStore(_DataStore):
   '''Specialization of _DataStore where keys are associated by
   some other key specifying ownership, such as a username or
   server handle.'''
@@ -130,29 +130,3 @@ class _OwnedDataStore(_DataStore):
     del self.variables[owner_tag][key]
     return out
 
-class Persistence(object):
-  def __init__(self):
-    '''Data persistence manager for tracking the three main datastores
-    for use with dicelang's host chatbot. This manager will attempt to
-    save variables in the directory specified by the environment variable
-    DICELANG_DATASTORE if it exists, or will create a new datastore
-    directory in place called `vars`.'''
-    try:
-      vars_directory = os.environ['DICELANG_DATASTORE']
-    except KeyError:
-      vars_directory = 'vars'
-    public_path = f'{vars_directory}{os.path.sep}public'
-    server_path = vars_directory
-    private_path = vars_directory
-    if not os.path.isdir(vars_directory):
-      os.mkdir(vars_directory)
-    
-    self.private = _OwnedDataStore(private_path, 'private')
-    self.server  = _OwnedDataStore(server_path, 'server')
-    self.public  = _DataStore(public_path)
-
-  def save(self):
-    self.private.save()
-    self.server.save()
-    self.public.save()
-  
