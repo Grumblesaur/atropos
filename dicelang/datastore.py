@@ -58,7 +58,7 @@ class DataStore(object):
         f.write(f'{key!r}{_DataStore.separator}{value!r}\n')
       Function.use_serializable_function_repr(False)
   
-class OwnedDataStore(_DataStore):
+class OwnedDataStore(DataStore):
   '''Specialization of _DataStore where keys are associated by
   some other key specifying ownership, such as a username or
   server handle.'''

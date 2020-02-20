@@ -2,6 +2,7 @@ import lark
 from dicelang import decompiler
 from dicelang import grammar
 from dicelang import visitor
+from dicelang import util
 
 class FunctionCallException(Exception):
   pass
@@ -21,9 +22,9 @@ class Function(object):
   
   def __init__(self, tree_or_source, param_names=None):
     self.visitor = None
-    self.decompiler = decompiler.Decompiler()
+    self.dcmp = decompiler.Decompiler()
     if param_names is None:
-      self.source = tree_or_source
+      self.src = tree_or_source
       tree = Function.parser.parse(tree_or_source)
       self.code = tree.children[-1]
       self.params = tree.children[0:-1]
@@ -31,13 +32,13 @@ class Function(object):
       self.code = tree_or_source
       self.params = param_names
       param_string = ', '.join(param_names)
-      self.source = f'({param_string}) -> {decompile(tree_or_source)}'
+      self.src = f'({param_string}) -> {self.dcmp.decompile(tree_or_source)}'
   
   def normal_repr(self):
-    return f'{self.source}'
+    return f'{self.src}'
   
   def file_repr(self):
-    flat_source = self.source.replace('\n', ' ')
+    flat_source = self.src.replace('\n', ' ')
     flat_source = flat_source.replace('\t', ' ')
     return f'Function({flat_source!r})'
 
@@ -51,7 +52,11 @@ class Function(object):
     arguments_scope = dict(zip(self.params, args))
     scoping_data.push_frame()
     scoping_data.push_scope(arguments_scope)
-    out = self.call_handler(self.code)
+    out = self.visitor.walk(
+      self.code,
+      scoping_data.user,
+      scoping_data.server,
+      scoping_data)
     scoping_data.pop_scope()
     scoping_data.pop_frame()
     return out

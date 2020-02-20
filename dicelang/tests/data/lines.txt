@@ -170,17 +170,17 @@ v[::-1] ===> list(range(10))[::-1]
 
 v[1:][0] ===> 1
 
-my p = [] ===> []
-for x in [0 to 10] do my p = my p + [x] ===> True
+my p = for x in [0 to 10] do x ===> [x for x in range(10)]
 my p ===> [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
-f = (for x in [] do 'nothing at all') ===> False
+f = (for x in [] do 'nothing at all') ===> []
 
-while my p do my p = my p[1:] ===> 10
+my q = !>my p ===> 9
+#(while my q do my q = my q - 1) ===> 9
 my p = [] ===> []
-do begin my p = my p + [4d6h3] end while #my p < 6 ===> 6
+#(do begin my p = my p + [4d6h3] end while #my p < 6) ===> 6
 
 zz = 0 ===> 0
-do begin global zz = global zz + 1 end while global zz < 3 ===> 3
+#(do begin global zz = global zz + 1 end while global zz < 3) ===> 3
 
 if True then 'zip' else 'zap' ===> 'zip'
 if False then 'zip' else 'zap' ===> 'zap'

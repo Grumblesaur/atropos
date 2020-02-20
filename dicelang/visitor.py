@@ -1,10 +1,12 @@
 import math
 import random
 import statistics
+import time
 from collections.abc import Iterable
 
 from dicelang import plugins
 from dicelang import util
+from dicelang.identifier import Identifier
 from dicelang.undefined import Undefined
 from dicelang.function import Function
 from dicelang import ownership
@@ -12,17 +14,27 @@ from dicelang import ownership
 class Visitor(object):
   def __init__(self, public_data, server_data, private_data, timeout=12):
     self.public = public_data
-    self.server = server_data
+    self.shared = server_data
     self.private = private_data
     self.scoping_data = None
     self.user = None
     self.server = None
     self.loop_timeout = timeout
-  
-  def walk(self, parse_tree, user_id, server_id):
-    self.scoping_data = ownership.ScopingData(user_id, server_id)
+    self.depth = 0
+    
+  def walk(self, parse_tree, user_id, server_id, scoping_data=None):
+    if scoping_data is None:
+      self.scoping_data = ownership.ScopingData(user_id, server_id)
+    else:
+      self.scoping_data = scoping_data
+    self.depth += 1
     out = self.handle_instruction(parse_tree)
-    self.scoping_data = None
+    self.depth -= 1
+    
+    # Ensure we don't destroy our call stack until
+    # we are no longer recursing.
+    if not self.depth:
+      self.scoping_data = None
     return out
   
   def process_operands(self, children):
@@ -30,7 +42,7 @@ class Visitor(object):
   
   def handle_instruction(self, tree):
     if tree.data == 'start':
-      out = [self.handle_instruction(c) for c in tree.children[-1]]
+      out = [self.handle_instruction(c) for c in tree.children][-1]
     elif tree.data == 'block' or tree.data == 'short_body':
       out = self.handle_block(tree.children)
     elif tree.data == 'function':
@@ -73,13 +85,13 @@ class Visitor(object):
     elif tree.data == 'if_expr':
       out = self.handle_instruction(tree.children[0])
     elif tree.data == 'inline_if':
-      out = self.handle_instruction(tree.children)
+      out = self.handle_inline_if(tree.children)
     elif tree.data == 'inline_if_binary':
-      out = self.handle_instruction(tree.children)
+      out = self.handle_inline_if_binary(tree.children)
     elif tree.data == 'repeat':
       out = self.handle_instruction(tree.children[0])
     elif tree.data == 'repetition':
-      out = self.handle_instruction(tree.children)
+      out = self.handle_repetition(tree.children)
     
     elif tree.data == 'bool_or':
       out = self.handle_instruction(tree.children[0])
@@ -111,7 +123,7 @@ class Visitor(object):
     elif tree.data == 'present':
       out = self.handle_present(tree.children)
     elif tree.data == 'absent':
-      out = self.handle_absent(tree.children, negate=True)
+      out = self.handle_present(tree.children, negate=True)
     
     elif tree.data == 'shift':
       out = self.handle_instruction(tree.children[0])
@@ -155,7 +167,7 @@ class Visitor(object):
       out = self.handle_logarithm(tree.children)
     
     elif tree.data == 'reduction':
-      out = self.handle_reduction(tree.children[0])
+      out = self.handle_instruction(tree.children[0])
     elif tree.data == 'sum_or_join':
       out = self.handle_sum_or_join(tree.children)
     elif tree.data == 'length':
@@ -186,7 +198,7 @@ class Visitor(object):
     elif tree.data == 'die':
       out = self.handle_instruction(tree.children[0])
     elif 'vector_die' in tree.data or 'scalar_die' in tree.data:
-      out = self.handle_dice(tree.children)
+      out = self.handle_dice(tree.data, tree.children)
     
     elif tree.data == 'application':
       out = self.handle_instruction(tree.children[0])
@@ -197,6 +209,11 @@ class Visitor(object):
       out = self.handle_instruction(tree.children[0])
     elif tree.data == 'function_call':
       out = self.handle_function_call(tree.children)
+    
+    elif tree.data == 'get_attribute':
+      out = self.handle_instruction(tree.children[0])
+    elif tree.data == 'getattr':
+      out = self.handle_getattr(tree.children)
     
     elif tree.data == 'atom' or tree.data == 'priority':
       out = self.handle_instruction(tree.children[0])
@@ -217,7 +234,7 @@ class Visitor(object):
     elif tree.data == 'empty_dict':
       out = self.handle_dict_literal(None)
     elif tree.data == 'identifier':
-      out = handle_instruction(tree.children[0])
+      out = self.handle_instruction(tree.children[0])
     elif tree.data in ('scoped_identifier',
                        'global_identifier',
                        'server_identifier',
@@ -284,7 +301,7 @@ class Visitor(object):
     results = [ ]
     timeout = time.time() + self.loop_timeout
     while self.handle_instruction(children[0]):
-      results.append(handle_instruction(children[1]))
+      results.append(self.handle_instruction(children[1]))
       if time.time() > timeout:
         times = len(results)
         e = f'`while` loop iterated {times} times without terminating.'
@@ -314,7 +331,8 @@ class Visitor(object):
     self.scoping_data.push_scope()
     if self.handle_instruction(children[0]):
       result = self.handle_instruction(children[1])
-    scoping_data.pop_scope()
+    self.scoping_data.pop_scope()
+    return result
   
   def handle_if_else(self, children):
     '''Similar to `if`, except the code of the else clause is evaluated and
@@ -336,7 +354,7 @@ class Visitor(object):
     '''Construct a Python code string that will delete from the possibly-
     nested dict object, and exec it to remove the key-value pair from the
     dict. The value is returned.'''
-    ident = kernel.handle_instruction(children[0])
+    ident = self.handle_instruction(children[0])
     subscripts = [self.handle_instruction(c) for c in children[1:]]
     subscripts = ''.join([f'[{s!r}]' for s in subscripts])
     target = ident.get()
@@ -444,7 +462,7 @@ class Visitor(object):
     return out
 
   def handle_logical_not(self, children):
-    operand = self.process_operands(children)[0]
+    operand = self.handle_instruction(children[-1])
     return not operand
   
   def handle_comp_math(self, children):
@@ -473,7 +491,7 @@ class Visitor(object):
     operands_and_operators = self.process_operands(children)
     operations = {'is': lambda l, r: l is r, 'is not': lambda l, r: l is not r}
     for i in range(0, len(operands_and_operators)-2, 2):
-      left, op, right = comparisons[i:i+3]
+      left, op, right = operands_and_operators[i:i+3]
       if not operations[op](left, right):
         break
     else:
@@ -493,7 +511,8 @@ class Visitor(object):
     return util.shift(*self.process_operands(children), left_shift=False)
   
   def handle_addition(self, children):
-    return util.addition(*self.process_operands(children))
+    operands = self.process_operands(children)
+    return util.addition(*operands)
   
   def handle_subtraction(self, children):
     '''Normal subtraction, as well as list element/dict key removal.'''
@@ -557,6 +576,7 @@ class Visitor(object):
     
   def handle_exponent(self, children):
     mantissa, exponent = self.process_operands(children)
+    util.log(f'{mantissa} ** {exponent}')
     return mantissa ** exponent
   
   def handle_logarithm(self, children):
@@ -688,9 +708,14 @@ class Visitor(object):
 
   def handle_apply(self, children):
     function, iterable = self.process_operands(children)
+    print(f'{function} -: {iterable}')
+    print(f'{self.scoping_data}')
     out = [ ]
     for item in iterable:
-      out.append(function(self.scoping_data, item))
+      out.append(function(self.scoping_data, self, item))
+      print(out)
+      print(function)
+      print(self.scoping_data)
     return out
 
   def handle_function_call(self, children):
@@ -708,7 +733,7 @@ class Visitor(object):
     return out
   
   def handle_number_literal(self, children):
-    number = children[-1]
+    child = children[-1]
     try:
       x = int(child.value)
       f = float(child.value)
@@ -750,6 +775,6 @@ class Visitor(object):
       self.scoping_data,
       ownership,
       self.public,
-      self.server,
+      self.shared,
       self.private)
 

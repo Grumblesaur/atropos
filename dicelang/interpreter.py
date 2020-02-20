@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 import os
 from lark import Lark
-from dicelang import kernel
+from dicelang import visitor
 from dicelang import grammar
 from dicelang import datastore
 
@@ -22,8 +22,7 @@ class Interpreter(object):
     self.public = datastore.DataStore(public_path)
     self.server = datastore.OwnedDataStore(server_path, 'server')
     self.private = datastore.OwnedDataStore(private_path, 'private')
-    
-    self.visitor = Visitor(self.public, self.server, self.private)
+    self.visitor = visitor.Visitor(self.public, self.server, self.private)
     
   def save(self):
     self.public.save()
@@ -39,7 +38,7 @@ class Interpreter(object):
     on that server, and the public `_` is intended to be the last result
     by any command passed to the interpreter.'''
     tree = self.parser.parse(command)
-    out = self.walk(tree, user, server)
+    out = self.visitor.walk(tree, user, server)
     self.private.put(user, '_', out)
     self.server.put(server, '_', out)
     self.public.put('_', out)

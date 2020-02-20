@@ -37,6 +37,7 @@ class TestInterpreter:
   def test_lines(self, command, expected):
     actual = TestInterpreter.interpreter.execute(command, user, server)
     predicate = actual == expected if expected is not Skip else True
+    print(actual)
     assert predicate
 
   @pytest.mark.parametrize("code, result", get_files())

@@ -23,6 +23,9 @@ class Identifier(object):
     self.public = pub
     self.server = serv
     self.private = priv
+    assert self.public is not None
+    assert self.server is not None
+    assert self.private is not None
   
   def __repr__(self):
     '''verbose string representation of an Identifier.'''
