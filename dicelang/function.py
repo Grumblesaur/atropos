@@ -1,8 +1,6 @@
 import lark
 from dicelang import decompiler
 from dicelang import grammar
-from dicelang import visitor
-from dicelang import util
 
 class FunctionCallException(Exception):
   pass
