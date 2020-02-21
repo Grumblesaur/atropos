@@ -39,8 +39,7 @@ class DataStore(object):
               value = eval(v_repr)
               self.variables[owner][key] = value
             except Exception as e:
-              print(f'Bad var when loading {filename!r}: {e}')
-              print(f'>>> {v_repr}')
+              print(f'Bad var when loading {filename!r}: {e!s}')
       except SyntaxError as e:
         print(e)
       except IOError as e:

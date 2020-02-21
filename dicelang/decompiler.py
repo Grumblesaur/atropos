@@ -52,7 +52,7 @@ class Decompiler(object):
       out = f'del {ident}'
     elif tree.data == 'delete_element':
       ident = self.decompile(tree.children[0])
-      subscripts = ''.join([f'[{decompile(child)}]' for child in tree.children[1:]])
+      subscripts = ''.join([f'[{self.decompile(child)}]' for child in tree.children[1:]])
       out = f'del {ident}{subscripts}'
     elif tree.data == 'assignment':
       out = self.decompile(tree.children[0])
@@ -66,7 +66,7 @@ class Decompiler(object):
       out = f'{ident} = {expr}'
     elif tree.data == 'identifier_set_subscript':
       identifier = self.decompile(tree.children[0])
-      subscripts = ''.join([f'[{decompile(child)}]' for child in tree.children[1:-1]])
+      subscripts = ''.join([f'[{self.decompile(c)}]' for c in tree.children[1:-1]])
       expression = self.decompile(tree.children[-1])
       out = f'{identifier}{subscripts} = {expression}'
     elif tree.data == 'identifier_get':
@@ -168,9 +168,9 @@ class Decompiler(object):
     elif tree.data == 'factor':
       out = self.decompile(tree.children[0])
     elif tree.data == 'negation':
-      out = f'-{decompile(tree.children[0])}'
+      out = f'-{self.decompile(tree.children[0])}'
     elif tree.data == 'absolute_value':
-      out = f'+{decompile(tree.children[0])}'
+      out = f'+{self.decompile(tree.children[0])}'
     
     elif tree.data == 'power':
       out = self.decompile(tree.children[0])
@@ -184,23 +184,23 @@ class Decompiler(object):
     elif tree.data == 'reduction':
       out = self.decompile(tree.children[0])
     elif tree.data == 'sum_or_join':
-      out = f'&{decompile(tree.children[0])}'
+      out = f'&{self.decompile(tree.children[0])}'
     elif tree.data == 'length':
-      out = f'#{decompile(tree.children[0])}'
+      out = f'#{self.decompile(tree.children[0])}'
     elif tree.data == 'selection':
-      out = f'@{decompile(tree.children[0])}'
+      out = f'@{self.decompile(tree.children[0])}'
     elif tree.data == 'minimum':
-      out = f'!<{decompile(tree.children[0])}'
+      out = f'!<{self.decompile(tree.children[0])}'
     elif tree.data == 'maximum':
-      out = f'!>{decompile(tree.children[0])}'
+      out = f'!>{self.decompile(tree.children[0])}'
     elif tree.data == 'flatten':
-      out = f'|{decompile(tree.children[0])}'
+      out = f'|{self.decompile(tree.children[0])}'
     elif tree.data == 'stats':
-      out = f'?{decompile(tree.children[0])}'
+      out = f'?{self.decompile(tree.children[0])}'
     elif tree.data == 'sort':
-      out = f'<>{decompile(tree.children[0])}'
+      out = f'<>{self.decompile(tree.children[0])}'
     elif tree.data == 'shuffle':
-      out = f'><{decompile(tree.children[0])}'
+      out = f'><{self.decompile(tree.children[0])}'
     
     elif tree.data == 'slice':
       out = self.decompile(tree.children[0])
