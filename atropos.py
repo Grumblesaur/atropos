@@ -21,7 +21,7 @@ command_parser = commands.CmdParser()
 def handle_saves(dl_interpreter, s_tracker):
   s_tracker.update()
   if s_tracker.should_save():
-    dl_interpreter.datastore.save()
+    dl_interpreter.save()
     s_tracker.saved()
 
 @client.event
@@ -44,7 +44,7 @@ async def on_message(msg):
   
   handle_saves(interpreter, last)
 
-atexit.register(interpreter.datastore.save)
+atexit.register(interpreter.save)
 
 if __name__ == '__main__':
   print('atropos initialized')
