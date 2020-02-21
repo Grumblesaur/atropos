@@ -6,7 +6,7 @@ from commands import Response
 import helptext
 
 def _fold(names):
-  return '  '.join(sorted(names))
+  return '  '.join(names)
 
 def dice_reply(interpreter, author, channel, argument):
   context_size = max(15, len(argument) // 10)
@@ -33,22 +33,15 @@ def dice_reply(interpreter, author, channel, argument):
   return fmt.format(user=author.display_name, value=evaluated)
   
 def view_globals_reply(lang, user):
-  names = _fold(lang.public.variables.keys())
+  names = _fold(lang.keys('global'))
   body = f'```Variables:\n  GLOBALS:\n    {names}```'
   head = f'{user.display_name} requested to view:\n'
   return head + body
 
 def view_all_reply(lang, user, channel):
-  pubs  = lang.public.variables.keys()
-  try:
-    servs = lang.server.variables[channel.id].keys()
-  except KeyError:
-    servs = [ ]
-  try:
-    privs = lang.private.variables[user.id].keys()
-  except KeyError:
-    privs = [ ]
-  pubnames, servnames, privnames = map(_fold, (pubs, servs, privs))
+  pubs  = _fold(lang.keys('global'))
+  servs = _foldlang.keys('server', channel.id))
+  privs = _fold(lang.keys('private', user.id))
   joinables = [ ]
   joinables.append(f'Variables:\n  GLOBALS:\n    {pubnames}')
   joinables.append(f'  SHAREDS:\n    {servnames}')
@@ -59,19 +52,13 @@ def view_all_reply(lang, user, channel):
   return head + body
 
 def view_shareds_reply(lang, user, channel):
-  try:
-    names = _fold(lang.server.variables[channel.id].keys())
-  except KeyError:
-    names =''
+  names = _fold(lang.keys('server', channel.id))
   body = f'```Variables:\n  SHAREDS:\n    {names}```'
   head = f'{user.display_name} requested to view:\n'
   return head + body
 
 def view_privates_reply(lang, user):
-  try:
-    names = _fold(lang.private.variables[user.id].keys())
-  except KeyError:
-    names = ''
+  names = _fold(lang.keys('private', user.id))
   body = f'```Variables:\n  PRIVATES:\n    {names}```'
   head = f'{user.display_name} requested to view:\n'
   return head + body
