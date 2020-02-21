@@ -148,6 +148,6 @@ class ScopingData(object):
     return out if out is not None else NotLocal
   
   def __repr__(self):
-    return f'ScopingData({self.user!r}, {self.server!r}, {self.stack!r})'
+    return f'ScopingData({self.user!r}, {self.server!r}, {self.frames!r})'
 
 

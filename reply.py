@@ -33,19 +33,19 @@ def dice_reply(interpreter, author, channel, argument):
   return fmt.format(user=author.display_name, value=evaluated)
   
 def view_globals_reply(lang, user):
-  names = _fold(lang.datastore.public.variables.keys())
+  names = _fold(lang.public.variables.keys())
   body = f'```Variables:\n  GLOBALS:\n    {names}```'
   head = f'{user.display_name} requested to view:\n'
   return head + body
 
 def view_all_reply(lang, user, channel):
-  pubs  = lang.datastore.public.variables.keys()
+  pubs  = lang.public.variables.keys()
   try:
-    servs = lang.datastore.server.variables[channel.id].keys()
+    servs = lang.server.variables[channel.id].keys()
   except KeyError:
     servs = [ ]
   try:
-    privs = lang.datastore.private.variables[user.id].keys()
+    privs = lang.private.variables[user.id].keys()
   except KeyError:
     privs = [ ]
   pubnames, servnames, privnames = map(_fold, (pubs, servs, privs))
@@ -60,7 +60,7 @@ def view_all_reply(lang, user, channel):
 
 def view_shareds_reply(lang, user, channel):
   try:
-    names = _fold(lang.datastore.server.variables[channel.id].keys())
+    names = _fold(lang.server.variables[channel.id].keys())
   except KeyError:
     names =''
   body = f'```Variables:\n  SHAREDS:\n    {names}```'
@@ -69,7 +69,7 @@ def view_shareds_reply(lang, user, channel):
 
 def view_privates_reply(lang, user):
   try:
-    names = _fold(lang.datastore.private.variables[user.id].keys())
+    names = _fold(lang.private.variables[user.id].keys())
   except KeyError:
     names = ''
   body = f'```Variables:\n  PRIVATES:\n    {names}```'

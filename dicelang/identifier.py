@@ -11,7 +11,7 @@ class Identifier(object):
   '''Internal class for storing the information of
   an identifier prior to its evaluation.'''
   
-  def __init__(self, name, scoping_data, mode, persistence):
+  def __init__(self, name, scoping_data, mode, pub, serv, priv):
     '''Creates an Identifier object.
       name: the name of this identifier.
       mode: the scoping method to use to look up a variable's value
@@ -20,7 +20,9 @@ class Identifier(object):
     self.name = name
     self.mode = mode
     self.scoping_data = scoping_data
-    self.persistence = persistence
+    self.public = pub
+    self.server = serv
+    self.private = priv
   
   def __repr__(self):
     '''verbose string representation of an Identifier.'''
@@ -32,36 +34,35 @@ class Identifier(object):
   def get(self):
     '''Retrieves the identifier's value from the appropriate datastore.'''
     if self.mode == 'private':
-      out = self.persistence.private.get(self.scoping_data.user, self.name)
+      out = self.private.get(self.scoping_data.user, self.name)
     elif self.mode == 'server':
-      out = self.persistence.server.get(self.scoping_data.server, self.name)
+      out = self.server.get(self.scoping_data.server, self.name)
     elif self.mode == 'scoped':
       if self.scoping_data:
         lookup = self.scoping_data.get(self.name)
       if not self.scoping_data or lookup is NotLocal:
-        lookup = self.persistence.public.get(self.name)
+        lookup = self.public.get(-1, self.name)
       out = lookup if lookup is not None else Undefined
     elif self.mode == 'global':
-      out = self.persistence.public.get(self.name)
+      out = self.public.get(-1, self.name)
     else:
       error()
-    print(self.persistence.public.variables)
     return out
   
   def put(self, value):
     '''Stores the identifier's value in the appropriate datastore.'''
     if self.mode == 'private':
-      out = self.persistence.private.put(self.scoping_data.user, self.name, value)
+      out = self.private.put(self.scoping_data.user, self.name, value)
     elif self.mode == 'server':
-      out = self.persistence.server.put(self.scoping_data.server, self.name, value)
+      out = self.server.put(self.scoping_data.server, self.name, value)
     elif self.mode == 'scoped':
       if self.scoping_data:
         put = self.scoping_data.put(self.name, value)
       if not self.scoping_data or put is NotLocal:
-        put = self.persistence.public.put(self.name, value)
+        put = self.public.put(-1, self.name, value)
       out = put
     elif self.mode == 'global':
-      out = self.persistence.public.put(self.name, value)
+      out = self.public.put(-1, self.name, value)
     else:
       error()
     return out
@@ -69,17 +70,17 @@ class Identifier(object):
   def drop(self):
     '''Removes the identifier from the appropriate datastore.'''
     if self.mode == 'private':
-      out = self.persistence.private.drop(self.scoping_data.user, self.name)
+      out = self.private.drop(self.scoping_data.user, self.name)
     elif self.mode == 'server':
-      out = self.persistence.server.drop(self.scoping_data.server, self.name)
+      out = self.server.drop(self.scoping_data.server, self.name)
     elif self.mode == 'scoped':
       if self.scoping_data:
         drop = self.scoping_data.drop(self.name)
       if not self.scoping_data or drop is NotLocal:
-        drop = self.persistence.public.drop(self.name)
+        drop = self.public.drop(-1, self.name)
       out = drop if drop is not None else Undefined
     elif self.mode == 'global':
-      out = self.persistence.public.drop(self.name)
+      out = self.public.drop(-1, self.name)
     else:
       error()
     return out
