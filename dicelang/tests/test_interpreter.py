@@ -4,8 +4,8 @@ from dicelang.function    import Function
 from dicelang.undefined   import Undefined
 Skip = object
 files_to_test = ['block_comment.txt', 'comment_lines.txt']
-user = 'User'
-server = 'Server'
+user = 10 
+server = 11
 
 def get_lines(filename):
   cases = [ ]
@@ -45,4 +45,9 @@ class TestInterpreter:
     actual = TestInterpreter.interpreter.execute(code, user, server)
     predicate = actual == result if result is not Skip else True
     assert predicate
-
+  
+  @pytest.mark.parametrize('arg', ['pass'])
+  def test_files(self, arg):
+    TestInterpreter.interpreter.save()
+  
+  

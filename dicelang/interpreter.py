@@ -6,22 +6,20 @@ from dicelang import grammar
 from dicelang import datastore
 
 class Interpreter(object):
+  GLOBAL_ID = -1
   def __init__(self):
     self.parser = Lark(grammar.raw_text, start='start', parser='earley')
     try:
       vars_directory = os.environ['DICELANG_DATASTORE']
     except KeyError:
       vars_directory = 'vars'
-    public_path = f'{vars_directory}{os.path.sep}public'
-    server_path = vars_directory
-    private_path = vars_directory
     
     if not os.path.isdir(vars_directory):
       os.mkdir(vars_directory)
     
-    self.public = datastore.DataStore(public_path)
-    self.server = datastore.OwnedDataStore(server_path, 'server')
-    self.private = datastore.OwnedDataStore(private_path, 'private')
+    self.public  = datastore.DataStore(vars_directory, 'public')
+    self.server  = datastore.DataStore(vars_directory, 'server')
+    self.private = datastore.DataStore(vars_directory, 'private')
     self.visitor = visitor.Visitor(self.public, self.server, self.private)
     
   def save(self):
@@ -41,6 +39,6 @@ class Interpreter(object):
     out = self.visitor.walk(tree, user, server)
     self.private.put(user, '_', out)
     self.server.put(server, '_', out)
-    self.public.put('_', out)
+    self.public.put(Interpreter.GLOBAL_ID, '_', out)
     return out
 

@@ -41,10 +41,10 @@ class Identifier(object):
       if self.scoping_data:
         lookup = self.scoping_data.get(self.name)
       if not self.scoping_data or lookup is NotLocal:
-        lookup = self.public.get(self.name)
+        lookup = self.public.get(-1, self.name)
       out = lookup if lookup is not None else Undefined
     elif self.mode == 'global':
-      out = self.public.get(self.name)
+      out = self.public.get(-1, self.name)
     else:
       error()
     return out
@@ -59,10 +59,10 @@ class Identifier(object):
       if self.scoping_data:
         put = self.scoping_data.put(self.name, value)
       if not self.scoping_data or put is NotLocal:
-        put = self.public.put(self.name, value)
+        put = self.public.put(-1, self.name, value)
       out = put
     elif self.mode == 'global':
-      out = self.public.put(self.name, value)
+      out = self.public.put(-1, self.name, value)
     else:
       error()
     return out
@@ -77,10 +77,10 @@ class Identifier(object):
       if self.scoping_data:
         drop = self.scoping_data.drop(self.name)
       if not self.scoping_data or drop is NotLocal:
-        drop = self.public.drop(self.name)
+        drop = self.public.drop(-1, self.name)
       out = drop if drop is not None else Undefined
     elif self.mode == 'global':
-      out = self.public.drop(self.name)
+      out = self.public.drop(-1, self.name)
     else:
       error()
     return out

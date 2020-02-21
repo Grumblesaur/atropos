@@ -6,10 +6,10 @@ from collections.abc import Iterable
 
 from dicelang import plugins
 from dicelang import util
-from dicelang.identifier import Identifier
-from dicelang.undefined import Undefined
 from dicelang.function import Function
-from dicelang import ownership
+from dicelang.identifier import Identifier
+from dicelang.ownership import ScopingData
+from dicelang.undefined import Undefined
 
 class Visitor(object):
   def __init__(self, public_data, server_data, private_data, timeout=12):
@@ -24,15 +24,17 @@ class Visitor(object):
     
   def walk(self, parse_tree, user_id, server_id, scoping_data=None):
     if scoping_data is None:
-      self.scoping_data = ownership.ScopingData(user_id, server_id)
+      self.scoping_data = ScopingData(user_id, server_id)
     else:
       self.scoping_data = scoping_data
     self.depth += 1
     out = self.handle_instruction(parse_tree)
     self.depth -= 1
     
-    # Ensure we don't destroy our call stack until
-    # we are no longer recursing.
+    # Reentrancy case -- when a dicelang Function is executed,
+    # we don't want to erase our scoping data since we're still
+    # pushing and popping stack frames. When depth is zero, we
+    # are finished executing.
     if not self.depth:
       self.scoping_data = None
     return out

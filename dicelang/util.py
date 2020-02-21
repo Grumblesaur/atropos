@@ -48,7 +48,7 @@ def iterable_repetition(iterable, repetitions):
   The normal python repetition rules apply for positive numbers, and
   for negatives, the iterable is reversed first.'''
   times = abs(repetitions)
-  sign  = repetitions / times
+  sign  = repetitions / times if times else 1
   if sign == 1:
     out = iterable * times
   else:
