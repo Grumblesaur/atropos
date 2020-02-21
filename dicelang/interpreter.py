@@ -27,7 +27,7 @@ class Interpreter(object):
     self.private.save()
     self.server.save()
 
-  def keys(self, datastore_name, owner_id=Interpreter.GLOBAL_ID):
+  def keys(self, datastore_name, owner_id=GLOBAL_ID):
     if datastore_name in ('public', 'global'):
       datastore = self.public
     elif datastore_name in ('server', 'shared'):

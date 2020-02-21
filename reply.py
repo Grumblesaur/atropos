@@ -40,12 +40,12 @@ def view_globals_reply(lang, user):
 
 def view_all_reply(lang, user, channel):
   pubs  = _fold(lang.keys('global'))
-  servs = _foldlang.keys('server', channel.id))
+  servs = _fold(lang.keys('server', channel.id))
   privs = _fold(lang.keys('private', user.id))
   joinables = [ ]
-  joinables.append(f'Variables:\n  GLOBALS:\n    {pubnames}')
-  joinables.append(f'  SHAREDS:\n    {servnames}')
-  joinables.append(f'  PRIVATES:\n    {privnames}')
+  joinables.append(f'Variables:\n  GLOBALS:\n    {pubs}')
+  joinables.append(f'  SHAREDS:\n    {servs}')
+  joinables.append(f'  PRIVATES:\n    {privs}')
   joined = '\n'.join(joinables)
   body = f'```{joined}```'
   head = f'{user.display_name} requested to view:\n'
