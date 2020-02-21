@@ -398,8 +398,10 @@ class Visitor(object):
         raise TypeError(error)
     subscripts = ''.join([f'[{s!r}]' for s in subscripts])
     target = ident.get()
+    Function.use_serializable_function_repr(True)
     stmt = f'target{subscripts} = {value!r}'
     exec(stmt)
+    Function.use_serializable_function_repr(False)
     return value
 
   def handle_setattr(self, children):
@@ -410,8 +412,10 @@ class Visitor(object):
     attr_chain = [self.handle_instruction(c) for c in children[1:-1]]
     subscripts = ''.join([f'[{attr.name!r}]' for attr in attr_chain])
     target = ident.get()
+    Function.use_serializable_function_repr(True)
     stmt = f'target{subscripts} = {value!r}'
     exec(stmt)
+    Function.use_serializable_function_repr(False)
     return value
 
   def handle_inline_if(self, children):
