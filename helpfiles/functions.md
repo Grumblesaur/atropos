@@ -15,7 +15,8 @@ function using a code block, the last expression evaluated in the function
 determines the return value.
 
 ### Examples:
-```  foo = () -> 1          ~ Simple nullary function that always returns 1.
+```
+  foo = () -> 1          ~ Simple nullary function that always returns 1.
 
   square = (a) -> a * a  ~ Squares a number.
 
@@ -30,7 +31,8 @@ determines the return value.
 ```
 
 ### Calls:
-```  foo()
+```
+  foo()
   >>> 1
 
   square(4)
