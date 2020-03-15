@@ -39,8 +39,8 @@ class CmdParser(object):
         | "view" (( "my"     "vars") | "privates" ) -> view_private
         | "view"                                    -> view_help
     
-    help: "help" (/[A-Za-z0-9_]+/)+ -> help_topic
-        | "help"                     -> help_help
+    help: "help" /\b\w+\b/+ -> help_topic
+        | "help"     -> help_help
     
     %import common.WS
     %ignore WS

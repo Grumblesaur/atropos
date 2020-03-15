@@ -66,8 +66,8 @@ def view_privates_reply(lang, user):
 def build(interpreter, author, channel, result):
   response = result.rtype
   argument = result.value.lower().strip()
-  if result.option:
-    option = result.option.lower().strip()
+  if result.other:
+    option = result.other.lower().strip()
   else:
     option = None
   

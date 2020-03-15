@@ -27,7 +27,9 @@ class DataStore(object):
       fn)
     filenames = map(builder, filenames)
     for filename in filenames:
+      print(filename)
       _, owner = filename.rsplit('_', 1)
+      print(type(owner), owner)
       owner = eval(owner)
       self.variables[owner] = { }
       try:
