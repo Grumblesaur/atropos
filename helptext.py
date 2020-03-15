@@ -1,9 +1,31 @@
-_help_messages = {
-  'functions'   : '[function help text coming soon]',
-  'operators'   : '[operator help text coming soon]',
-  'source'      : 'https://github.com/Grumblesaur/atropos',
-  'limitations' : '[limitations help text coming soon]',
-}
+import os
+HELP_PATH = 'helpfiles/'
+
+def build_help_table():
+  table = { }
+  for help_file in [hf for hf in os.listdir(HELP_PATH) if hf.endswith('.md')]:
+    key = help_file.split(os.sep)[-1].rstrip('.md')
+    text = f'[{key}.md failed to load]'
+    with open(help_file, 'r') as f:
+      text = f.read()
+    table[key] = text
+  return table
+
+def build_option_table():
+  options = { }
+  for directory in [hf for hf in os.listdir(HELP_PATH) if not hf.endswith('.md')]:
+    option = directory.split(os.sep)[-1].strip()
+    options[option] = {}
+    for filename in [hf for hf in os.listdir(directory) if hf.endswith('.md')]:
+      key = filename.split(os.sep)[-1].rstrip('.md')
+      text = f'[{key}.md failed to load]'
+      with open(filename, 'r') as f:
+        text = f.read()
+      options[option][key] = text
+  return options
+
+_help_messages = build_help_table()
+_options       = build_option_table()
 
 topics = sorted(list(_help_messages.keys()) + ['topics'])
 
@@ -23,18 +45,23 @@ _aliases = {
   'topic'      : 'topics',
   'keyword'    : 'topics',
   'keywords'   : 'topics',
-
 }
 
-def lookup(keyword):
+def get_canonical_key(alias):
   try:
-    key = _aliases[keyword]
+    key = _aliases[alias]
   except KeyError:
-    key = keyword
-  try:
-    out = _help_messages[key]
-  except KeyError:
-    out = _help_messages['topics']
+    key = alias
+  return key
+
+def lookup(keyword, option):
+  key = get_canonical_key(keyword)
+  if key in _options:
+    message = _options[key][option]
+  elif key not in _options and key in _help_messages:
+    message = _help_messages[key]
+  else:
+    message = _help_messages['topics']
   return out
 
 

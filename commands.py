@@ -4,9 +4,10 @@ import lark
 from lark import UnexpectedToken, UnexpectedCharacters, UnexpectedInput
 
 class Result(object):
-  def __init__(self, response_type, value=''):
+  def __init__(self, response_type, value='', other=''):
     self.rtype = response_type
     self.value = value
+    self.other = other
 
 class Response(enum.Enum):
   ERROR            = -1
@@ -98,7 +99,8 @@ class CmdParser(object):
     elif tree.data == 'help_help':
       out = Result(Response.HELP_HELP)
     elif tree.data == 'help_topic':
-      out = Result(Response.HELP_KEYWORD, tree.children[0].value)
+      option = tree.children[1].value if len(tree.children) > 1 else ''
+      out = Result(Response.HELP_KEYWORD, tree.children[0].value, option)
     else:
       out = Result(Response.ERROR, f'UNIMPLEMENTED: {tree.data}')
     return out

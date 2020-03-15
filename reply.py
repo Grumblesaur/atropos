@@ -65,7 +65,11 @@ def view_privates_reply(lang, user):
 
 def build(interpreter, author, channel, result):
   response = result.rtype
-  argument = result.value.strip()
+  argument = result.value.lower().strip()
+  if result.option:
+    option = result.option.lower().strip()
+  else:
+    option = None
   
   if response in (Response.ERROR, Response.NONE):
     reply = ''
@@ -97,7 +101,7 @@ def build(interpreter, author, channel, result):
     reply = f'Topic keywords:\n```{topics}```\nEnter `+help <topic>` for more info.'
   
   elif response == Response.HELP_KEYWORD:
-    help_string = helptext.lookup(argument)
+    help_string = helptext.lookup(argument, option)
     reply = f'Help for `{argument}`:\n{help_string}'
   
   return reply
