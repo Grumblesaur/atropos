@@ -1,4 +1,4 @@
-Type "+help operator <name> for more details":
+Type `+help operator <name>` for more details:
 ```
 name        | symbol
 ---------------------
