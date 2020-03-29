@@ -2,6 +2,7 @@ aiohttp==3.5.4
 async-timeout==3.0.1
 attrs==19.3.0
 chardet==3.0.4
+discord==1.0.1
 discord.py==1.2.5
 idna==2.8
 idna-ssl==1.1.0
@@ -17,7 +18,7 @@ py==1.8.1
 pyparsing==2.4.6
 pytest==5.3.5
 six==1.14.0
--e git+https://github.com/hrmay/tesnames.git@40688d5e32e08a9e904703fc99df4baeab6d12d0#egg=tesnames
+-e git+https://github.com/hrmay/tesnames.git@e9dba4258aa064328ac79a016268739781589bb1#egg=tesnames
 typing-extensions==3.7.4.1
 Unidecode==1.1.1
 wcwidth==0.1.8
