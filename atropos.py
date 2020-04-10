@@ -38,7 +38,11 @@ async def on_message(msg):
   print('{} sent: {}'.format(user_name, msg.content))
   result = command_parser.response_to(msg)
   print(f'type={result.rtype}, value={result.value!r}')
-  reply_text = reply.build(interpreter, msg.author, msg.channel, result)
+  if isinstance(msg.channel, (discord.DMChannel, discord.GroupChannel)):
+    server = msg.channel
+  else:
+    server = msg.channel.guild
+  reply_text = reply.build(interpreter, msg.author, server, result)
   if reply_text:
     await msg.channel.send(reply_text)
   

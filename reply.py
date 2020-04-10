@@ -8,11 +8,11 @@ import helptext
 def _fold(names):
   return '  '.join(names)
 
-def dice_reply(interpreter, author, channel, argument):
+def dice_reply(interpreter, author, server, argument):
   context_size = max(15, len(argument) // 10)
   is_error = True
   try:
-    evaluated = interpreter.execute(argument, author.id, channel.id)
+    evaluated = interpreter.execute(argument, author.id, server.id)
     is_error = False
   except (UnexpectedCharacters, UnexpectedToken, UnexpectedInput) as e:
     evaluated = e.get_context(argument, context_size)
