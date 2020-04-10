@@ -165,7 +165,7 @@ TRUE:      "True"
 FALSE:     "False"
 UNDEFINED: "Undefined"
 
-IDENT:  /[a-zA-Z_]+[a-zA-Z0-9_]*/
+IDENT:  /(?!(global|my|our|del)\b)[a-zA-Z_]+[a-zA-Z0-9_]*/
 PARAM:  /[a-zA-Z_]+[a-zA-Z0-9_]*/
 STRING: /("(?!"").*?(?<!\\)(\\\\)*?"|'(?!'').*?(?<!\\)(\\\\)*?')/i
 
