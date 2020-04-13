@@ -231,6 +231,8 @@ class Visitor(object):
       out = self.handle_list_literal(None)
     elif tree.data == 'range_list' or tree.data == 'range_list_stepped':
       out = self.handle_list_range_literal(tree.children)
+    elif tree.data == 'closed_list' or tree.data == 'closed_list_stepped':
+      out = self.handle_closed_list_literal(tree.children)
     elif tree.data == 'populated_dict':
       out = self.handle_dict_literal(tree.children)
     elif tree.data == 'empty_dict':
@@ -763,6 +765,14 @@ class Visitor(object):
   
   def handle_list_range_literal(self, children):
     return [x for x in range(*self.process_operands(children))]
+  
+  def handle_closed_list_literal(self, children):
+    operands = self.process_operands(children)
+    step = operands[2] if len(operands) == 3 else 1
+    start, stop = operands[0], operands[1] + 1
+    if start > stop and step == 1:
+      step *= -1
+    return [x for x in range(start, stop, step)]
 
   def handle_dict_literal(self, children):
     pairs = { }

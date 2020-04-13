@@ -142,9 +142,11 @@ number_literal:    NUMBER
 string_literal:    STRING
 boolean_literal:   TRUE | FALSE
 list_literal: "[" expression ("," expression)* (",")? "]"  -> populated_list
-    | "[" "]"                                              -> empty_list
-    | "[" expression "to" expression "]"                   -> range_list
-    | "[" expression "to" expression "by" expression "]"   -> range_list_stepped
+  | "[" "]"                                              -> empty_list
+  | "[" expression "to" expression "]"                   -> range_list
+  | "[" expression "to" expression "by" expression "]"   -> range_list_stepped
+  | "[" expression ("through"|"thru") expression   "]"   -> closed_list
+  | "[" expression ("through"|"thru") expression "by" expression "]" -> closed_list_stepped
 
 dict_literal: "{" "}"                                   -> empty_dict
   | "{" key_value_pair ("," key_value_pair)* (",")? "}" -> populated_dict
