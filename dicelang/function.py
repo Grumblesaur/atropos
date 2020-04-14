@@ -22,10 +22,11 @@ class Function(object):
     self.visitor = None
     self.dcmp = decompiler.Decompiler()
     if param_names is None:
-      self.src = tree_or_source
       tree = Function.parser.parse(tree_or_source)
       self.code = tree.children[-1]
       self.params = tree.children[0:-1]
+      param_string = ', '.join(self.params)
+      self.src = f'({param_string}) -> {self.dcmp.decompile(tree)}'
     else:
       self.code = tree_or_source
       self.params = param_names

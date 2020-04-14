@@ -15,4 +15,5 @@ class SaveTracker(object):
   
   def saved(self):
     self.save_at = time.time()
+    print('saved')
   
