@@ -301,6 +301,12 @@ class Decompiler(object):
     elif tree.data == 'range_list_stepped':
       start, stop, step = [self.decompile(child) for child in tree.children]
       out = f'[{start} to {stop} by {step}]'
+    elif tree.data == 'closed_list':
+      start, stop = [self.decompile(child) for child in tree.children]
+      out = f'[{start} through {stop}]'
+    elif tree.data == 'closed_list_stepped':
+      start, stop, step = [self.decompile(child) for child in tree.children]
+      out = f'[{start} through {stop} by {step}]'
     elif tree.data == 'dict_literal':
       out = self.decompile(tree.children[0])
     elif tree.data == 'empty_dict':
