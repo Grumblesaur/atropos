@@ -17,10 +17,11 @@ class Response(enum.Enum):
   VIEW_GLOBALS     =  3
   VIEW_SHAREDS     =  4
   VIEW_PRIVATES    =  5
-  VIEW_ALL         =  6
-  VIEW_HELP        =  7
-  HELP_HELP        =  8
-  HELP_KEYWORD     =  9
+  VIEW_CORE        =  6
+  VIEW_ALL         =  7
+  VIEW_HELP        =  8
+  HELP_HELP        =  9
+  HELP_KEYWORD     = 10
 
 
 class CmdParser(object):
@@ -37,6 +38,7 @@ class CmdParser(object):
         | "view" (( "global" "vars") | "globals"  ) -> view_public
         | "view" (( "our"    "vars") | "shareds"  ) -> view_shared
         | "view" (( "my"     "vars") | "privates" ) -> view_private
+        | "view" (( "core"   "vars") | "core" | "library") -> view_core
         | "view"                                    -> view_help
     
     help: "help" /\b\w+\b/+ -> help_topic
@@ -94,6 +96,8 @@ class CmdParser(object):
       out = Result(Response.VIEW_SHAREDS)
     elif tree.data == 'view_private':
       out = Result(Response.VIEW_PRIVATES)
+    elif tree.data == 'view_core':
+      out = Result(Response.VIEW_CORE)
     elif tree.data == 'view_help':
       out = Result(Response.VIEW_HELP)
     elif tree.data == 'help_help':
