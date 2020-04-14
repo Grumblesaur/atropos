@@ -718,14 +718,9 @@ class Visitor(object):
 
   def handle_apply(self, children):
     function, iterable = self.process_operands(children)
-    print(f'{function} -: {iterable}')
-    print(f'{self.scoping_data}')
     out = [ ]
     for item in iterable:
       out.append(function(self.scoping_data, self, item))
-      print(out)
-      print(function)
-      print(self.scoping_data)
     return out
 
   def handle_function_call(self, children):

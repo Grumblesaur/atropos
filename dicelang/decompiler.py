@@ -244,22 +244,22 @@ class Decompiler(object):
     elif tree.data == 'die':
       out = self.decompile(tree.children[0])
     elif tree.data == 'scalar_die_all':
-      dice, sides = self.binop_decompile(tree.children)
+      dice, sides = self.binop_decompile(tree.children[::2])
       out = f'{dice} d {sides}'
     elif tree.data == 'scalar_die_highest':
-      dice, sides, keep = [self.decompile(child) for child in tree.children]
+      dice, sides, keep = [self.decompile(child) for child in tree.children[::2]]
       out = f'{dice} d {sides} h {keep}'
     elif tree.data == 'scalar_die_lowest':
-      dice, sides, keep = [self.decompile(child) for child in tree.children]
+      dice, sides, keep = [self.decompile(child) for child in tree.children[::2]]
       out = f'{dice} d {sides} l {keep}'
     elif tree.data == 'vector_die_all':
-      dice, sides = self.binop_decompile(tree.children)
+      dice, sides = self.binop_decompile(tree.children[::2])
       out = f'{dice} r {sides}'
     elif tree.data == 'vector_die_highest':
-      dice, sides, keep = [self.decompile(child) for child in tree.children]
+      dice, sides, keep = [self.decompile(child) for child in tree.children[::2]]
       out = f'{dice} r {sides} h {keep}'
     elif tree.data == 'vector_die_lowest':
-      dice, sides, keep = [self.decompile(child) for child in tree.children]
+      dice, sides, keep = [self.decompile(child) for child in tree.children[::2]]
       out = f'{dice} r {sides} l {keep}'
     
     elif tree.data == 'plugin_op':
