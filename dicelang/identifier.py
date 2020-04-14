@@ -81,7 +81,7 @@ class Identifier(object):
       if self.scoping_data:
         put = self.scoping_data.put(self.name, value)
       if not self.scoping_data or put is NotLocal:
-        put = self.public.put(self.scoping_data.server, self.name, value)
+        put = self.server.put(self.scoping_data.server, self.name, value)
       out = put
     elif self.mode == 'global':
       out = self.public.put(-1, self.name, value)
@@ -103,7 +103,7 @@ class Identifier(object):
       if self.scoping_data:
         drop = self.scoping_data.drop(self.name)
       if not self.scoping_data or drop is NotLocal:
-        drop = self.public.drop(self.scoping_data.server, self.name)
+        drop = self.server.drop(self.scoping_data.server, self.name)
       out = drop if drop is not None else Undefined
     elif self.mode == 'global':
       out = self.public.drop(-1, self.name)

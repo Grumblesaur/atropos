@@ -36,8 +36,7 @@ class Function(object):
     return f'{self.src}'
   
   def file_repr(self):
-    flat_source = self.src.replace('\n', ' ')
-    flat_source = flat_source.replace('\t', ' ')
+    flat_source = self.src.replace('\n', '\f')
     return f'Function({flat_source!r})'
 
   __repr__ = normal_repr

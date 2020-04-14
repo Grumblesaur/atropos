@@ -13,8 +13,9 @@ class Decompiler(object):
       self.level += 1
       expressions = [self.decompile(child) for child in tree.children]
       indent = self.indent * self.level
+      endent = self.indent * (self.level - 1)
       exprs = indent + f';\n{indent}'.join(expressions)
-      out = f'begin\n{exprs}\nend'
+      out = f'begin\n{exprs}\n{endent}end'
       self.level -= 1
     
     elif tree.data == 'function':

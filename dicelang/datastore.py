@@ -37,6 +37,8 @@ class DataStore(object):
             try:
               k_repr, v_repr = line.strip().split(self.sep, 1)
               key = eval(k_repr)
+              if '\f' in v_repr:
+                v_repr = v_repr.replace('\f', '\n')
               value = eval(v_repr)
               self.variables[owner][key] = value
             except Exception as e:
