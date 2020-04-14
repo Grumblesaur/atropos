@@ -387,9 +387,7 @@ class Visitor(object):
 
   def handle_identifier_set(self, children):
     ident = self.handle_instruction(children[0])
-    print(ident)
     value = self.handle_instruction(children[1])
-    print(value)
     return ident.put(value)
   
   def handle_identifier_set_subscript(self, children):

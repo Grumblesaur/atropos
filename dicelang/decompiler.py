@@ -327,6 +327,8 @@ class Decompiler(object):
       out = f'our {tree.children[-1].value}'
     elif tree.data == 'global_identifier':
       out = f'global {tree.children[-1].value}'
+    elif tree.data == 'core_identifier':
+      out = f'core {tree.children[-1].value}'
     elif tree.data == 'priority':
       out = f'({self.decompile(tree.children[0])})'
     else:

@@ -52,20 +52,16 @@ class Identifier(object):
     return self.name
   
   def get(self):
-    print(repr(self))
     '''Retrieves the identifier's value from the appropriate datastore.'''
     if self.mode == 'private':
-      print('{self.name!r} :: {self.scoping_data.user!r}')
       out = self.private.get(self.scoping_data.user, self.name)
     elif self.mode == 'server':
       out = self.server.get(self.scoping_data.server, self.name)
     elif self.mode == 'scoped':
       if self.scoping_data:
         lookup = self.scoping_data.get(self.name)
-        print(f'scope lookup = {lookup}')
       if not self.scoping_data or lookup is NotLocal:
         lookup = self.server.get(self.scoping_data.server, self.name)
-        print(f'server lookup = {lookup}')
       out = lookup if lookup is not None else Undefined
     elif self.mode == 'global':
       out = self.public.get(-1, self.name)
@@ -73,11 +69,9 @@ class Identifier(object):
       out = self.core.get(-1, self.name)
     else:
       error()
-    print(f"Identifier.get(): out -> {out}")
     return out
   
   def put(self, value):
-    print(repr(self))
     '''Stores the identifier's value in the appropriate datastore.'''
     if self.mode == 'private':
       out = self.private.put(self.scoping_data.user, self.name, value)
@@ -100,7 +94,6 @@ class Identifier(object):
     return out
 
   def drop(self):
-    print(repr(self))
     '''Removes the identifier from the appropriate datastore.'''
     if self.mode == 'private':
       out = self.private.drop(self.scoping_data.user, self.name)
