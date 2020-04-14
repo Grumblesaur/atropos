@@ -44,7 +44,16 @@ async def on_message(msg):
     server = msg.channel.guild
   reply_text = reply.build(interpreter, msg.author, server, result)
   if reply_text:
-    await msg.channel.send(reply_text)
+    try:
+      await msg.channel.send(reply_text)
+    except discord.errors.HTTPException as e:
+      if e.code == 50035: # Message too long to send
+        note  = "I can't send you back the whole reply -- it's too much data."
+        note2 = "Here's the first bit of it as a confirmation."
+        note3 = "...\n```"
+        chunk_size = 1000
+        message = '\n'.join([note, note2, reply_text[:1000], note3])
+        await msg.channel.send(message)
   
   handle_saves(interpreter, last)
 

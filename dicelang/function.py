@@ -26,7 +26,7 @@ class Function(object):
       self.code = tree.children[-1]
       self.params = tree.children[0:-1]
       param_string = ', '.join(self.params)
-      self.src = f'({param_string}) -> {self.dcmp.decompile(tree)}'
+      self.src = f'{self.dcmp.decompile(tree)}'
     else:
       self.code = tree_or_source
       self.params = param_names
