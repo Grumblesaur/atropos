@@ -111,12 +111,12 @@ slice: slice ("["            ":"             (":")?           "]") -> whole_slic
 application: die "-:" application -> apply
            | die
 
-die: die "d" plugin_op               -> scalar_die_all
-   | die "d" plugin_op "h" plugin_op -> scalar_die_highest
-   | die "d" plugin_op "l" plugin_op -> scalar_die_lowest
-   | die "r" plugin_op               -> vector_die_all
-   | die "r" plugin_op "h" plugin_op -> vector_die_highest
-   | die "r" plugin_op "l" plugin_op -> vector_die_lowest
+die: die KW_D plugin_op                -> scalar_die_all
+   | die KW_D plugin_op KW_H plugin_op -> scalar_die_highest
+   | die KW_D plugin_op KW_L plugin_op -> scalar_die_lowest
+   | die KW_R plugin_op                -> vector_die_all
+   | die KW_R plugin_op KW_H plugin_op -> vector_die_highest
+   | die KW_R plugin_op KW_L plugin_op -> vector_die_lowest
    | plugin_op
 
 plugin_op: call_or_atom "::" plugin_op -> plugin_call
@@ -169,7 +169,7 @@ TRUE:      "True"
 FALSE:     "False"
 UNDEFINED: "Undefined"
 
-IDENT:  /(?!(global|my|our|del)\b)[a-zA-Z_]+[a-zA-Z0-9_]*/
+IDENT:  /(?!(global|my|our|core|del)\b)[a-zA-Z_]+[a-zA-Z0-9_]*/
 PARAM:  /[a-zA-Z_]+[a-zA-Z0-9_]*/
 STRING: /("(?!"").*?(?<!\\)(\\\\)*?"|'(?!'').*?(?<!\\)(\\\\)*?')/i
 
@@ -184,6 +184,10 @@ KW_CORE:   "core"
 KW_GLOBAL: "global"
 KW_OUR:    "our"
 KW_MY:     "my"
+KW_R:      "r"
+KW_D:      "d"
+KW_H:      "h"
+KW_L:      "l"
 
 IS:  /\bis\b/
 NOT: /\bnot\b/

@@ -10,9 +10,12 @@ class Decompiler(object):
     if tree.data == 'start':
       out = '; '.join([self.decompile(child) for child in tree.children])
     elif tree.data == 'block':
+      self.level += 1
       expressions = [self.decompile(child) for child in tree.children]
-      exprs = '\t' + ';\n\t'.join(expressions)
+      indent = self.indent * self.level
+      exprs = indent + f';\n{indent}'.join(expressions)
       out = f'begin\n{exprs}\nend'
+      self.level -= 1
     
     elif tree.data == 'function':
       code = self.decompile(tree.children[-1])

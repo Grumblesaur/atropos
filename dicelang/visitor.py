@@ -710,7 +710,7 @@ class Visitor(object):
   
   def handle_dice(self, roll_type, children):
     result_type, _, keep_mode = roll_type.split('_')
-    operands = self.process_operands(children)
+    operands = self.process_operands(children[::2])
     dice, sides = operands[:2]
     count = operands[2] if len(operands) > 2 else None
     as_sum = result_type == 'scalar'
