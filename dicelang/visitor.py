@@ -12,10 +12,11 @@ from dicelang.ownership import ScopingData
 from dicelang.undefined import Undefined
 
 class Visitor(object):
-  def __init__(self, public_data, server_data, private_data, timeout=12):
+  def __init__(self, public_data, server_data, private_data, core_data, timeout=12):
     self.public = public_data
     self.shared = server_data
     self.private = private_data
+    self.core = core_data
     self.scoping_data = None
     self.user = None
     self.server = None
@@ -239,7 +240,8 @@ class Visitor(object):
       out = self.handle_dict_literal(None)
     elif tree.data == 'identifier':
       out = self.handle_instruction(tree.children[0])
-    elif tree.data in ('scoped_identifier',
+    elif tree.data in ('core_identifier',
+                       'scoped_identifier',
                        'global_identifier',
                        'server_identifier',
                        'private_identifier'):
@@ -385,7 +387,9 @@ class Visitor(object):
 
   def handle_identifier_set(self, children):
     ident = self.handle_instruction(children[0])
+    print(ident)
     value = self.handle_instruction(children[1])
+    print(value)
     return ident.put(value)
   
   def handle_identifier_set_subscript(self, children):
@@ -792,5 +796,6 @@ class Visitor(object):
       mode,
       self.public,
       self.shared,
-      self.private)
+      self.private,
+      self.core)
 

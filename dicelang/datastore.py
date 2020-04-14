@@ -27,9 +27,8 @@ class DataStore(object):
       fn)
     filenames = map(builder, filenames)
     for filename in filenames:
-      print(filename)
+      print(f"loading '{filename}' ...")
       _, owner = filename.rsplit('_', 1)
-      print(type(owner), owner)
       owner = eval(owner)
       self.variables[owner] = { }
       try:
@@ -40,6 +39,8 @@ class DataStore(object):
               key = eval(k_repr)
               value = eval(v_repr)
               self.variables[owner][key] = value
+              print(f'\t{key} : {value}')
+              print('\t')
             except Exception as e:
               print(f'Bad var when loading {filename!r}: {e!s}')
       except SyntaxError as e:
@@ -59,12 +60,16 @@ class DataStore(object):
         Function.use_serializable_function_repr(False)
   
   def get(self, owner_tag, key, default=Undefined):
+    print(f"DataStore.get(): owner_tag={owner_tag}, key={key}")
     try:
       out = self.variables[owner_tag][key]
     except KeyError as e:
+      print("KeyError in get()")
       if str(e) == owner_tag:
+        print('if statement in get()')
         self.variables[owner_tag] = { }
       out = default
+    print(f"DataStore.get() -> {out}")
     return out
   
   def put(self, owner_tag, key, value):

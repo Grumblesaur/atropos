@@ -1,5 +1,6 @@
 source ./env/bin/activate
 export DICELANG_DATASTORE="/home/$USER/.atropos-vars"
+export DICELANG_CORE_EDITORS="/home/$USER/.atropos-vars/editors"
 export ATROPOS_TOKEN_FILE="/home/$USER/.atropos-vars/token"
 export ATROPOS_ID_FILE="/home/$USER/.atropos-vars/id"
 while true; do

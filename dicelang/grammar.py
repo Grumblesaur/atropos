@@ -157,11 +157,13 @@ identifier: scoped_identifier
           | private_identifier
           | server_identifier
           | global_identifier
+          | core_identifier
 
 scoped_identifier:              IDENT
 private_identifier:   KW_MY     IDENT
 server_identifier:    KW_OUR    IDENT
 global_identifier.2:  KW_GLOBAL IDENT
+core_identifier:      KW_CORE   IDENT
 
 TRUE:      "True"
 FALSE:     "False"
@@ -178,6 +180,7 @@ NE:  "!="
 LE:  "<="
 LT:  "<"
 
+KW_CORE:   "core"
 KW_GLOBAL: "global"
 KW_OUR:    "our"
 KW_MY:     "my"

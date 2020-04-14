@@ -39,11 +39,13 @@ def view_globals_reply(lang, user):
   return head + body
 
 def view_all_reply(lang, user, channel):
+  cores = _fold(lang.keys('core'))
   pubs  = _fold(lang.keys('global'))
   servs = _fold(lang.keys('server', channel.id))
   privs = _fold(lang.keys('private', user.id))
   joinables = [ ]
   joinables.append(f'Variables:\n  GLOBALS:\n    {pubs}')
+  joinables.append(f'  CORE:\n    {cores}')
   joinables.append(f'  SHAREDS:\n    {servs}')
   joinables.append(f'  PRIVATES:\n    {privs}')
   joined = '\n'.join(joinables)
@@ -60,6 +62,12 @@ def view_shareds_reply(lang, user, channel):
 def view_privates_reply(lang, user):
   names = _fold(lang.keys('private', user.id))
   body = f'```Variables:\n  PRIVATES:\n    {names}```'
+  head = f'{user.display_name} requested to view:\n'
+  return head + body
+
+def view_core_reply(lang, user):
+  names = _fold(lang.keys('core'))
+  body = f'```Variables:\n  CORE:\n    {names}```'
   head = f'{user.display_name} requested to view:\n'
   return head + body
 
@@ -87,6 +95,9 @@ def build(interpreter, author, channel, result):
   
   elif response == Response.VIEW_PRIVATES:
     reply = view_privates_reply(interpreter, author)
+  
+  elif response == Response.VIEW_CORE:
+    reply = view_core_reply(interpreter, author)
   
   elif response == Response.VIEW_ALL:
     reply = view_all_reply(interpreter, author, channel)

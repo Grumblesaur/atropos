@@ -17,12 +17,18 @@ class Interpreter(object):
     if not os.path.isdir(vars_directory):
       os.mkdir(vars_directory)
     
+    self.core    = datastore.DataStore(vars_directory, 'core')
     self.public  = datastore.DataStore(vars_directory, 'public')
     self.server  = datastore.DataStore(vars_directory, 'server')
     self.private = datastore.DataStore(vars_directory, 'private')
-    self.visitor = visitor.Visitor(self.public, self.server, self.private)
+    self.visitor = visitor.Visitor(
+      self.public,
+      self.server,
+      self.private,
+      self.core)
     
   def save(self):
+    self.core.save()
     self.public.save()
     self.private.save()
     self.server.save()
@@ -32,6 +38,8 @@ class Interpreter(object):
       datastore = self.public
     elif datastore_name in ('server', 'shared'):
       datastore = self.server
+    elif datastore_name in ('core',):
+      datastore = self.core
     else:
       datastore = self.private
     
