@@ -30,7 +30,7 @@ def dice_reply(interpreter, author, server, argument):
     fmt = '{user} received error:\n```{value}```'
   else:
     fmt = '{user} rolled:\n```diff\n{value}```'
-  return fmt.format(user=author.display_name, value=evaluated)
+  return (fmt.format(user=author.display_name, value=evaluated), evaluated)
   
 def view_globals_reply(lang, user):
   names = _fold(lang.keys('global'))
@@ -72,6 +72,7 @@ def view_core_reply(lang, user):
   return head + body
 
 def build(interpreter, author, channel, result):
+  raw_reply = ''
   response = result.rtype
   argument = result.value.strip()
   if result.other:
@@ -83,7 +84,7 @@ def build(interpreter, author, channel, result):
     reply = ''
   
   elif response == Response.DICE:
-    reply = dice_reply(interpreter, author, channel, argument)
+    reply, raw_reply = dice_reply(interpreter, author, channel, argument)
   elif response == Response.DICE_HELP:
     reply = '[dice help message unimplemented]'
   
@@ -115,6 +116,6 @@ def build(interpreter, author, channel, result):
     help_string = helptext.lookup(argument, option)
     reply = f'Help for `{argument}`:\n{help_string}'
   
-  return reply
+  return (reply, raw_reply)
 
  

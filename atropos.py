@@ -8,6 +8,7 @@ import discord
 import auth
 import commands
 import reply
+import result_file
 
 from dicelang.interpreter import Interpreter
 from save_tracker import SaveTracker
@@ -42,18 +43,27 @@ async def on_message(msg):
     server = msg.channel
   else:
     server = msg.channel.guild
-  reply_text = reply.build(interpreter, msg.author, server, result)
+    reply_text, raw_reply_text = reply.build(
+      interpreter,
+      msg.author,
+      server,
+      result)
+  
   if reply_text:
     try:
       await msg.channel.send(reply_text)
     except discord.errors.HTTPException as e:
       if e.code == 50035: # Message too long to send
-        note  = "I can't send you back the whole reply -- it's too much data."
-        note2 = "Here's the first bit of it as a confirmation."
-        note3 = "...\n```"
-        chunk_size = 1000
-        message = '\n'.join([note, note2, reply_text[:1000], note3])
-        await msg.channel.send(message)
+        note1 = f"{user_name} got a result that was too large, so I've "
+        note2 = "turned it into a file:"
+        note = note1 + note2
+        path = result_file.get(raw_reply_text, user_name)
+        await msg.channel.send(
+          content=note,
+          file=discord.File(path))
+        os.remove(path)
+        
+        
   
   handle_saves(interpreter, last)
 
