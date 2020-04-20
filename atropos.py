@@ -43,11 +43,12 @@ async def on_message(msg):
     server = msg.channel
   else:
     server = msg.channel.guild
-    reply_text, raw_reply_text = reply.build(
-      interpreter,
-      msg.author,
-      server,
-      result)
+  
+  reply_text, raw_reply_text = reply.build(
+    interpreter,
+    msg.author,
+    server,
+    result)
   
   if reply_text:
     try:
