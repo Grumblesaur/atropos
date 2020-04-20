@@ -57,7 +57,7 @@ async def on_message(msg):
         note1 = f"{user_name} got a result that was too large, so I've "
         note2 = "turned it into a file:"
         note = note1 + note2
-        path = result_file.get(raw_reply_text, msg.author.display_name)
+        path = result_file.get(raw_reply_text, msg.author.name)
         await msg.channel.send(
           content=note,
           file=discord.File(path))
