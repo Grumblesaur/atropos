@@ -11,7 +11,7 @@ def get(raw_result_text, user_name):
   filename = f'{user_name}-{timestamp}.txt'
   full_path = os.path.join(FILE_AREA, filename)
   with open(full_path, 'w') as f:
-    f.write(raw_result_text)
+    f.write(f'{raw_result_text}')
   return full_path
   
   
