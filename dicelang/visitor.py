@@ -360,7 +360,7 @@ class Visitor(object):
     self.scoping_data.pop_scope()
     return out
   
-  def handle_standard_import(children):
+  def handle_standard_import(self, children):
     ident = self.handle_instruction(children[1])
     value = copy.deepcopy(ident.get())
     if value is not Undefined:
@@ -379,8 +379,8 @@ class Visitor(object):
     return out
       
   
-  def handle_as_import(children):
-    importable, alias = [self.handle_instruction(c) for c in children]
+  def handle_as_import(self, children):
+    importable, alias = [self.handle_instruction(c) for c in children[1:]]
     value = copy.deepcopy(importable.get())
     new_name = alias.name
     if value is not Undefined:
