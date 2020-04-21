@@ -1,3 +1,4 @@
+import copy
 import math
 import random
 import statistics
@@ -66,6 +67,13 @@ class Visitor(object):
     
     elif tree.data == 'expression':
       out = self.handle_instruction(tree.children[0])
+    
+    elif tree.data == 'import':
+      out = self.handle_instruction(tree.children[0])
+    elif tree.data == 'standard_import':
+      out = self.handle_standard_import(tree.children)
+    elif tree.data == 'as_import':
+      out = self.handle_as_import(tree.children)
     
     elif tree.data == 'deletion':
       out = self.handle_instruction(tree.children[0])
@@ -350,6 +358,44 @@ class Visitor(object):
     else:
       out = self.handle_instruction(children[2])
     self.scoping_data.pop_scope()
+    return out
+  
+  def handle_standard_import(children):
+    ident = self.handle_instruction(children[1])
+    value = copy.deepcopy(ident.get())
+    if value is not Undefined:
+      imported = Identifier(
+        ident.name,
+        self.scoping_data,
+        'server',
+        self.public,
+        self.shared,
+        self.private,
+        self.core)
+      imported.put(value)
+      out = True
+    else:
+      out = False
+    return out
+      
+  
+  def handle_as_import(children):
+    importable, alias = [self.handle_instruction(c) for c in children]
+    value = copy.deepcopy(importable.get())
+    new_name = alias.name
+    if value is not Undefined:
+      imported = Identifier(
+        new_name,
+        self.scoping_data,
+        'server',
+        self.public,
+        self.shared,
+        self.private,
+        self.core)
+      imported.put(value)
+      out = True
+    else:
+      out = False
     return out
   
   def handle_delete_variable(self, children):

@@ -49,6 +49,15 @@ class Decompiler(object):
       out = self.decompile(tree.children[0])
     elif tree.data == 'expression':
       out = self.decompile(tree.children[0])
+    elif tree.data == 'import':
+      out = self.decompile(tree.children[0])
+    elif tree.data == 'standard_import':
+      ident = self.decompile(tree.children[1])
+      out = f'import {ident}'
+    elif tree.data == 'as_import':
+      ident = self.decompile(tree.children[1])
+      alias = self.decompile(tree.children[2])
+      out = f'import {ident} as {alias}'
     elif tree.data == 'deletion':
       out = self.decompile(tree.children[0])
     elif tree.data == 'delete_variable':
