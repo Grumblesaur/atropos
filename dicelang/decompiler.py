@@ -49,6 +49,15 @@ class Decompiler(object):
       out = self.decompile(tree.children[0])
     elif tree.data == 'expression':
       out = self.decompile(tree.children[0])
+    elif tree.data == 'import':
+      out = self.decompile(tree.children[0])
+    elif tree.data == 'standard_import':
+      ident = self.decompile(tree.children[1])
+      out = f'import {ident}'
+    elif tree.data == 'as_import':
+      ident = self.decompile(tree.children[1])
+      alias = self.decompile(tree.children[2])
+      out = f'import {ident} as {alias}'
     elif tree.data == 'deletion':
       out = self.decompile(tree.children[0])
     elif tree.data == 'delete_variable':
@@ -281,6 +290,15 @@ class Decompiler(object):
       obj = self.decompile(tree.children[0])
       chain = '.'.join([self.decompile(child) for child in tree.children[1:]])
       out = f'{obj}.{chain}'
+    
+    elif tree.data == 'regex':
+      out = self.decompile(tree.children[0])
+    elif tree.data == 'match':
+      text, pattern = [self.decompile(c) for c in tree.children[0::2]]
+      out = f'{text} like {pattern}'
+    elif tree.data == 'search':
+      text, pattern = [self.decompile(c) for c in tree.children[0::2]]
+      out = f'{text} seek {pattern}'
     
     elif tree.data == 'atom':
       out = self.decompile(tree.children[0])

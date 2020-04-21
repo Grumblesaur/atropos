@@ -1,5 +1,7 @@
+import copy
 import math
 import random
+import re
 import statistics
 import time
 from collections.abc import Iterable
@@ -66,6 +68,13 @@ class Visitor(object):
     
     elif tree.data == 'expression':
       out = self.handle_instruction(tree.children[0])
+    
+    elif tree.data == 'import':
+      out = self.handle_instruction(tree.children[0])
+    elif tree.data == 'standard_import':
+      out = self.handle_standard_import(tree.children)
+    elif tree.data == 'as_import':
+      out = self.handle_as_import(tree.children)
     
     elif tree.data == 'deletion':
       out = self.handle_instruction(tree.children[0])
@@ -218,6 +227,13 @@ class Visitor(object):
     elif tree.data == 'getattr':
       out = self.handle_getattr(tree.children)
     
+    elif tree.data == 'regex':
+      out = self.handle_instruction(tree.children[0])
+    elif tree.data == 'match':
+      out = self.handle_match(tree.children)
+    elif tree.data == 'search':
+      out = self.handle_search(tree.children)
+    
     elif tree.data == 'atom' or tree.data == 'priority':
       out = self.handle_instruction(tree.children[0])
     elif tree.data == 'number_literal':
@@ -350,6 +366,44 @@ class Visitor(object):
     else:
       out = self.handle_instruction(children[2])
     self.scoping_data.pop_scope()
+    return out
+  
+  def handle_standard_import(self, children):
+    ident = self.handle_instruction(children[1])
+    value = copy.deepcopy(ident.get())
+    if value is not Undefined:
+      imported = Identifier(
+        ident.name,
+        self.scoping_data,
+        'server',
+        self.public,
+        self.shared,
+        self.private,
+        self.core)
+      imported.put(value)
+      out = True
+    else:
+      out = False
+    return out
+      
+  
+  def handle_as_import(self, children):
+    importable, alias = [self.handle_instruction(c) for c in children[1:]]
+    value = copy.deepcopy(importable.get())
+    new_name = alias.name
+    if value is not Undefined:
+      imported = Identifier(
+        new_name,
+        self.scoping_data,
+        'server',
+        self.public,
+        self.shared,
+        self.private,
+        self.core)
+      imported.put(value)
+      out = True
+    else:
+      out = False
     return out
   
   def handle_delete_variable(self, children):
@@ -736,6 +790,24 @@ class Visitor(object):
     for attr in operands[1:]:
       out = out[attr.name]
     return out
+
+  def handle_search(self, children):
+    text, pattern = [self.handle_instruction(c) for c in children[0::2]]
+    p = re.compile(pattern)
+    match = p.search(text)
+    if match is None:
+      start = -1
+      end   = -1
+    else:
+      start = match.start()
+      end   = match.end()
+    return {'start' : start, 'end' : end}
+  
+  def handle_match(self, children):
+    text, pattern = [self.handle_instruction(c) for c in children[0::2]]
+    p = re.compile(pattern)
+    match = p.match(text)
+    return match is not None
   
   def handle_number_literal(self, children):
     child = children[-1]
