@@ -1,6 +1,7 @@
 import copy
 import math
 import random
+import re
 import statistics
 import time
 from collections.abc import Iterable
@@ -225,6 +226,11 @@ class Visitor(object):
       out = self.handle_instruction(tree.children[0])
     elif tree.data == 'getattr':
       out = self.handle_getattr(tree.children)
+    
+    elif tree.data == 'regex':
+      out = self.handle_instruction(tree.children[0])
+    elif tree.data == 'match':
+      out = self.handle_match(tree.children)
     
     elif tree.data == 'atom' or tree.data == 'priority':
       out = self.handle_instruction(tree.children[0])
@@ -782,6 +788,12 @@ class Visitor(object):
     for attr in operands[1:]:
       out = out[attr.name]
     return out
+
+  def handle_match(self, children):
+    pattern_text, search_text = self.process_operands(children)
+    pattern = re.compile(pattern_text)
+    match = pattern.search(search_text)
+    return {'start': match.start(), 'end': match.end()}
   
   def handle_number_literal(self, children):
     child = children[-1]

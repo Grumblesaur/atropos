@@ -291,6 +291,12 @@ class Decompiler(object):
       chain = '.'.join([self.decompile(child) for child in tree.children[1:]])
       out = f'{obj}.{chain}'
     
+    elif tree.data == 'regex':
+      out = self.decompile(tree.children[0])
+    elif tree.data == 'match':
+      pattern, text = [self.decompile(c) for c in tree.children]
+      out = f'{pattern} => {text}'
+    
     elif tree.data == 'atom':
       out = self.decompile(tree.children[0])
     elif tree.data == 'number_literal':

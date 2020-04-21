@@ -133,8 +133,11 @@ plugin_op: call_or_atom "::" plugin_op -> plugin_call
 call_or_atom: get_attribute "(" (expression ("," expression)* )? ")" -> function_call
             | get_attribute
 
-get_attribute: atom ("." scoped_identifier)+ -> getattr
-             | atom
+get_attribute: match ("." scoped_identifier)+ -> getattr
+             | match
+
+regex: atom "=>" atom -> match
+     | atom
 
 atom: number_literal
     | boolean_literal
