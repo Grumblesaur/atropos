@@ -231,6 +231,8 @@ class Visitor(object):
       out = self.handle_instruction(tree.children[0])
     elif tree.data == 'match':
       out = self.handle_match(tree.children)
+    elif tree.data == 'search':
+      out = self.handle_search(tree.children)
     
     elif tree.data == 'atom' or tree.data == 'priority':
       out = self.handle_instruction(tree.children[0])
@@ -789,11 +791,23 @@ class Visitor(object):
       out = out[attr.name]
     return out
 
+  def handle_search(self, children):
+    text, pattern = [self.handle_instruction(c) for c in children[0::2]]
+    p = re.compile(pattern)
+    match = p.search(text)
+    if match is None:
+      start = -1
+      end   = -1
+    else:
+      start = match.start()
+      end   = match.end()
+    return {'start' : start, 'end' : end}
+  
   def handle_match(self, children):
-    pattern_text, search_text = self.process_operands(children)
-    pattern = re.compile(pattern_text)
-    match = pattern.search(search_text)
-    return {'start': match.start(), 'end': match.end()}
+    text, pattern = [self.handle_instruction(c) for c in children[0::2]]
+    p = re.compile(pattern)
+    match = p.match(text)
+    return match is not None
   
   def handle_number_literal(self, children):
     child = children[-1]

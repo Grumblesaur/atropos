@@ -294,8 +294,11 @@ class Decompiler(object):
     elif tree.data == 'regex':
       out = self.decompile(tree.children[0])
     elif tree.data == 'match':
-      pattern, text = [self.decompile(c) for c in tree.children]
-      out = f'{pattern} => {text}'
+      text, pattern = [self.decompile(c) for c in tree.children[0::2]]
+      out = f'{text} like {pattern}'
+    elif tree.data == 'search':
+      text, pattern = [self.decompile(c) for c in tree.children[0::2]]
+      out = f'{text} seek {pattern}'
     
     elif tree.data == 'atom':
       out = self.decompile(tree.children[0])
