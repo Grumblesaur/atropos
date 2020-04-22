@@ -28,12 +28,8 @@ conditional: "if" expression "then" [block | short_body] -> if
 
 short_body: expression
 
-library: KW_CORE
-       | KW_GLOBAL
-       | KW_MY
-       | KW_OUR 
-import: KW_IMPORT identifier                        -> standard_import
-      | KW_IMPORT identifier "as" scoped_identifier -> as_import
+import: KW_IMPORT identifier                 -> standard_import
+      | KW_IMPORT identifier "as" identifier -> as_import
 
 expression: assignment
           | deletion

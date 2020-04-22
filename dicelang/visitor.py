@@ -395,7 +395,7 @@ class Visitor(object):
       imported = Identifier(
         new_name,
         self.scoping_data,
-        'server',
+        alias.mode,
         self.public,
         self.shared,
         self.private,
