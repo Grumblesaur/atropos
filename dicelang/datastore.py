@@ -1,7 +1,11 @@
 import os
 from collections.abc import Iterable
 
+os.environ['DJANGO_SETTINGS_MODULE'] = 'db_config.settings'
+import django
+django.setup()
 from atropos_db.models import Variable
+from asgiref.sync import sync_to_async
 
 # The following imports are not used by name in this file, but are
 # necessary for enabling `eval` to work correctly. Do not let
@@ -48,18 +52,34 @@ class DataStore(object):
       except IOError as e:
         with open(filename, 'w') as f:
           pass
-      
-  def get(self, owner_tag, key, default=Undefined, mode=Variable.SERVER):
-    return eval(Variable.objects.get(owner_id=owner_tag, var_type=mode, name=key).value_string)
+  
+  def get(self, owner_tag, key, mode):
+    result = Variable.objects.get(owner_id=owner_tag, var_type=mode, name=key)
+    print(result)
+    try:
+      out = result.value_string
+    except Exception as e:
+      print(f'{e}\n') 
+      out = None
+    return eval(out)
 
-  def put(self, owner_tag, key, value, mode=Variable.SERVER):
+  def put(self, owner_tag, key, value, mode):
     Function.use_serializable_function_repr(True)
-    variable = Variable.objects.update_or_create(owner_id=owner_tag, var_type=mode, name=key, value_string=repr(value)).value_string
+    mutating = {'value_string': repr(value)}
     Function.use_serializable_function_repr(False)
-    return variable
+    
+    variable = Variable.objects.update_or_create(
+      owner_id=owner_tag,
+      var_type=mode,
+      name=key,
+      defaults=mutating)
+    
+    variable = variable[0].value_string
+    return eval(variable)
 
-  def drop(self, owner_tag, key, mode=Variable.SERVER):
+  def drop(self, owner_tag, key, mode):
     variable = Variable.objects.get(owner_id=owner_tag, var_type=mode, name=key)
     out = variable.value_string
     variable.delete()
     return eval(out)
+

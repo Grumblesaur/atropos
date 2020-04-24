@@ -21,4 +21,5 @@ class Variable(models.Model):
     name = CharField(max_length=2000)
 
     class Meta:
-        unique_together = [['name', 'owner_id']]
+        unique_together = [['name', 'owner_id', 'var_type']]
+
