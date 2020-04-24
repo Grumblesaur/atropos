@@ -18,3 +18,6 @@ class Variable(Model):
 
     value_string = TextField()
     name = CharField(max_length=2000)
+
+    class Meta:
+        unique_together = [['name', 'owner_id']]
