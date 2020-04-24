@@ -28,6 +28,9 @@ conditional: "if" expression "then" [block | short_body] -> if
 
 short_body: expression
 
+import: KW_IMPORT identifier                 -> standard_import
+      | KW_IMPORT identifier "as" identifier -> as_import
+
 expression: assignment
           | deletion
           | block
@@ -37,6 +40,7 @@ expression: assignment
           | do_while_loop
           | conditional
           | if_expr
+          | import
 
 if_expr: repeat "if" repeat "else" if_expr -> inline_if
        | repeat "if"        "else" if_expr -> inline_if_binary
@@ -125,8 +129,12 @@ plugin_op: call_or_atom "::" plugin_op -> plugin_call
 call_or_atom: get_attribute "(" (expression ("," expression)* )? ")" -> function_call
             | get_attribute
 
-get_attribute: atom ("." identifier)+ -> getattr
-             | atom
+get_attribute: regex ("." scoped_identifier)+ -> getattr
+             | regex
+
+regex: atom KW_SEEK atom -> search
+     | atom KW_LIKE atom -> match
+     | atom
 
 atom: number_literal
     | boolean_literal
@@ -169,7 +177,7 @@ TRUE:      "True"
 FALSE:     "False"
 UNDEFINED: "Undefined"
 
-IDENT:  /(?!(global|my|our|core|del)\b)[a-zA-Z_]+[a-zA-Z0-9_]*/
+IDENT:  /(?!(global|my|our|core|del|like|seek)\b)[a-zA-Z_]+[a-zA-Z0-9_]*/
 PARAM:  /[a-zA-Z_]+[a-zA-Z0-9_]*/
 STRING: /("(?!"").*?(?<!\\)(\\\\)*?"|'(?!'').*?(?<!\\)(\\\\)*?')/i
 
@@ -180,14 +188,17 @@ NE:  "!="
 LE:  "<="
 LT:  "<"
 
+KW_IMPORT: "import"
 KW_CORE:   "core"
 KW_GLOBAL: "global"
-KW_OUR:    "our"
-KW_MY:     "my"
+KW_OUR:    "our" 
+KW_MY:     "my" 
 KW_R:      "r"
 KW_D:      "d"
 KW_H:      "h"
 KW_L:      "l"
+KW_LIKE:   "like"
+KW_SEEK:   "seek"
 
 IS:  /\bis\b/
 NOT: /\bnot\b/

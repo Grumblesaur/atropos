@@ -104,7 +104,7 @@ def build(interpreter, author, channel, result):
     reply = view_all_reply(interpreter, author, channel)
   
   elif response == Response.VIEW_HELP:
-    options = ['my vars', 'our vars', 'global vars', 'all vars']
+    options = ['my vars', 'our vars', 'global vars', 'all vars', 'core vars']
     optstring = '   '.join(options)
     reply = f'Options for `+view`:\n```{optstring}```'
   

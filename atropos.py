@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-
+import os
 import sys
 import time
 import atexit
@@ -43,11 +43,12 @@ async def on_message(msg):
     server = msg.channel
   else:
     server = msg.channel.guild
-    reply_text, raw_reply_text = reply.build(
-      interpreter,
-      msg.author,
-      server,
-      result)
+  
+  reply_text, raw_reply_text = reply.build(
+    interpreter,
+    msg.author,
+    server,
+    result)
   
   if reply_text:
     try:
@@ -57,13 +58,11 @@ async def on_message(msg):
         note1 = f"{user_name} got a result that was too large, so I've "
         note2 = "turned it into a file:"
         note = note1 + note2
-        path = result_file.get(raw_reply_text, user_name)
+        path = result_file.get(raw_reply_text, msg.author.name)
         await msg.channel.send(
           content=note,
           file=discord.File(path))
         os.remove(path)
-        
-        
   
   handle_saves(interpreter, last)
 
