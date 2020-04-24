@@ -9,33 +9,29 @@ class Interpreter(object):
   GLOBAL_ID = -1
   def __init__(self):
     self.parser = Lark(grammar.raw_text, start='start', parser='earley')
-    try:
-      vars_directory = os.environ['DICELANG_DATASTORE']
-    except KeyError:
-      vars_directory = 'vars'
+    self.vars_directory = os.environ.get('DICELANG_DATASTORE', 'vars')
+
+    if not os.path.isdir(self.vars_directory):
+      os.mkdir(self.vars_directory)
     
-    if not os.path.isdir(vars_directory):
-      os.mkdir(vars_directory)
-    
-    self.datastore = datastore.DataStore(vars_directory, 'private')
+    self.datastore = datastore.DataStore('private')
     self.visitor = visitor.Visitor(self.datastore)
     
   def keys(self, datastore_name, owner_id=GLOBAL_ID):
-    # if datastore_name in ('public', 'global'):
-    #   datastore = self.public
-    # elif datastore_name in ('server', 'shared'):
-    #   datastore = self.server
-    # elif datastore_name in ('core',):
-    #   datastore = self.core
-    # else:
-    #   datastore = self.private
-    # 
-    # try:
-    #   out = sorted(datastore.variables[owner_id].keys())
-    # except KeyError:
-    #   out = [ ]
-    # return out
-    return ''  
+    if datastore_name in ('public', 'global'):
+      _datastore = datastore.DataStore('global')
+    elif datastore_name in ('server', 'shared'):
+      _datastore = datastore.DataStore('server')
+    elif datastore_name in ('core',):
+      _datastore = datastore.DataStore('core')
+    else:
+      _datastore = datastore.DataStore('private')
+
+    try:
+      out = sorted(_datastore.variables[owner_id].keys())
+    except KeyError:
+      out = [ ]
+    return out
 
   
   def execute(self, command, user, server):

@@ -18,7 +18,23 @@ class DataStore(object):
   some other key specifying ownership, such as a username or
   server handle.'''
   
-  def __init__(self, storage_directory, prefix):
+  def __init__(self, prefix):
+    for var in Variable.objects.filter(var_type=prefix):
+      owner = eval(var.owner_tag)
+      self.variables[owner] = { }
+      key = eval(var.name)
+      value = eval(var.value_string)
+      self.variables[owner][key] = value
+
+
+  # TODO: run this like:
+  # vars_directory = os.environ.get('DICELANG_DATASTORE', 'vars')
+  # migrate(self.vars_directory, 'global')
+  # migrate(self.vars_directory, 'server')
+  # migrate(self.vars_directory, 'core')
+  # migrate(self.vars_directory, 'private')
+  # TODO: and then yeet this method into the stratosphere
+  def migrate(self, storage_directory, prefix):
     '''Internal class for saving, loading, accessing, and mutating
     standing variables during the use of the chat bot.'''
     self.storage_directory = storage_directory
@@ -35,16 +51,12 @@ class DataStore(object):
     for filename in filenames:
       print(f"loading '{filename}' ...")
       _, owner = filename.rsplit('_', 1)
-      owner = eval(owner)
-      self.variables[owner] = { }
       try:
         with open(filename, 'r') as f:
           for line in f:
             try:
               k_repr, v_repr = line.strip().split(self.sep, 1)
-              key = eval(k_repr)
-              value = eval(v_repr)
-              self.variables[owner][key] = value
+              self.put(owner_tag=owner, mode=prefix, key=k_repr, value=v_repr)
             except Exception as e:
               print(f'Bad var when loading {filename!r}: {e!s}')
       except SyntaxError as e:
