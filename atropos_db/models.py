@@ -1,7 +1,8 @@
-from django.db.models import Model, CharField, IntegerField, TextField
+from django.db.models import CharField, IntegerField, TextField
+from django.db import models
 
 
-class Variable(Model):
+class Variable(models.Model):
     owner_id = IntegerField()
 
     CORE = 'core'

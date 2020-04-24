@@ -1,6 +1,8 @@
 import os
 from collections.abc import Iterable
 
+from atropos_db.models import Variable
+
 # The following imports are not used by name in this file, but are
 # necessary for enabling `eval` to work correctly. Do not let
 # PyCharm "optimize" them out.
@@ -47,36 +49,17 @@ class DataStore(object):
         with open(filename, 'w') as f:
           pass
       
-  def save(self):
-    owners = self.variables.keys()
-    for owner in owners:
-      filename = f'{self.storage_directory}{os.path.sep}{self.prefix}_{owner}'
-      with open(filename, 'w') as f:
-        Function.use_serializable_function_repr(True)
-        for key, value in self.variables[owner].items():
-          f.write(f'{key!r}{self.sep}{value!r}\n')
-        Function.use_serializable_function_repr(False)
-  
-  def get(self, owner_tag, key, default=Undefined):
-    try:
-      out = self.variables[owner_tag][key]
-    except KeyError as e:
-      if str(e) == owner_tag:
-        self.variables[owner_tag] = { }
-      out = default
-    return out
-  
-  def put(self, owner_tag, key, value):
-    if owner_tag not in self.variables:
-      self.variables[owner_tag] = { }
-    self.variables[owner_tag][key] = value
-    return value
-  
-  def drop(self, owner_tag, key):
-    target = self.variables[owner_tag][key]
-    if isinstance(target, Iterable) and not isinstance(target, str):
-      target = target.copy()
-    out = target
-    del self.variables[owner_tag][key]
-    return out
+  def get(self, owner_tag, key, default=Undefined, mode=Variable.SERVER):
+    return eval(Variable.objects.get(owner_id=owner_tag, var_type=mode, name=key).value_string)
 
+  def put(self, owner_tag, key, value, mode=Variable.SERVER):
+    Function.use_serializable_function_repr(True)
+    variable = Variable.objects.update_or_create(owner_id=owner_tag, var_type=mode, name=key, value_string=repr(value)).value_string
+    Function.use_serializable_function_repr(False)
+    return variable
+
+  def drop(self, owner_tag, key, mode=Variable.SERVER):
+    variable = Variable.objects.get(owner_id=owner_tag, var_type=mode, name=key)
+    out = variable.value_string
+    variable.delete()
+    return eval(out)
