@@ -61,10 +61,10 @@ class Identifier(object):
         lookup = self.scoping_data.get(self.name)
       if not self.scoping_data or lookup is NotLocal:
         lookup = self.datastore.get(self.scoping_data.server, self.name, 'server')
-      out = lookup if lookup is not None else Undefined
+      out = lookup
     else:
       error()
-    return out
+    return out if out is not None else Undefined
   
   def put(self, value):
     '''Stores the identifier's value in the appropriate datastore.'''
@@ -86,7 +86,7 @@ class Identifier(object):
       out = put
     else:
       error()
-    return out
+    return out if out is not None else Undefined
 
   def drop(self):
     '''Removes the identifier from the appropriate datastore.'''
@@ -105,9 +105,9 @@ class Identifier(object):
         drop = self.scoping_data.drop(self.name)
       if not self.scoping_data or drop is NotLocal:
         drop = self.datastore.drop(self.scoping_data.server, self.name, 'server')
-      out = drop if drop is not None else Undefined
+      out = drop
     else:
       error()
-    return out
+    return out if out is not None else Undefined
 
 

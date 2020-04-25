@@ -14,10 +14,10 @@ class Interpreter(object):
     if not os.path.isdir(self.vars_directory):
       os.mkdir(self.vars_directory)
     
-    self.datastore = datastore.DataStore('private')
+    self.datastore = datastore.DataStore(migrate=True)
     self.visitor = visitor.Visitor(self.datastore)
   
-  def keys(self, mode, owner_id=Interpreter.GLOBAL_ID):
+  def keys(self, mode, owner_id=GLOBAL_ID):
     return self.datastore.view(mode, owner_id)
   
   def execute(self, command, user, server):
