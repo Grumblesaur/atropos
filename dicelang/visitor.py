@@ -414,6 +414,7 @@ class Visitor(object):
     out = eval(val_repr)
     exec(f'del {val_repr}')
     Function.use_serializable_function_repr(False)
+    ident.put(target)
     return out
 
   def handle_delete_attribute(self, children):
@@ -428,6 +429,7 @@ class Visitor(object):
     out = eval(val_repr)
     exec(f'del {val_repr}')
     Function.use_serializable_function_repr(False)
+    ident.put(target)
     return out
 
   def handle_identifier_set(self, children):

@@ -21,6 +21,7 @@ class Cache(object):
       self.vars[mode] = {}
   
   def get(self, owner_id, key, mode):
+    print(f'cache: get: owner={owner_id}, key={key}, mode={mode}')
     mode_dict = self.vars[mode]
     try:
       out = mode_dict[owner_id][key]
@@ -29,12 +30,14 @@ class Cache(object):
     return out
   
   def put(self, owner_id, key, value, mode):
+    print(f'cache: put: owner={owner_id}, key={key}, value={value}, mode={mode}')
     if owner_id not in self.vars[mode]:
       self.vars[mode][owner_id] = {}
     self.vars[mode][owner_id][key] = value
     return value
   
   def drop(self, owner_id, key, mode):
+    print(f'cache: drop: owner={owner_id}, key={key}, mode={mode}')
     if owner_id in self.vars[mode] and key in self.vars[mode][owner_id]:
       out = copy.copy(self.vars[mode][owner_id][key])
     else:

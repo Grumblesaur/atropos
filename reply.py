@@ -27,7 +27,7 @@ def dice_reply(interpreter, author, server, argument):
   if is_error:
     fmt = '{user} received error:\n```{value}```'
   else:
-    fmt = '{user} rolled:\n```diff\n{value}```'
+    fmt = '{user} tested:\n```diff\n{value}```'
   return (fmt.format(user=author.display_name, value=evaluated), evaluated)
   
 def view_globals_reply(lang, user):

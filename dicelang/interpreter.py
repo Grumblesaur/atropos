@@ -14,7 +14,7 @@ class Interpreter(object):
     if not os.path.isdir(self.vars_directory):
       os.mkdir(self.vars_directory)
     
-    self.datastore = datastore.DataStore(migrate=True)
+    self.datastore = datastore.DataStore(migrate=False)
     self.visitor = visitor.Visitor(self.datastore)
   
   def keys(self, mode, owner_id=GLOBAL_ID):
