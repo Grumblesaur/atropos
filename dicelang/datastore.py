@@ -65,6 +65,13 @@ class DataStore(object):
         with open(filename, 'w') as f:
           pass
   
+  def view(self, mode, owner_id):
+    results = Variable.objects.get(var_type=mode, owner_id=owner_id)
+    names = [ ]
+    for result in results:
+      names.append(result.name)
+    return names
+  
   def get(self, owner_tag, key, mode):
     result = Variable.objects.get(owner_id=owner_tag, var_type=mode, name=key)
     print(result)
