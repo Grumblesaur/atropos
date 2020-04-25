@@ -451,6 +451,7 @@ class Visitor(object):
     stmt = f'target{subscripts} = {value!r}'
     exec(stmt)
     Function.use_serializable_function_repr(False)
+    ident.put(target) # update the database and not just the cache
     return value
 
   def handle_setattr(self, children):
@@ -465,6 +466,7 @@ class Visitor(object):
     stmt = f'target{subscripts} = {value!r}'
     exec(stmt)
     Function.use_serializable_function_repr(False)
+    ident.put(target)
     return value
 
   def handle_inline_if(self, children):
