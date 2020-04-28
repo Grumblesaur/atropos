@@ -1,6 +1,9 @@
 import os
 import copy
+import threading
+import time
 from collections.abc import Iterable
+from collections import defaultdict
 
 os.environ['DJANGO_SETTINGS_MODULE'] = 'db_config.settings'
 import django
@@ -14,46 +17,84 @@ from asgiref.sync import sync_to_async
 from dicelang.undefined import Undefined
 from dicelang.function  import Function
 
+VAR_MODES = ['private', 'server', 'core', 'global']
+
 class Cache(object):
-  def __init__(self, modes=['private', 'server', 'core', 'global']):
+  def __init__(self, modes=VAR_MODES, prune_below=10):
     self.vars = {}
+    self.uses = {}
+    self.threshold = prune_below
     for mode in modes:
       self.vars[mode] = {}
+      self.uses[mode] = {}
   
   def get(self, owner_id, key, mode):
-    print(f'cache: get: owner={owner_id}, key={key}, mode={mode}')
-    mode_dict = self.vars[mode]
     try:
-      out = mode_dict[owner_id][key]
+      out = self.vars[mode][owner_id][key]
+      self.uses[mode][owner_id][key] += 1
     except KeyError:
       out = None
     return out
   
   def put(self, owner_id, key, value, mode):
-    print(f'cache: put: owner={owner_id}, key={key}, value={value}, mode={mode}')
     if owner_id not in self.vars[mode]:
       self.vars[mode][owner_id] = {}
+      self.uses[mode][owner_id] = defaultdict(int)
     self.vars[mode][owner_id][key] = value
+    self.uses[mode][owner_id][key] += 1
     return value
   
   def drop(self, owner_id, key, mode):
-    print(f'cache: drop: owner={owner_id}, key={key}, mode={mode}')
     if owner_id in self.vars[mode] and key in self.vars[mode][owner_id]:
       out = copy.copy(self.vars[mode][owner_id][key])
+      del self.uses[mode][owner_id][key]
     else:
       out = None
     return out
-
+  
+  def prune(self):
+    marked = [ ]
+    for mode in self.uses:
+      for owner in self.uses[mode]:
+        for key in self.uses[mode][owner]:
+          uses = self.uses[mode][owner][key]
+          is_function = isinstance(self.vars[mode][owner][key], Function)
+          function_sweep =     is_function and uses < self.threshold / 2
+          value_sweep    = not is_function and uses < self.threshold
+          if function_sweep or value_sweep:
+            marked.append((mode, owner, key))
+          else:
+            self.uses[mode][owner][key] = 0
+    
+    objects_pruned = 0
+    for item in marked:
+      objects_pruned += self._remove(*item)
+    return objects_pruned
+  
+  def _remove(self, mode, owner, key):
+    print(f'prune {(mode, owner, key)} from cache')
+    del self.vars[mode][owner][key]
+    del self.uses[mode][owner][key]
+    return 1
  
 class DataStore(object):
   '''Specialization of _DataStore where keys are associated by
   some other key specifying ownership, such as a username or
   server handle.'''
   
-  def __init__(self, migrate=False):
+  def __init__(self, migrate=False, cache_time=30*60):
     self.cache = Cache()
     if migrate is True:
       self.migrate_all()
+    
+    def pruning_task(cycle_time):
+      while True:
+        time.sleep(cycle_time)
+        pruned = self.cache.prune()
+        print(f'{pruned} objects pruned from cache')
+    a = (cache_time,)
+    self.pruner = threading.Thread(target=pruning_task, args=a, daemon=True)
+    self.pruner.start()
   
   def migrate_all(self):
     storage_dir = os.environ['DICELANG_DATASTORE']
