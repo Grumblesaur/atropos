@@ -30,7 +30,7 @@ class Identifier(object):
   
   core_editors = load_core_editors()
   
-  def __init__(self, name, scoping_data, mode, pub, serv, priv, core):
+  def __init__(self, name, scoping_data, mode, variable_data):
     '''Creates an Identifier object.
       name: the name of this identifier.
       mode: the scoping method to use to look up a variable's value
@@ -39,10 +39,7 @@ class Identifier(object):
     self.name = name
     self.mode = mode
     self.scoping_data = scoping_data
-    self.core = core
-    self.public = pub
-    self.server = serv
-    self.private = priv
+    self.datastore = variable_data
   
   def __repr__(self):
     '''verbose string representation of an Identifier.'''
@@ -54,65 +51,63 @@ class Identifier(object):
   def get(self):
     '''Retrieves the identifier's value from the appropriate datastore.'''
     if self.mode == 'private':
-      out = self.private.get(self.scoping_data.user, self.name)
+      out = self.datastore.get(self.scoping_data.user, self.name, self.mode)
     elif self.mode == 'server':
-      out = self.server.get(self.scoping_data.server, self.name)
+      out = self.datastore.get(self.scoping_data.server, self.name, self.mode)
+    elif self.mode == 'global' or self.mode == 'core':
+      out = self.datastore.get(-1, self.name, self.mode)
     elif self.mode == 'scoped':
       if self.scoping_data:
         lookup = self.scoping_data.get(self.name)
       if not self.scoping_data or lookup is NotLocal:
-        lookup = self.server.get(self.scoping_data.server, self.name)
-      out = lookup if lookup is not None else Undefined
-    elif self.mode == 'global':
-      out = self.public.get(-1, self.name)
-    elif self.mode == 'core':
-      out = self.core.get(-1, self.name)
+        lookup = self.datastore.get(self.scoping_data.server, self.name, 'server')
+      out = lookup
     else:
       error()
-    return out
+    return out if out is not None else Undefined
   
   def put(self, value):
     '''Stores the identifier's value in the appropriate datastore.'''
     if self.mode == 'private':
-      out = self.private.put(self.scoping_data.user, self.name, value)
+      out = self.datastore.put(self.scoping_data.user, self.name, value, self.mode)
     elif self.mode == 'server':
-      out = self.server.put(self.scoping_data.server, self.name, value)
+      out = self.datastore.put(self.scoping_data.server, self.name, value, self.mode)
+    elif self.mode == 'global':
+      out = self.datastore.put(-1, self.name, value, self.mode)
+    elif self.mode == 'core':
+      if self.scoping_data.user not in Identifier.core_editors:
+        raise PrivilegeError('non-privileged user cannot modify core library')
+      out = self.datastore.put(-1, self.name, value, self.mode)
     elif self.mode == 'scoped':
       if self.scoping_data:
         put = self.scoping_data.put(self.name, value)
       if not self.scoping_data or put is NotLocal:
-        put = self.server.put(self.scoping_data.server, self.name, value)
+        put = self.datastore.put(self.scoping_data.server, self.name, value, 'server')
       out = put
-    elif self.mode == 'global':
-      out = self.public.put(-1, self.name, value)
-    elif self.mode == 'core':
-      if self.scoping_data.user not in Identifier.core_editors:
-        raise PrivilegeError('non-privileged user cannot modify core library')
-      out = self.core.put(-1, self.name, value)
     else:
       error()
-    return out
+    return out if out is not None else Undefined
 
   def drop(self):
     '''Removes the identifier from the appropriate datastore.'''
     if self.mode == 'private':
-      out = self.private.drop(self.scoping_data.user, self.name)
+      out = self.datastore.drop(self.scoping_data.user, self.name, self.mode)
     elif self.mode == 'server':
-      out = self.server.drop(self.scoping_data.server, self.name)
+      out = self.datastore.drop(self.scoping_data.server, self.name, self.mode)
+    elif self.mode == 'global':
+      out = self.datastore.drop(-1, self.name, self.mode)
+    elif self.mode == 'core':
+      if self.scoping_data.user not in Identifier.core_editors:
+        raise PrivilegeError('non-privileged user cannot delete core library')
+      out = self.self.datastore.drop(-1, self.name)
     elif self.mode == 'scoped':
       if self.scoping_data:
         drop = self.scoping_data.drop(self.name)
       if not self.scoping_data or drop is NotLocal:
-        drop = self.server.drop(self.scoping_data.server, self.name)
-      out = drop if drop is not None else Undefined
-    elif self.mode == 'global':
-      out = self.public.drop(-1, self.name)
-    elif self.mode == 'core':
-      if self.scoping_data.user not in Identifier.core_editors:
-        raise PrivilegeError('non-privileged user cannot delete core library')
-      out = self.core.drop(-1, self.name)
+        drop = self.datastore.drop(self.scoping_data.server, self.name, 'server')
+      out = drop
     else:
       error()
-    return out
+    return out if out is not None else Undefined
 
 

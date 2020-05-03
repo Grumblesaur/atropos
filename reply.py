@@ -20,8 +20,6 @@ def dice_reply(interpreter, author, server, argument):
     evaluated = str(e).split('.')[0] + '.'
   except (ParseError, LexError) as e:
     evaluated = f'{e.__class__.__name__}: {e!s}'
-  except IndexError:
-    raise
   except Exception as e:
     evaluated = f'(Dicelang error) {e.__class__.__name__}: {e!s}'
     traceback.print_tb(e.__traceback__)
@@ -29,7 +27,7 @@ def dice_reply(interpreter, author, server, argument):
   if is_error:
     fmt = '{user} received error:\n```{value}```'
   else:
-    fmt = '{user} rolled:\n```diff\n{value}```'
+    fmt = '{user} received:\n```diff\n{value}```'
   return (fmt.format(user=author.display_name, value=evaluated), evaluated)
   
 def view_globals_reply(lang, user):

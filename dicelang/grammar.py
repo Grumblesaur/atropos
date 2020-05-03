@@ -126,7 +126,7 @@ die: die KW_D plugin_op                -> scalar_die_all
 plugin_op: call_or_atom "::" plugin_op -> plugin_call
          | call_or_atom
 
-call_or_atom: get_attribute "(" (expression ("," expression)* )? ")" -> function_call
+call_or_atom: call_or_atom "(" (expression ("," expression)* )? ")" -> function_call
             | get_attribute
 
 get_attribute: regex ("." scoped_identifier)+ -> getattr

@@ -14,11 +14,8 @@ from dicelang.ownership import ScopingData
 from dicelang.undefined import Undefined
 
 class Visitor(object):
-  def __init__(self, public_data, server_data, private_data, core_data, timeout=12):
-    self.public = public_data
-    self.shared = server_data
-    self.private = private_data
-    self.core = core_data
+  def __init__(self, data, timeout=12):
+    self.variable_data = data
     self.scoping_data = None
     self.user = None
     self.server = None
@@ -376,10 +373,7 @@ class Visitor(object):
         ident.name,
         self.scoping_data,
         'server',
-        self.public,
-        self.shared,
-        self.private,
-        self.core)
+        self.variable_data)
       imported.put(value)
       out = True
     else:
@@ -396,10 +390,7 @@ class Visitor(object):
         new_name,
         self.scoping_data,
         alias.mode,
-        self.public,
-        self.shared,
-        self.private,
-        self.core)
+        self.variable_data)
       imported.put(value)
       out = True
     else:
@@ -423,6 +414,7 @@ class Visitor(object):
     out = eval(val_repr)
     exec(f'del {val_repr}')
     Function.use_serializable_function_repr(False)
+    ident.put(target)
     return out
 
   def handle_delete_attribute(self, children):
@@ -437,6 +429,7 @@ class Visitor(object):
     out = eval(val_repr)
     exec(f'del {val_repr}')
     Function.use_serializable_function_repr(False)
+    ident.put(target)
     return out
 
   def handle_identifier_set(self, children):
@@ -460,6 +453,7 @@ class Visitor(object):
     stmt = f'target{subscripts} = {value!r}'
     exec(stmt)
     Function.use_serializable_function_repr(False)
+    ident.put(target) # update the database and not just the cache
     return value
 
   def handle_setattr(self, children):
@@ -474,6 +468,7 @@ class Visitor(object):
     stmt = f'target{subscripts} = {value!r}'
     exec(stmt)
     Function.use_serializable_function_repr(False)
+    ident.put(target)
     return value
 
   def handle_inline_if(self, children):
@@ -859,8 +854,5 @@ class Visitor(object):
       name,
       self.scoping_data,
       mode,
-      self.public,
-      self.shared,
-      self.private,
-      self.core)
+      self.variable_data)
 
