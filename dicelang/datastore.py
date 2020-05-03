@@ -82,7 +82,7 @@ class DataStore(object):
   some other key specifying ownership, such as a username or
   server handle.'''
   
-  def __init__(self, migrate=False, cache_time=30*60):
+  def __init__(self, migrate=False, cache_time=6*60*60):
     self.cache = Cache()
     if migrate is True:
       self.migrate_all()
