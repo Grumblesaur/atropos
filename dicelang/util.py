@@ -76,4 +76,12 @@ def log(msg):
     f.write(f'{msg}\n')
 
 
+def string_format(format_string, fields):
+  if isinstance(fields, dict):
+    out = format_string.format(**fields)
+  elif isinstance(fields, (list, tuple)):
+    out = format_string.format(*fields)
+  else:
+    out = format_string.format(fields)
+  return out
 

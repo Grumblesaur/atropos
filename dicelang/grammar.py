@@ -132,9 +132,12 @@ call_or_atom: call_or_atom "(" (expression ("," expression)* )? ")" -> function_
 get_attribute: regex ("." scoped_identifier)+ -> getattr
              | regex
 
-regex: atom KW_SEEK atom -> search
-     | atom KW_LIKE atom -> match
-     | atom
+regex: reflection KW_SEEK reflection -> search
+     | reflection KW_LIKE reflection -> match
+     | reflection
+
+reflection: KW_TYPEOF atom -> typeof
+          | atom
 
 atom: number_literal
     | boolean_literal
@@ -150,6 +153,7 @@ undefined_literal: UNDEFINED
 number_literal:    NUMBER
 string_literal:    STRING
 boolean_literal:   TRUE | FALSE
+
 list_literal: "[" expression ("," expression)* (",")? "]"  -> populated_list
   | "[" "]"                                              -> empty_list
   | "[" expression "to" expression "]"                   -> range_list
@@ -183,7 +187,7 @@ TRUE:      "True"
 FALSE:     "False"
 UNDEFINED: "Undefined"
 
-IDENT:  /(?!(global|my|our|core|del|like|seek)\b)[a-zA-Z_]+[a-zA-Z0-9_]*/
+IDENT:  /(?!(global|my|our|core|del|like|seek|format|typeof)\b)[a-zA-Z_]+[a-zA-Z0-9_]*/
 PARAM:  /[a-zA-Z_]+[a-zA-Z0-9_]*/
 STRING: /("(?!"").*?(?<!\\)(\\\\)*?"|'(?!'').*?(?<!\\)(\\\\)*?')/i
 
@@ -195,16 +199,18 @@ LE:  "<="
 LT:  "<"
 
 KW_IMPORT: "import"
-KW_CORE:   "core"
+KW_FORMAT: "format"
+KW_TYPEOF: "typeof"
 KW_GLOBAL: "global"
+KW_LIKE:   "like"
+KW_SEEK:   "seek"
+KW_CORE:   "core"
 KW_OUR:    "our" 
 KW_MY:     "my" 
 KW_R:      "r"
 KW_D:      "d"
 KW_H:      "h"
 KW_L:      "l"
-KW_LIKE:   "like"
-KW_SEEK:   "seek"
 
 IS:  /\bis\b/
 NOT: /\bnot\b/
