@@ -317,6 +317,15 @@ class Decompiler(object):
       out = f'[{chain}]'
     elif tree.data == 'empty_list':
       out = '[]'
+    elif tree.data == 'tuple_literal':
+      out = self.decompile(tree.children[0])
+    elif tree.data == 'mono_tuple':
+      out = f'({self.decompile(tree.children[0])},)'
+    elif tree.data == 'multi_tuple':
+      chain = ', '.join([self.decompile(child) for child in tree.children])
+      out = f'({chain})'
+    elif tree.data == 'empty_tuple':
+      out = '()'
     elif tree.data == 'range_list':
       start, stop = self.binop_decompile(tree.children)
       out = f'[{start} to {stop}]'

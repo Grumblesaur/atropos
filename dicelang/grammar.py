@@ -140,6 +140,7 @@ atom: number_literal
     | boolean_literal
     | string_literal
     | list_literal
+    | tuple_literal
     | dict_literal
     | undefined_literal
     | identifier_get
@@ -155,6 +156,11 @@ list_literal: "[" expression ("," expression)* (",")? "]"  -> populated_list
   | "[" expression "to" expression "by" expression "]"   -> range_list_stepped
   | "[" expression ("through"|"thru") expression   "]"   -> closed_list
   | "[" expression ("through"|"thru") expression "by" expression "]" -> closed_list_stepped
+
+tuple_literal: "(" expression                    ","   ")" -> mono_tuple
+             | "(" expression ("," expression)+ (",")? ")" -> multi_tuple
+             | "("                                     ")" -> empty_tuple
+
 
 dict_literal: "{" "}"                                   -> empty_dict
   | "{" key_value_pair ("," key_value_pair)* (",")? "}" -> populated_dict
