@@ -183,7 +183,7 @@ TRUE:      "True"
 FALSE:     "False"
 UNDEFINED: "Undefined"
 
-IDENT:  /(?!(global|my|our|core|del|like|seek)\b)[a-zA-Z_]+[a-zA-Z0-9_]*/
+IDENT:  /(?!(global|my|our|core|del|like|seek|format)\b)[a-zA-Z_]+[a-zA-Z0-9_]*/
 PARAM:  /[a-zA-Z_]+[a-zA-Z0-9_]*/
 STRING: /("(?!"").*?(?<!\\)(\\\\)*?"|'(?!'').*?(?<!\\)(\\\\)*?')/i
 
@@ -195,6 +195,7 @@ LE:  "<="
 LT:  "<"
 
 KW_IMPORT: "import"
+KW_FORMAT: "format"
 KW_CORE:   "core"
 KW_GLOBAL: "global"
 KW_OUR:    "our" 

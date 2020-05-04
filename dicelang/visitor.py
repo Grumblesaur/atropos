@@ -231,6 +231,11 @@ class Visitor(object):
     elif tree.data == 'search':
       out = self.handle_search(tree.children)
     
+    elif tree.data == 'format':
+      out = self.handle_instruction(tree.children[0])
+    elif tree.data == 'string_format':
+      out = self.handle_string_format(tree.children)   
+    
     elif tree.data == 'atom' or tree.data == 'priority':
       out = self.handle_instruction(tree.children[0])
     elif tree.data == 'number_literal':
@@ -644,7 +649,11 @@ class Visitor(object):
   
   def handle_logarithm(self, children):
     base, exponent = self.process_operands(children)
-    return math.log(exponent, base)
+    if isinstance(base, str):
+      out = util.string_format(base, exponent)
+    else:
+      out = math.log(exponent, base)
+    return out
 
   def handle_sum_or_join(self, children):
     operand = self.process_operands(children)[0]
@@ -807,7 +816,7 @@ class Visitor(object):
     p = re.compile(pattern)
     match = p.match(text)
     return match is not None
-  
+   
   def handle_number_literal(self, children):
     child = children[-1]
     try:

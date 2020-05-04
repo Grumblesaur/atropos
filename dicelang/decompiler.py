@@ -58,6 +58,7 @@ class Decompiler(object):
       ident = self.decompile(tree.children[1])
       alias = self.decompile(tree.children[2])
       out = f'import {ident} as {alias}'
+
     elif tree.data == 'deletion':
       out = self.decompile(tree.children[0])
     elif tree.data == 'delete_variable':
@@ -67,13 +68,13 @@ class Decompiler(object):
       ident = self.decompile(tree.children[0])
       subscripts = ''.join([f'[{self.decompile(child)}]' for child in tree.children[1:]])
       out = f'del {ident}{subscripts}'
+
     elif tree.data == 'assignment':
       out = self.decompile(tree.children[0])
     elif tree.data == 'setattr':
       chain = '.'.join([self.decompile(child) for child in tree.children[:-1]])
       expression = self.decompile(tree.children[-1])
       out = f'{chain} = {expression}'
-    
     elif tree.data == 'identifier_set':
       ident, expr = self.binop_decompile(tree.children)
       out = f'{ident} = {expr}'
@@ -82,6 +83,7 @@ class Decompiler(object):
       subscripts = ''.join([f'[{self.decompile(c)}]' for c in tree.children[1:-1]])
       expression = self.decompile(tree.children[-1])
       out = f'{identifier}{subscripts} = {expression}'
+    
     elif tree.data == 'identifier_get':
       out = self.decompile(tree.children[0])
     
@@ -142,6 +144,7 @@ class Decompiler(object):
     elif tree.data == 'absent':
       left, right = self.binop_decompile(tree.children)
       out = f'{left} not in {right}'
+    
     elif tree.data == 'shift':
       out = self.decompile(tree.children[0])
     elif tree.data == 'left_shift':
@@ -300,6 +303,12 @@ class Decompiler(object):
       text, pattern = [self.decompile(c) for c in tree.children[0::2]]
       out = f'{text} seek {pattern}'
     
+    elif tree.data == 'format':
+      out = self.decompile(tree.children[0])
+    elif tree.data == 'string_format':
+      form, fields = [self.decompile(c) for c in tree.children[0::2]]
+      out = f'{form} format {fields}'
+    
     elif tree.data == 'atom':
       out = self.decompile(tree.children[0])
     elif tree.data == 'number_literal':
@@ -310,6 +319,7 @@ class Decompiler(object):
       out = tree.children[-1].value
     elif tree.data == 'undefined_literal':
       out = tree.children[-1].value
+    
     elif tree.data == 'list_literal':
       out = self.decompile(tree.children[0])
     elif tree.data == 'populated_list':
@@ -317,6 +327,7 @@ class Decompiler(object):
       out = f'[{chain}]'
     elif tree.data == 'empty_list':
       out = '[]'
+    
     elif tree.data == 'tuple_literal':
       out = self.decompile(tree.children[0])
     elif tree.data == 'mono_tuple':
@@ -326,6 +337,7 @@ class Decompiler(object):
       out = f'({chain})'
     elif tree.data == 'empty_tuple':
       out = '()'
+    
     elif tree.data == 'range_list':
       start, stop = self.binop_decompile(tree.children)
       out = f'[{start} to {stop}]'
@@ -338,6 +350,7 @@ class Decompiler(object):
     elif tree.data == 'closed_list_stepped':
       start, stop, step = [self.decompile(child) for child in tree.children]
       out = f'[{start} through {stop} by {step}]'
+    
     elif tree.data == 'dict_literal':
       out = self.decompile(tree.children[0])
     elif tree.data == 'empty_dict':
@@ -348,6 +361,7 @@ class Decompiler(object):
     elif tree.data == 'key_value_pair':
       key, value = self.binop_decompile(tree.children)
       out = f'{key}: {value}'
+    
     elif tree.data == 'identifier':
       out = self.decompile(tree.children[0])
     elif tree.data == 'scoped_identifier':
