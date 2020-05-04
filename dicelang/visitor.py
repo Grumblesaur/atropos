@@ -247,6 +247,10 @@ class Visitor(object):
       out = self.handle_list_range_literal(tree.children)
     elif tree.data == 'closed_list' or tree.data == 'closed_list_stepped':
       out = self.handle_closed_list_literal(tree.children)
+    elif tree.data == 'tuple_literal':
+      out = self.handle_instruction(tree.children[0])
+    elif tree.data in ('mono_tuple', 'multi_tuple', 'empty_tuple'):
+      out = self.handle_tuple(tree.children)
     elif tree.data == 'populated_dict':
       out = self.handle_dict_literal(tree.children)
     elif tree.data == 'empty_dict':
@@ -837,7 +841,14 @@ class Visitor(object):
     if start > stop and step == 1:
       step *= -1
     return [x for x in range(start, stop, step)]
-
+  
+  def handle_tuple(self, children):
+    if children:
+      out = tuple(self.process_operands(children))
+    else:
+      out = ()
+    return out
+  
   def handle_dict_literal(self, children):
     pairs = { }
     if children:
