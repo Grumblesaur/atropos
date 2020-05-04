@@ -303,11 +303,10 @@ class Decompiler(object):
       text, pattern = [self.decompile(c) for c in tree.children[0::2]]
       out = f'{text} seek {pattern}'
     
-    elif tree.data == 'format':
+    elif tree.data == 'reflection':
       out = self.decompile(tree.children[0])
-    elif tree.data == 'string_format':
-      form, fields = [self.decompile(c) for c in tree.children[0::2]]
-      out = f'{form} format {fields}'
+    elif tree.data == 'typeof':
+      out = f'typeof {self.decompile(tree.children[1])}'
     
     elif tree.data == 'atom':
       out = self.decompile(tree.children[0])

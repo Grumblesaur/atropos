@@ -231,10 +231,10 @@ class Visitor(object):
     elif tree.data == 'search':
       out = self.handle_search(tree.children)
     
-    elif tree.data == 'format':
+    elif tree.data == 'reflection':
       out = self.handle_instruction(tree.children[0])
-    elif tree.data == 'string_format':
-      out = self.handle_string_format(tree.children)   
+    elif tree.data == 'typeof':
+      out = self.handle_typeof(tree.children)
     
     elif tree.data == 'atom' or tree.data == 'priority':
       out = self.handle_instruction(tree.children[0])
@@ -816,6 +816,14 @@ class Visitor(object):
     p = re.compile(pattern)
     match = p.match(text)
     return match is not None
+  
+  def handle_typeof(self, children):
+    obj = self.handle_instruction(children[1])
+    if isinstance(obj, Function):
+      out = 'func'
+    else:
+      out = type(obj).__name__
+    return out
    
   def handle_number_literal(self, children):
     child = children[-1]

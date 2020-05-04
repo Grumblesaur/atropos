@@ -82,6 +82,6 @@ def string_format(format_string, fields):
   elif isinstance(fields, (list, tuple)):
     out = format_string.format(*fields)
   else:
-    out = form.format(fields)
+    out = format_string.format(fields)
   return out
 
