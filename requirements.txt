@@ -19,7 +19,7 @@ py==1.8.1
 pyparsing==2.4.6
 pytest==5.3.5
 six==1.14.0
--e git+https://github.com/hrmay/tesnames.git@e9dba4258aa064328ac79a016268739781589bb1#egg=tesnames
+git+git://github.com/hrmay/tesnames.git@master#egg=tesnames
 typing-extensions==3.7.4.1
 Unidecode==1.1.1
 wcwidth==0.1.8
