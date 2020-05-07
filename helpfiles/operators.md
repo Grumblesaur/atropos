@@ -3,6 +3,9 @@ Type `+help operator <name>` for more details:
 name        | symbol
 ---------------------
 priority    | ( )
+reflection  | typeof
+seek        | seek
+like        | like
 attribute   | .
 plugin      | ::
 dice        | d
