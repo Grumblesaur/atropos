@@ -107,8 +107,8 @@ def build(interpreter, author, channel, result):
     reply = f'Options for `+view`:\n```{optstring}```'
   
   elif response == Response.HELP_HELP:
-    topics = '  '.join(helptext.topics)
-    reply = f'Topic keywords:\n```{topics}```\nEnter `+help <topic>` for more info.'
+    help_string = helptext.lookup('topics', None).replace('\n', '  ')
+    reply = f'Help for `topics`:\n```{help_string}```'
   
   elif response == Response.HELP_KEYWORD:
     help_string = helptext.lookup(argument, option)
