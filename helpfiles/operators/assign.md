@@ -11,7 +11,7 @@ Examples:
 ```
   x = 1   ~ Creates or updates a value called x in the current scope with the
           ~ value of 1. Outside of blocks or functions, this is automatically
-          ~ the global scope.
+          ~ the server scope.
   
   global x = 1   ~ Creates or updates a value called x in the global scope,
                  ~ regardless of the location of this expression.

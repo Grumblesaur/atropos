@@ -1,4 +1,4 @@
-## Functions
+## Function
 
 Functions are a type of object in Dicelang. A function is some code that a user
 stores for later use, and can optionally take some parameters. A function is
