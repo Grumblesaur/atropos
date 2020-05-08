@@ -5,6 +5,8 @@ from lark import UnexpectedToken, UnexpectedCharacters, UnexpectedInput
 from commands import Response
 import helptext
 
+helptable = helptext.HelpText()
+
 def _fold(names):
   return '  '.join(names)
 
@@ -107,11 +109,11 @@ def build(interpreter, author, channel, result):
     reply = f'Options for `+view`:\n```{optstring}```'
   
   elif response == Response.HELP_HELP:
-    help_string = helptext.lookup('topics', None).replace('\n', '  ')
+    help_string = helptable.lookup('topics', None).replace('\n', '  ')
     reply = f'Help for `topics`:\n```{help_string}```'
   
   elif response == Response.HELP_KEYWORD:
-    help_string = helptext.lookup(argument, option)
+    help_string = helptable.lookup(argument, option)
     reply = f'Help for `{argument}`:\n{help_string}'
   
   return (reply, raw_reply)
