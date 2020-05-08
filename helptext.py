@@ -41,7 +41,7 @@ class HelpText(object):
     out = None
     for topic in self.help_options:
       if keyword in self.help_options[topic]:
-        out = self.help_options[topic]
+        out = self.help_options[topic][keyword]
         break
     return out
   
