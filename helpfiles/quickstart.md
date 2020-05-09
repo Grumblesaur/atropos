@@ -1,25 +1,3 @@
-# Atropos
-Atropos is a tool for playing tabletop RPG games over Discord. Its primary
-feature is a simple expression-based programming language that borrows heavily
-from the behaviors of Python, but uses a lot of syntactic sugar or shorthand
-to make things quicker to type than a Python REPL or scientific calculator
-would allow.
-
-## Questions
-
-If you're confused about how something words, need to report a bug, or have an
-idea for a new feature, you can open an issue on Atropos' GitHub repository,
-which if you're not viewing the code there already, is here:
-
-<https://github.com/Grumblesaur/atropos>
-
-If you're shy or don't want to make a GitHub account, you can email me at
-james.f.murphy.one@gmail.com
-and I can answer your question or add your issue or feature request to the
-project myself. If you're having a problem, please have your error message
-and the input that caused it ready!
-
-
 ## Quickstart
 
 If you're a newbie user, or you just need to know how to roll dice, here's a
@@ -109,36 +87,4 @@ There are many more operations left out of the quickstart guide, but these are
 all most games require. Read on if you consider yourself a power user,
 a programmer, or a dungeon master/game master/referee.
 
-
-## Commands
-
-Atropos has a few different commands for interaction.
-
-### roll
-Invocation: `+atropos roll <dicelang command>` or `+roll <dicelang command>`
-
-This is the main use case for Atropos. The operators and code constructs will
-be described in detail further down the README. For the essentials, refer to
-the quickstart guide above.
-
-### help
-Invocation: `+atropos help <topic> [option]` or `+help <topic> [option]`
-
-This is the help command. For a list of topics, use the command `+help topics`.
-Some topics have further detailed information, and will provide options to view
-as well.
-
-### view
-Invocation: `+atropos view <datastore name>` or `+view <datastore name>`
-
-This allows a user to see all dicelang variables that are available for them
-to use. The datastore names are:
-
-  * `globals`  -- See the names of variables available to any Atropos user.
-  * `shareds`  -- See the names of variables available to any server user.
-  * `privates` -- See the names of variables available only to you.
-  * `all`      -- See all three of the above.
-
-`shareds` has the alias `our vars`
-`privates` has the alias `my vars`
 
