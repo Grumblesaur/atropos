@@ -54,12 +54,11 @@ async def on_message(msg):
       await msg.channel.send(reply_text)
     except discord.errors.HTTPException as e:
       if e.code == 50035: # Message too long to send
-        note1 = f"{user_name} got a result that was too large, so I've "
-        note2 = "turned it into a file:"
-        note = note1 + note2
+        note1 = f"The response to `{user_name}`'s request was too large,"
+        note2 = f"so I've uploaded it as a file:"
         path = result_file.get(raw_reply_text, msg.author.name)
         await msg.channel.send(
-          content=note,
+          content=f'{note1} {note2}'
           file=discord.File(path))
         os.remove(path)
   
