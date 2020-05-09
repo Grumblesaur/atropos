@@ -104,8 +104,8 @@ def build(interpreter, author, channel, result):
     reply = view_all_reply(interpreter, author, channel)
   
   elif response == Response.VIEW_HELP:
-    options = ['my vars', 'our vars', 'global vars', 'all vars', 'core vars']
-    optstring = '   '.join(options)
+    options = map(lambda s: f'  {s}', ['my', 'our', 'global', 'all', 'core'])
+    optstring = '\n'.join(options)
     reply = f'Options for `+view`:\n```{optstring}```'
   
   elif response == Response.HELP_HELP:
@@ -114,6 +114,7 @@ def build(interpreter, author, channel, result):
   
   elif response == Response.HELP_KEYWORD:
     help_string = helptable.lookup(argument, option)
+    raw_reply = help_string
     reply = f'Help for `{argument}`:\n{help_string}'
   
   return (reply, raw_reply)
