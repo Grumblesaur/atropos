@@ -4,6 +4,7 @@ export DICELANG_CORE_EDITORS="/home/$USER/.atropos-vars/editors"
 export ATROPOS_TOKEN_FILE="/home/$USER/.atropos-vars/token"
 export ATROPOS_ID_FILE="/home/$USER/.atropos-vars/id"
 export DJANGO_ALLOW_ASYNC_UNSAFE="true"
+./build-readme.sh
 while true; do
   python3 atropos.py
   echo "Atropos stopped with exit code $?. Respawning in 3..."
