@@ -13,6 +13,9 @@ from dicelang.identifier import Identifier
 from dicelang.ownership import ScopingData
 from dicelang.undefined import Undefined
 
+class LoopTimeout(Exception):
+  pass
+
 class Visitor(object):
   def __init__(self, data, timeout=12):
     self.variable_data = data
@@ -332,11 +335,14 @@ class Visitor(object):
       results.append(self.handle_instruction(children[1]))
       if time.time() > timeout:
         times = len(results)
-        e = f'`while` loop iterated {times} times without terminating.'
+        e = f'while loop iterated {times} times without terminating.'
+        e += '\nThis can happen when using a while loop outside a function.'
+        e += '\nYou may need to mark certain variables with "our" in front.'
+        e += '\nSee "+help while" for more information.'
         raise LoopTimeout(e)
     self.scoping_data.pop_scope()
     return results
-
+ 
   def handle_do_while_loop(self, children):
     '''Same as a while loop, but is guaranteed to execute at least once.'''
     self.scoping_data.push_scope()
@@ -346,7 +352,10 @@ class Visitor(object):
       results.append(self.handle_instruction(children[0]))
       if time.time() > timeout:
         times = len(results)
-        e = f'`do while` loop iterated {times} times without terminating.'
+        e = f'do while loop iterated {times} times without terminating.'
+        e += '\nThis can happen when using a do-while loop outside a function.'
+        e += '\nYou may need to mark certain variables with "our" in front.'
+        e += '\nSee "+help dowhile" for more information.'
         raise LoopTimeout(e)
     self.scoping_data.pop_scope()
     return results
