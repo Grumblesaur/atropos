@@ -128,7 +128,7 @@ class HelpText(object):
     if lookup_result[0] == LookupType.PATH:
       with open(lookup_result[1], 'r') as f:
         out = f.read()
-    elif lookup_result[1] == LookupType.LIST_OF_ARGUMENTS:
+    elif lookup_result[0] == LookupType.LIST_OF_ARGUMENTS:
       rows_of_args = '\n'.join(['  %s %s' % t for t in lookup_result[1]])
       out =  'Your search yielded ambiguous results. Try the `+help` command '
       out += f'with any of the following arguments:\n```{rows_of_args}```'
