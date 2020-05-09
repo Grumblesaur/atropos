@@ -126,7 +126,17 @@ Invocation: `+atropos help <topic> [option]` or `+help <topic> [option]`
 
 This is the help command. For a list of topics, use the command `+help topics`.
 Some topics have further detailed information, and will provide options to view
-as well.
+as well. If an option is searched without a topic, like
+
+```+help [option]```
+
+Atropos will attempt to look it up. If this lookup is ambiguous (that is, if
+the same option is available to multiple topics), the user will receive a list
+of possible topic-option combinations to try.
+
+If the topic or option is shortened or incomplete, Atropos will attempt to find
+a matching file or report a list of possible matches for the user to choose
+from.
 
 ### view
 Invocation: `+atropos view <datastore name>` or `+view <datastore name>`
