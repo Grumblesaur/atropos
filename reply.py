@@ -110,9 +110,9 @@ def build(interpreter, author, channel, result):
   
   elif response == Response.HELP_HELP:
     help_string1 = helptable.lookup('help', None)
-    topics = helptable.lookup('topics', None).split('\n')
-    help_string2 = '\n'.join([f'  * {topic}' for topic in topics])
-    reply = f'{help_string1}```{help_string2}```'
+    help_string2 = helptable.lookup('topics', None)
+    
+    reply = f'{help_string1}{help_string2}'
   
   elif response == Response.HELP_KEYWORD:
     help_string = helptable.lookup(argument, option)

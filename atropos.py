@@ -18,6 +18,13 @@ interpreter = Interpreter()
 command_parser = commands.CmdParser() 
 
 @client.event
+async def on_ready():
+  activity_type = discord.ActivityType.listening
+  name = "'+atropos help' or '+atropos help quickstart'"
+  activity = discord.Activity(type=activity_type, name=name)
+  await client.change_presence(activity=activity)
+
+@client.event
 async def on_message(msg):
   user_id = msg.author.id
   server_id = msg.channel.id
