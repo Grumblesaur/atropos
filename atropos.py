@@ -20,7 +20,7 @@ command_parser = commands.CmdParser()
 @client.event
 async def on_ready():
   activity_type = discord.ActivityType.listening
-  name = "'+atropos help' or '+atropos help quickstart'"
+  name = "+atropos help quickstart"
   activity = discord.Activity(type=activity_type, name=name)
   await client.change_presence(activity=activity)
 
