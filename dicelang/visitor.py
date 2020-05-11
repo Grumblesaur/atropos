@@ -12,6 +12,7 @@ from dicelang.function import Function
 from dicelang.identifier import Identifier
 from dicelang.ownership import ScopingData
 from dicelang.undefined import Undefined
+from dicelang.validators import IntegerValidator
 
 class ExecutionTimeout(Exception):
   pass
@@ -27,8 +28,9 @@ class Visitor(object):
     self.server = None
     self.loop_timeout = timeout
     self.execution_timeout = timeout * 3
-    self.must_finish_by = None
     self.depth = 0
+    self.must_finish_by = None
+    self.iv = IntegerValidator()
     
   def walk(self, parse_tree, user_id, server_id, scoping_data=None):
     if scoping_data is None:
@@ -666,7 +668,9 @@ class Visitor(object):
     
   def handle_exponent(self, children):
     mantissa, exponent = self.process_operands(children)
-    util.log(f'{mantissa} ** {exponent}')
+    # try to prevent the construction of extremely large integers from
+    # locking up the interpreter or building to a memory error
+    _ = self.iv.validate_exponent(exponent) and self.iv.validate_base(mantissa)
     return mantissa ** exponent
   
   def handle_logarithm(self, children):
