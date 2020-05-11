@@ -4,10 +4,13 @@ import random
 import re
 import statistics
 import time
-from collections.abc import Iterable
 
+from collections.abc import Iterable
 from dicelang import plugins
 from dicelang import util
+
+from dicelang.float_special import inf
+from dicelang.float_special import nan
 from dicelang.function import Function
 from dicelang.identifier import Identifier
 from dicelang.ownership import ScopingData

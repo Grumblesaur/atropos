@@ -16,8 +16,8 @@ from asgiref.sync import sync_to_async
 # PyCharm "optimize" them out.
 from dicelang.undefined import Undefined
 from dicelang.function  import Function
-inf = 10e10000
-nan = inf - inf
+from dicelang.float_special import inf
+from dicelang.float_special import nan
 
 VAR_MODES = ['private', 'server', 'core', 'global']
 
