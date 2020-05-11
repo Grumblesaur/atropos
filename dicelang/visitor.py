@@ -13,7 +13,10 @@ from dicelang.identifier import Identifier
 from dicelang.ownership import ScopingData
 from dicelang.undefined import Undefined
 
-class LoopTimeout(Exception):
+class ExecutionTimeout(Exception):
+  pass
+
+class LoopTimeout(ExecutionTimeout):
   pass
 
 class Visitor(object):
@@ -23,10 +26,13 @@ class Visitor(object):
     self.user = None
     self.server = None
     self.loop_timeout = timeout
+    self.execution_timeout = timeout * 3
+    self.must_finish_by = None
     self.depth = 0
     
   def walk(self, parse_tree, user_id, server_id, scoping_data=None):
     if scoping_data is None:
+      self.must_finish_by = self.execution_timeout + time.time()
       self.scoping_data = ScopingData(user_id, server_id)
     else:
       self.scoping_data = scoping_data
@@ -46,6 +52,11 @@ class Visitor(object):
     return [self.handle_instruction(c) for c in children]
   
   def handle_instruction(self, tree):
+    now = time.time()
+    if now > self.must_finish_by:
+      e = 'Dicelang command took too long! You may have chained too many '
+      e += 'dice together, or tried to construct an extremely large number.'
+      raise ExecutionTimeout(e)
     if tree.data == 'start':
       out = [self.handle_instruction(c) for c in tree.children][-1]
     elif tree.data == 'block' or tree.data == 'short_body':
@@ -336,8 +347,9 @@ class Visitor(object):
       if time.time() > timeout:
         times = len(results)
         e = f'while loop iterated {times} times without terminating.'
-        e += '\nThis can happen when using a while loop outside a function.'
-        e += '\nYou may need to mark certain variables with "our" in front.'
+        e += '\nThis can happen when using a while loop outside a function, '
+        e += "or your loop's condition never changed state. "
+        e += 'You may need to mark certain variables with "our" in front.'
         e += '\nSee "+help while" for more information.'
         raise LoopTimeout(e)
     self.scoping_data.pop_scope()
@@ -353,8 +365,9 @@ class Visitor(object):
       if time.time() > timeout:
         times = len(results)
         e = f'do while loop iterated {times} times without terminating.'
-        e += '\nThis can happen when using a do-while loop outside a function.'
-        e += '\nYou may need to mark certain variables with "our" in front.'
+        e += '\nThis can happen when using a do-while loop outside a function, '
+        e += "or your loop's condition never changed state. "
+        e += 'You may need to mark certain variables with "our" in front.'
         e += '\nSee "+help dowhile" for more information.'
         raise LoopTimeout(e)
     self.scoping_data.pop_scope()

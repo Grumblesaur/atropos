@@ -68,13 +68,11 @@ or modify a roll
   10 * 5d4
   10 / 1d20
 ```
-
 Exponents (Examples)
 ```
   3 ** 2      ~ gives 9
   10 ** (-1)  ~ gives 0.1
 ```
-
 Just like with regular math, Atropos' dice engine adheres to an order of
 operations (also known as operator precedence). For the operations defined
 above, the order of precedence is:

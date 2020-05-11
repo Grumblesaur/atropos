@@ -58,7 +58,7 @@ async def on_message(msg):
         note2 = f"so I've uploaded it as a file:"
         path = result_file.get(raw_reply_text, msg.author.name)
         await msg.channel.send(
-          content=f'{note1} {note2}'
+          content=f'{note1} {note2}',
           file=discord.File(path))
         os.remove(path)
   
