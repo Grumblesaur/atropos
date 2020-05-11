@@ -16,6 +16,7 @@ from asgiref.sync import sync_to_async
 # PyCharm "optimize" them out.
 from dicelang.undefined import Undefined
 from dicelang.function  import Function
+inf = 9e999
 
 VAR_MODES = ['private', 'server', 'core', 'global']
 

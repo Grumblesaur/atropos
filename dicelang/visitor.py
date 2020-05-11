@@ -14,8 +14,6 @@ from dicelang.ownership import ScopingData
 from dicelang.undefined import Undefined
 from dicelang.validators import IntegerValidator
 
-inf = 9e9999
-
 class ExecutionTimeout(Exception):
   pass
 
