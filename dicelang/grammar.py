@@ -136,7 +136,7 @@ regex: reflection KW_SEEK reflection -> search
      | reflection KW_LIKE reflection -> match
      | reflection
 
-reflection: KW_TYPEOF atom -> typeof
+reflection: KW_TYPEOF reflection -> typeof
           | atom
 
 atom: number_literal
