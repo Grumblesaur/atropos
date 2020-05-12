@@ -7,6 +7,8 @@ class Decompiler(object):
     return (self.decompile(children[0]), self.decompile(children[1]))
 
   def decompile(self, tree):
+    '''Recursively reconstruct a normalized source code form for an abstract
+    syntax tree.'''
     if tree.data == 'start':
       out = '; '.join([self.decompile(child) for child in tree.children])
     elif tree.data == 'block':
