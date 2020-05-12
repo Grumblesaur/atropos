@@ -55,8 +55,10 @@ class Cache(object):
     return out
   
   def prune(self):
+    '''Don't prune `core` variables -- they're usually large, often-used, and
+    well-curated, which means they're good candidates for remaining loaded.'''
     marked = [ ]
-    for mode in self.uses:
+    for mode in filter(lambda s: s != 'core', self.uses):
       for owner in self.uses[mode]:
         for key in self.uses[mode][owner]:
           uses = self.uses[mode][owner][key]

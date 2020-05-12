@@ -22,6 +22,8 @@ class IntegerValidator(object):
     self.base_size_multiplier = base_size_multiplier
   
   def validate_base(self, base):
+    '''Bases are allowed to be larger as they don't affect the size of a power
+    operation's outcome nearly as much as an exponent does.'''
     if isinstance(base, int):
       orders_of_magnitude = len(str(base))
       if orders_of_magnitude >= self.size_limit * self.base_size_multiplier:
@@ -29,6 +31,8 @@ class IntegerValidator(object):
     return True
   
   def validate_exponent(self, exponent):
+    '''Exponents must be severely limited in magnitude to avoid locking up
+    the interpreter.'''
     if isinstance(exponent, int):
       orders_of_magnitude = len(str(exponent))
       if orders_of_magnitude >= self.size_limit:
