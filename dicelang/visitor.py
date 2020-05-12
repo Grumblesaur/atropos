@@ -20,8 +20,23 @@ from dicelang.validators import IntegerValidator
 class ExecutionTimeout(Exception):
   pass
 
+loop_error = ' '.join(['{do1}while loop iterated %s times without terminating.',
+  'This can happen when using a while loop outside a function,',
+  "or your loop's condition never changed state.",
+  'You may need to mark certain variables with "our" in front.',
+  '\nSee "+help {do2}while" for more information.'
+])
+
 class LoopTimeout(ExecutionTimeout):
   pass
+
+class WhileLoopTimeout(LoopTimeout):
+  def __init__(self, msg=loop_error.format(do1='', do2=''), *args, **kwargs):
+    super().__init__(self, msg % kwargs['times'], *args, **kwargs)
+
+class DoWhileLoopTimeout(LoopTimeout):
+  def __init__(self, msg=loop_error.format(do1='do ', do2='do'), *args, **kwargs):
+    super().__init(self, msg % kwargs['times'], *args, **kwargs)
 
 class Visitor(object):
   def __init__(self, data, timeout=12):
@@ -36,6 +51,7 @@ class Visitor(object):
     self.iv = IntegerValidator()
     
   def walk(self, parse_tree, user_id, server_id, scoping_data=None):
+    '''Start execution of a syntax tree.'''
     if scoping_data is None:
       self.must_finish_by = self.execution_timeout + time.time()
       self.scoping_data = ScopingData(user_id, server_id)
@@ -54,9 +70,11 @@ class Visitor(object):
     return out
   
   def process_operands(self, children):
+    '''Avoid typing the following list comprehension in a majority of handlers.'''
     return [self.handle_instruction(c) for c in children]
   
   def handle_instruction(self, tree):
+    '''Dispatch execution recursively through the syntax tree.'''
     now = time.time()
     if now > self.must_finish_by:
       e = 'Dicelang command took too long! You may have chained too many '
@@ -299,6 +317,8 @@ class Visitor(object):
     
     
   def handle_block(self, children):
+    '''Compound expression consisting of `;`-separated expressions and
+    evaluating to the last expression in the sequence.'''
     self.scoping_data.push_scope()
     tail = children[-1]
     for child in children[:-1]:
@@ -351,12 +371,7 @@ class Visitor(object):
       results.append(self.handle_instruction(children[1]))
       if time.time() > timeout:
         times = len(results)
-        e = f'while loop iterated {times} times without terminating.'
-        e += '\nThis can happen when using a while loop outside a function, '
-        e += "or your loop's condition never changed state. "
-        e += 'You may need to mark certain variables with "our" in front.'
-        e += '\nSee "+help while" for more information.'
-        raise LoopTimeout(e)
+        raise WhileLoopTimeout(e, times=times)
     self.scoping_data.pop_scope()
     return results
  
@@ -369,12 +384,7 @@ class Visitor(object):
       results.append(self.handle_instruction(children[0]))
       if time.time() > timeout:
         times = len(results)
-        e = f'do while loop iterated {times} times without terminating.'
-        e += '\nThis can happen when using a do-while loop outside a function, '
-        e += "or your loop's condition never changed state. "
-        e += 'You may need to mark certain variables with "our" in front.'
-        e += '\nSee "+help dowhile" for more information.'
-        raise LoopTimeout(e)
+        raise DoWhileLoopTimeout(e, times=times)
     self.scoping_data.pop_scope()
     return results
 
@@ -402,6 +412,8 @@ class Visitor(object):
     return out
   
   def handle_standard_import(self, children):
+    '''Copies a variable by value to a new variable with the same name in the
+    server-level namespace.'''
     ident = self.handle_instruction(children[1])
     value = copy.deepcopy(ident.get())
     if value is not Undefined:
@@ -418,6 +430,7 @@ class Visitor(object):
       
   
   def handle_as_import(self, children):
+    '''Copies a variable by value to a new variable with a different name.'''
     importable, alias = [self.handle_instruction(c) for c in children[1:]]
     value = copy.deepcopy(importable.get())
     new_name = alias.name
@@ -537,6 +550,7 @@ class Visitor(object):
     return out
     
   def handle_logical_or(self, children):
+    '''Boolean disjunction of two objects, with short circuit behavior.'''
     left = self.handle_instruction(children[0])
     if left:
       out = left
@@ -545,10 +559,12 @@ class Visitor(object):
     return out
   
   def handle_logical_xor(self, children):
+    '''Boolean exclusive disjunction of two objects.'''
     left, right = self.process_operands(children)
     return (left or right) and not (left and right)
   
   def handle_logical_and(self, children):
+    '''Boolean conjunction of two objects, with short circuit behavior.'''
     left = self.handle_instruction(children[0])
     if left:
       out = self.handle_instruction(children[1])
@@ -557,6 +573,7 @@ class Visitor(object):
     return out
 
   def handle_logical_not(self, children):
+    '''Boolean negation of an object.'''
     operand = self.handle_instruction(children[-1])
     return not operand
   
@@ -600,12 +617,15 @@ class Visitor(object):
     return out if not negate else not out
 
   def handle_left_shift(self, children):
+    '''Integer leftward bit shift. "Rotates" iterables.'''
     return util.shift(*self.process_operands(children))
   
   def handle_right_shift(self, children):
+    '''Integer rightward bit shift. "Rotates" iterables.'''
     return util.shift(*self.process_operands(children), left_shift=False)
   
   def handle_addition(self, children):
+    '''Numeric addition or concatenation of ordered iterables.'''
     operands = self.process_operands(children)
     return util.addition(*operands)
   
@@ -625,11 +645,14 @@ class Visitor(object):
     return result
 
   def handle_catenation(self, children):  
+    '''Joins two numbers via their representation of digit strings.'''
     numbers = self.process_operands(children)
     intstrings = map(lambda x: str(int(x)), numbers)
     return int(''.join(intstrings))
 
   def handle_multiplication(self, children):
+    '''Handles multiplication of numerics and the repetition of ordered
+    iterables.'''
     multiplier, multiplicand = self.process_operands(children)
     array = (list, str)
     numeric = (int, float)
@@ -642,18 +665,23 @@ class Visitor(object):
     return out
 
   def handle_division(self, children):
+    '''Ordinary floating point division.'''
     dividend, divisor = self.process_operands(children)
     return dividend / divisor
   
   def handle_remainder(self, children):
+    '''Remainder for float or int.'''
     dividend, divisor = self.process_operands(children)
     return dividend % divisor
   
   def handle_floor_division(self, children):
+    '''Divide and always round down, returning integer.'''
     dividend, divisor = self.process_operands(children)
     return dividend // divisor
   
   def handle_negation(self, children):
+    '''Get the arithmetic inverse of a numeric value, or the reverse of
+    some ordered iterable.'''
     operand = self.process_operands(children)[0]
     if isinstance(operand, (list, str)):
       out = operand[::-1]
@@ -662,6 +690,8 @@ class Visitor(object):
     return out
   
   def handle_absolute_value(self, children):
+    '''Get the absolute value of a numeric while keeping the same type;
+    no-op on non-numerics.'''
     operand = self.process_operands(children)[0]
     if isinstance(operand, (float, int)):
       out = operand if operand >= 0 else -operand
@@ -670,6 +700,7 @@ class Visitor(object):
     return out
     
   def handle_exponent(self, children):
+    '''Handle exponents, and reject oversized bases or powers.'''
     mantissa, exponent = self.process_operands(children)
     # try to prevent the construction of extremely large integers from
     # locking up the interpreter or building to a memory error
@@ -677,6 +708,8 @@ class Visitor(object):
     return mantissa ** exponent
   
   def handle_logarithm(self, children):
+    '''Logarithm is overloaded with a format syntax in analogy with `%` being
+    overloaded with an interpolation syntax.'''
     base, exponent = self.process_operands(children)
     if isinstance(base, str):
       out = util.string_format(base, exponent)
@@ -685,6 +718,8 @@ class Visitor(object):
     return out
 
   def handle_sum_or_join(self, children):
+    '''Sum a list of numbers or concatenate a |list of strings|, or
+    |list of lists/tuples|, or |list of dicts|.'''
     operand = self.process_operands(children)[0]
     if isinstance(operand, Iterable) and operand:
       out = operand[0]
@@ -697,6 +732,7 @@ class Visitor(object):
     return out
 
   def handle_length(self, children):
+    '''Obtain the length of an iterable.'''
     operand = self.process_operands(children)[0]
     if isinstance(operand, Iterable):
       out = len(operand)
@@ -707,6 +743,7 @@ class Visitor(object):
     return out
   
   def handle_selection(self, children):
+    '''Select a random element from an iterable.'''
     operand = self.process_operands(children)[0]
     if isinstance(operand, (float, int)):
       operand = [operand]
@@ -715,15 +752,19 @@ class Visitor(object):
     return random.choice(operand)
 
   def handle_extrema(self, children, extremum_type):
+    '''Find max or min, depending on the speciifcs of the parse tree.'''
     operand = self.process_operands(children)[0]
     if not isinstance(operand, Iterable):
       operand = [operand]
     return min(operand) if extremum_type == 'minimum' else max(operand)
   
   def handle_flatten(self, children):
+    '''Iterates through an arbitrarily-nested iterable and feeds all the scalar
+    values into a new list, which is returned.'''
     return util.flatten(self.process_operands(children)[0])
   
   def handle_stats(self, children):
+    '''Generate a number summary from some iterable.'''
     operand = self.process_operands(children)[0]
     out = { }
     if isinstance(operand, (float, int)):
@@ -744,6 +785,7 @@ class Visitor(object):
     return out
 
   def handle_sort(self, children):
+    '''Return a sorted copy of an iterable.'''
     operand = self.process_operands(children)[0]
     if isinstance(operand, str):
       out = ''.join(sorted(operand))
@@ -756,6 +798,7 @@ class Visitor(object):
     return out
   
   def handle_shuffle(self, children):
+    '''Return a shuffled copy of an iterable.'''
     operand = self.process_operands(children)[0][:]
     if isinstance(operand, str):
       operand = list(operand)
@@ -767,6 +810,7 @@ class Visitor(object):
     return out
 
   def handle_slices(self, slice_type, children):
+    '''Handle slicing, indexing, and dict value retrieval.'''
     operands = self.process_operands(children)
     v = operands[0]
     args = operands[1:]
@@ -795,11 +839,15 @@ class Visitor(object):
     return out
 
   def handle_plugin_call(self, children):
+    '''Find a plugin by the alias provided and execute it with the right
+    operand as an argument.'''
     plugin_alias, argument = self.process_operands(children)
     operation = plugins.lookup(plugin_alias)
     return operation(argument)
   
   def handle_dice(self, roll_type, children):
+    '''Scan the dice subtree for specifics and then call the utility function
+    to do the actual random generation.'''
     result_type, _, keep_mode = roll_type.split('_')
     operands = self.process_operands(children[::2])
     dice, sides = operands[:2]
@@ -808,6 +856,8 @@ class Visitor(object):
     return util.roll(dice, sides, count, mode=keep_mode, return_sum=as_sum)
 
   def handle_apply(self, children):
+    '''Execute a function on each argument of an iterable to
+    generate a new list.'''
     function, iterable = self.process_operands(children)
     out = [ ]
     for item in iterable:
@@ -815,12 +865,14 @@ class Visitor(object):
     return out
 
   def handle_function_call(self, children):
+    '''Evaluate the arguments and call the function with them.'''
     operands = self.process_operands(children)
     function = operands[0]
     arguments = operands[1:]
     return function(self.scoping_data, self, *arguments)
 
   def handle_getattr(self, children):
+    '''Handle field lookup by `.` operator.'''
     operands = self.process_operands(children)
     obj = operands[0]
     out = obj
@@ -829,6 +881,7 @@ class Visitor(object):
     return out
 
   def handle_search(self, children):
+    '''Handle the `seek` regular expression operator.'''
     text, pattern = [self.handle_instruction(c) for c in children[0::2]]
     p = re.compile(pattern)
     match = p.search(text)
@@ -841,12 +894,14 @@ class Visitor(object):
     return {'start' : start, 'end' : end}
   
   def handle_match(self, children):
+    '''Handle the `like` regular expression operator.'''
     text, pattern = [self.handle_instruction(c) for c in children[0::2]]
     p = re.compile(pattern)
     match = p.match(text)
     return match is not None
   
   def handle_typeof(self, children):
+    '''Generates a string describing the type of an object.'''
     obj = self.handle_instruction(children[1])
     if isinstance(obj, Function):
       out = 'func'
@@ -855,6 +910,7 @@ class Visitor(object):
     return out
    
   def handle_number_literal(self, children):
+    '''Constructs an int or float from a numeric literal.'''
     child = children[-1]
     try:
       x = int(child.value)
@@ -865,12 +921,15 @@ class Visitor(object):
     return x if x == f else f
   
   def handle_boolean_literal(self, children):
+    '''Constructs a bool from the literal syntax.'''
     return eval(children[-1].value)
 
   def handle_string_literal(self, children):
+    '''Constructs a string from the literal syntax.'''
     return eval(children[-1].value)
   
   def handle_list_literal(self, children):
+    '''Constructs a list literal from the literal syntax.'''
     if children:
       out = self.process_operands(children)
     else:
@@ -878,9 +937,11 @@ class Visitor(object):
     return out
   
   def handle_list_range_literal(self, children):
+    '''Constructs a list literal on the interval [1, n).'''
     return [x for x in range(*self.process_operands(children))]
   
   def handle_closed_list_literal(self, children):
+    '''Constructs a list on the interval [1, n].'''
     operands = self.process_operands(children)
     step = operands[2] if len(operands) == 3 else 1
     start, stop = operands[0], operands[1] + 1
@@ -889,6 +950,7 @@ class Visitor(object):
     return [x for x in range(start, stop, step)]
   
   def handle_tuple(self, children):
+    '''Constructs a tuple from the literal syntax.'''
     if children:
       out = tuple(self.process_operands(children))
     else:
@@ -896,6 +958,7 @@ class Visitor(object):
     return out
   
   def handle_dict_literal(self, children):
+    '''Constructs a dict from the literal syntax.'''
     pairs = { }
     if children:
       for c in children:
@@ -905,6 +968,8 @@ class Visitor(object):
 
 
   def handle_identifiers(self, identifier_type, children):
+    '''Creates an identifier appropriate for the appropriate access
+    type and current scope.'''
     mode, _ = identifier_type.split('_')
     name = children[-1].value
     return Identifier(
