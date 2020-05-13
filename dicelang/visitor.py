@@ -15,7 +15,6 @@ from dicelang.function import Function
 from dicelang.identifier import Identifier
 from dicelang.ownership import ScopingData
 from dicelang.undefined import Undefined
-from dicelang.validators import IntegerValidator
 
 class ExecutionTimeout(Exception):
   pass
@@ -37,6 +36,9 @@ class WhileLoopTimeout(LoopTimeout):
 class DoWhileLoopTimeout(LoopTimeout):
   def __init__(self, msg=loop_error.format(do1='do ', do2='do'), *args, **kwargs):
     super().__init(self, msg % kwargs['times'], *args, **kwargs)
+
+class ExponentiationTimeout(ExecutionTimeout):
+  pass
 
 class Visitor(object):
   def __init__(self, data, timeout=12):
@@ -77,8 +79,11 @@ class Visitor(object):
     '''Dispatch execution recursively through the syntax tree.'''
     now = time.time()
     if now > self.must_finish_by:
-      e = 'Dicelang command took too long! You may have chained too many '
-      e += 'dice together, or tried to construct an extremely large number.'
+      e = ' '.join([
+        'Dicelang command took too long! You may have chained',
+        'too many dice together, constructed an extremely large number,',
+        'or just used a lot of different operations.'
+      ])
       raise ExecutionTimeout(e)
     if tree.data == 'start':
       out = [self.handle_instruction(c) for c in tree.children][-1]
@@ -700,12 +705,21 @@ class Visitor(object):
     return out
     
   def handle_exponent(self, children):
-    '''Handle exponents, and reject oversized bases or powers.'''
+    '''Handle exponents, which are strictly numeric (for now). Use inelegant
+    iterated multiplication for integer powers in order to allow for timeout
+    checks for when an extremely large number is being constructed.'''
     mantissa, exponent = self.process_operands(children)
-    # try to prevent the construction of extremely large integers from
-    # locking up the interpreter or building to a memory error
-    _ = self.iv.validate_exponent(exponent) and self.iv.validate_base(mantissa)
-    return mantissa ** exponent
+    if isinstance(exponent, float) and isinstance(mantissa, (int, float)):
+      out = mantissa ** exponent
+    elif isinstance(exponent, int) and isinstance(mantissa, (int, float)):
+      out = mantissa
+      for x in range(exponent):
+        if time.time() > self.must_finish_by:
+          raise ExponentiationTimeout('Base or exponent too large!')
+        out = out * mantissa
+    else:
+      raise TypeError('Operands to exponentiation (**) must be numeric!')
+    return out
   
   def handle_logarithm(self, children):
     '''Logarithm is overloaded with a format syntax in analogy with `%` being
