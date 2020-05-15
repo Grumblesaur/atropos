@@ -15,6 +15,7 @@ from dicelang.function import Function
 from dicelang.identifier import Identifier
 from dicelang.ownership import ScopingData
 from dicelang.undefined import Undefined
+from dicelang.validator import IntegerValidator
 
 class ExecutionTimeout(Exception):
   pass
@@ -38,6 +39,9 @@ class DoWhileLoopTimeout(LoopTimeout):
     super().__init(self, msg % kwargs['times'], *args, **kwargs)
 
 class ExponentiationTimeout(ExecutionTimeout):
+  pass
+
+class DiceRollTimeout(ExecutionTimeout):
   pass
 
 class Visitor(object):
@@ -866,13 +870,12 @@ class Visitor(object):
     dice, sides = operands[:2]
     count = operands[2] if len(operands) > 2 else None
     as_sum = result_type == 'scalar'
-    return util.roll(dice, sides, count, mode=keep_mode, return_sum=as_sum)
-
-  def handle_apply(self, children):
-    '''Execute a function on each argument of an iterable to
-    generate a new list.'''
-    function, iterable = self.process_operands(children)
-    out = [ ]
+    if not IntegerValidator(10).validate(dice):
+      e = ' '.join([
+        f'{dice} is too many dice! This operation may take too long, potentially preventing',
+        'other users from being able to roll dice too.'
+      ])
+      raise DiceRollTimeout(e)
     for item in iterable:
       out.append(function(self.scoping_data, self, item))
     return out
