@@ -870,12 +870,11 @@ class Visitor(object):
     dice, sides = operands[:2]
     count = operands[2] if len(operands) > 2 else None
     as_sum = result_type == 'scalar'
-    if not IntegerValidator(10).validate(dice):
-      e = ' '.join([
-        f'{dice} is too many dice! This operation may take too long, potentially preventing',
-        'other users from being able to roll dice too.'
-      ])
-      raise DiceRollTimeout(e)
+    
+    e = ' '.join([
+      f'{dice} is too many dice! This operation may take too long, potentially preventing',
+      'other users from being able to roll dice too.'])
+    IntegerValidator(10, DiceRollTimeout).validate(dice, e)
     for item in iterable:
       out.append(function(self.scoping_data, self, item))
     return out
