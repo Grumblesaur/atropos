@@ -65,8 +65,10 @@ class Decompiler(object):
       alias = self.decompile(tree.children[2])
       out = f'import {ident} as {alias}'
     elif tree.data == 'as_getattr_import':
-      getattr_, ident = [self.decompile(c) for c in tree.children[1:]]
-      out = f'import {getattr_} as ident'
+      items = [self.decompile(c) for c in tree.children[1:]]
+      chain = '.'.join(items[:-1])
+      ident = items[-1]
+      out = f'import {chain} as {ident}'
 
     elif tree.data == 'deletion':
       out = self.decompile(tree.children[0])
