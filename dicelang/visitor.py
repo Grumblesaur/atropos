@@ -909,9 +909,7 @@ class Visitor(object):
       f'{dice} is too many dice! This operation may take too long, potentially preventing',
       'other users from being able to roll dice too.'])
     IntegerValidator(10, DiceRollTimeout).validate(dice, e)
-    for item in iterable:
-      out.append(function(self.scoping_data, self, item))
-    return out
+    return util.roll(dice, sides, count, keep_mode, as_sum)
 
   def handle_function_call(self, children):
     '''Evaluate the arguments and call the function with them.'''
