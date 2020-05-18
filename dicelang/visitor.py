@@ -919,7 +919,11 @@ class Visitor(object):
       'other users from being able to roll dice too.'])
     IntegerValidator(10, DiceRollTimeout).validate(dice, e)
     return util.roll(dice, sides, count, keep_mode, as_sum)
-
+  
+  def handle_apply(self, children):
+    function, iterable = self.process_operands(children)
+    return [function(self.scoping_data, self, x) for x in iterable]
+  
   def handle_function_call(self, children):
     '''Evaluate the arguments and call the function with them.'''
     operands = self.process_operands(children)
