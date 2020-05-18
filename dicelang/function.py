@@ -31,12 +31,21 @@ class Function(object):
       param_string = ', '.join(self.params)
       self.src = f'{self.dcmp.decompile(tree)}'
     else:
-      if len(set(param_names)) != len(param_names):
-        raise DefinitionError('One or more parameter names are duplicated.') 
+      Function._ensure_unique(param_names)
       self.code = tree_or_source
       self.params = param_names
       param_string = ', '.join(param_names)
       self.src = f'({param_string}) -> {self.dcmp.decompile(tree_or_source)}'
+  
+  @staticmethod
+  def _ensure_unique(parameters):
+    parameters = sorted(parameters)
+    last = None
+    for parameter in parameters:
+      if parameter == last:
+        raise DefinitionError(f'Parameter name duplicated: "{parameter}".')
+      last = parameter
+    return True
   
   def normal_repr(self):
     return f'{self.src}'
