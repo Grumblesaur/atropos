@@ -28,8 +28,10 @@ conditional: "if" expression "then" [block | short_body] -> if
 
 short_body: expression
 
-import: KW_IMPORT identifier                 -> standard_import
-      | KW_IMPORT identifier "as" identifier -> as_import
+import: KW_IMPORT identifier                   -> standard_import
+      | KW_IMPORT identifier ("." identifier)+ -> standard_getattr_import
+      | KW_IMPORT identifier "as" identifier   -> as_import
+      | KW_IMPORT identifier ("." identifier)+  "as" identifier   -> as_getattr_import
 
 expression: assignment
           | deletion

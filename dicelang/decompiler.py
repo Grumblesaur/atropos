@@ -56,10 +56,17 @@ class Decompiler(object):
     elif tree.data == 'standard_import':
       ident = self.decompile(tree.children[1])
       out = f'import {ident}'
+    elif tree.data == 'standard_getattr_import':
+      idents = [self.decompile(c) for c in tree.children[1:]]
+      chain = '.'.join(idents)
+      out = f'import {chain}'
     elif tree.data == 'as_import':
       ident = self.decompile(tree.children[1])
       alias = self.decompile(tree.children[2])
       out = f'import {ident} as {alias}'
+    elif tree.data == 'as_getattr_import':
+      getattr_, ident = [self.decompile(c) for c in tree.children[1:]]
+      out = f'import {getattr_} as ident'
 
     elif tree.data == 'deletion':
       out = self.decompile(tree.children[0])

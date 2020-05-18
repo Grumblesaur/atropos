@@ -115,8 +115,12 @@ class Visitor(object):
       out = self.handle_instruction(tree.children[0])
     elif tree.data == 'standard_import':
       out = self.handle_standard_import(tree.children)
+    elif tree.data == 'standard_getattr_import':
+      out = self.handle_standard_getattr_import(tree.children)
     elif tree.data == 'as_import':
       out = self.handle_as_import(tree.children)
+    elif tree.data == 'as_getattr_import':
+      out = self.handle_as_getattr_import(tree.children)
     
     elif tree.data == 'deletion':
       out = self.handle_instruction(tree.children[0])
@@ -424,23 +428,37 @@ class Visitor(object):
     server-level namespace.'''
     ident = self.handle_instruction(children[1])
     value = copy.deepcopy(ident.get())
+    new_name = ident.name
+    mode = 'server'
     if value is not Undefined:
-      imported = Identifier(
-        ident.name,
-        self.scoping_data,
-        'server',
-        self.variable_data)
+      imported = Identifier(new_name, self.scoping_data, mode, self.variable_data)
       imported.put(value)
       out = True
     else:
       out = False
     return out
       
-  
+  def handle_standard_getattr_import(self, children):
+    operands = self.process_operands(children[1:])
+    ident = operands[0]
+    try:
+      name = ident.name
+      val = ident.get()
+      for attr in operands[1:]:
+        name = attr.name
+        val = val[name]
+      imported = Identifier(name, self.scoping_data, 'server', self.variable_data)
+      imported.put(copy.deepcopy(val))
+      out = True
+    except (KeyError, AttributeError) as e:
+      print(e)
+      out = False
+    return out
+      
   def handle_as_import(self, children):
     '''Copies a variable by value to a new variable with a different name.'''
     importable, alias = [self.handle_instruction(c) for c in children[1:]]
-    value = copy.deepcopy(importable.get())
+    value = importable.get()
     new_name = alias.name
     if value is not Undefined:
       imported = Identifier(
@@ -448,9 +466,25 @@ class Visitor(object):
         self.scoping_data,
         alias.mode,
         self.variable_data)
-      imported.put(value)
+      imported.put(copy.deepcopy(value))
       out = True
     else:
+      out = False
+    return out
+  
+  def handle_as_getattr_import(self, children):
+    try:
+      operands = self.process_operands(children[1:])
+      idents = operands[:-1]
+      new_name = operands[-1].name
+      mode = operands[-1].mode
+      value = idents[0].get()
+      for attr in idents[1:]:
+        value = value[attr.name]
+      imported = Identifier(new_name, self.scoping_data, mode, self.variable_data)
+      imported.put(copy.deepcopy(value))
+      out = True
+    except (KeyError, AttributeError):
       out = False
     return out
   
