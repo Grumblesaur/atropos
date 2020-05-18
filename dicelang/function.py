@@ -2,12 +2,15 @@ import lark
 from dicelang import decompiler
 from dicelang import grammar
 
-class FunctionCallException(Exception):
+class FunctionError(Exception):
   pass
 
-length_error = FunctionCallException(
-  'Function formal parameters mismatch arguments in length.')
- 
+class DefinitionError(FunctionError):
+  pass
+
+class CallError(FunctionError):
+  pass
+
 class Function(object):
   parser = lark.Lark(grammar.raw_text, start='function', parser='earley')
   
@@ -28,6 +31,8 @@ class Function(object):
       param_string = ', '.join(self.params)
       self.src = f'{self.dcmp.decompile(tree)}'
     else:
+      if len(set(param_names)) != len(param_names):
+        raise DefinitionError('One or more parameter names are duplicated.') 
       self.code = tree_or_source
       self.params = param_names
       param_string = ', '.join(param_names)
@@ -46,7 +51,7 @@ class Function(object):
     if self.visitor is None:
       self.visitor = visitor
     if len(self.params) != len(args):
-      raise length_error
+      raise CallError('Arguments mismatch formal parameters in length.')
     arguments_scope = dict(zip(self.params, args))
     scoping_data.push_frame()
     scoping_data.push_scope(arguments_scope)
