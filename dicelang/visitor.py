@@ -473,7 +473,9 @@ class Visitor(object):
   
   def handle_deletable_variable(self, children):
     ident = self.handle_instruction(children[0])
-    return ident.drop()
+    out = ident.drop()
+    print(out)
+    return out
 
   def handle_deletable_element(self, children):
     '''Construct a Python code string that will delete from the possibly-
