@@ -754,11 +754,20 @@ class Visitor(object):
     if isinstance(exponent, float) and isinstance(mantissa, (int, float)):
       out = mantissa ** exponent
     elif isinstance(exponent, int) and isinstance(mantissa, (int, float)):
-      out = mantissa
-      for x in range(exponent):
-        if time.time() > self.must_finish_by:
-          raise ExponentiationTimeout('Base or exponent too large!')
-        out = out * mantissa
+      e = ExponentiationTimeout('Base or exponent too large in magnitude!')
+      out = 1
+      if exponent != 0:
+        for x in range(abs(exponent)):
+          if time.time() > self.must_finish_by:
+            raise e
+          out = out * mantissa
+        if exponent < 0:
+          out = 1 / out
+      else:
+        if mantissa == 0:
+          out = 0.0 * 9e99999999999 # generate a nan for 0 ** 0
+        else:
+          out = 1 # nonzero to the power zero is always 1
     else:
       raise TypeError('Operands to exponentiation (**) must be numeric!')
     return out
@@ -914,10 +923,12 @@ class Visitor(object):
       f'{dice} is too many dice! This operation may take too long, potentially preventing',
       'other users from being able to roll dice too.'])
     IntegerValidator(10, DiceRollTimeout).validate(dice, e)
-    for item in iterable:
-      out.append(function(self.scoping_data, self, item))
-    return out
-
+    return util.roll(dice, sides, count, keep_mode, as_sum)
+  
+  def handle_apply(self, children):
+    function, iterable = self.process_operands(children)
+    return [function(self.scoping_data, self, x) for x in iterable]
+  
   def handle_function_call(self, children):
     '''Evaluate the arguments and call the function with them.'''
     operands = self.process_operands(children)
