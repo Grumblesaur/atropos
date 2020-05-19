@@ -69,17 +69,15 @@ class Decompiler(object):
       chain = '.'.join(items[:-1])
       ident = items[-1]
       out = f'import {chain} as {ident}'
-
+    
     elif tree.data == 'deletion':
+      chain = ', '.join([self.decompile(c) for c in tree.children])
+      out = f'del {chain}'
+    elif tree.data == 'deletable':
       out = self.decompile(tree.children[0])
-    elif tree.data == 'delete_variable':
-      ident = self.decompile(tree.children[0])
-      out = f'del {ident}'
-    elif tree.data == 'delete_element':
-      ident = self.decompile(tree.children[0])
-      subscripts = ''.join([f'[{self.decompile(child)}]' for child in tree.children[1:]])
-      out = f'del {ident}{subscripts}'
-
+    elif tree.data in ('deletable_variable', 'deletable_element', 'deletable_attribute'):
+      out = self.decompile(tree.children[0])
+    
     elif tree.data == 'assignment':
       out = self.decompile(tree.children[0])
     elif tree.data == 'setattr':

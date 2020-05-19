@@ -5,9 +5,11 @@ identifier_get: identifier
 identifier_set: identifier "=" expression
 identifier_set_subscript: identifier ("[" expression "]")+ "=" expression
 
-deletion: "del" identifier                       -> delete_variable
-        | "del" identifier ("[" expression "]")+ -> delete_element
-        | "del" identifier ("." identifier    )+ -> delete_attribute
+deletable: identifier                       -> deletable_variable
+         | identifier ("[" expression "]")+ -> deletable_element
+         | identifier ("." identifier    )+ -> deletable_attribute
+
+deletion: "del" deletable ("," deletable)*
 
 assignment: identifier_set
           | identifier_set_subscript
@@ -28,9 +30,9 @@ conditional: "if" expression "then" [block | short_body] -> if
 
 short_body: expression
 
-import: KW_IMPORT identifier                   -> standard_import
-      | KW_IMPORT identifier ("." identifier)+ -> standard_getattr_import
-      | KW_IMPORT identifier "as" identifier   -> as_import
+import: KW_IMPORT identifier                                      -> standard_import
+      | KW_IMPORT identifier ("." identifier)+                    -> standard_getattr_import
+      | KW_IMPORT identifier "as" identifier                      -> as_import
       | KW_IMPORT identifier ("." identifier)+  "as" identifier   -> as_getattr_import
 
 expression: assignment

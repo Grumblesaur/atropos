@@ -123,13 +123,15 @@ class Visitor(object):
       out = self.handle_as_getattr_import(tree.children)
     
     elif tree.data == 'deletion':
+      out = self.handle_multiple_deletion(tree.children)
+    elif tree.data == 'deletable':
       out = self.handle_instruction(tree.children[0])
-    elif tree.data == 'delete_variable':
-      out = self.handle_delete_variable(tree.children)
-    elif tree.data == 'delete_element':
-      out = self.handle_delete_element(tree.children)
-    elif tree.data == 'delete_attribute':
-      out = self.handle_delete_attribute(tree.children)
+    elif tree.data == 'deletable_variable':
+      out = self.handle_deletable_variable(tree.children)
+    elif tree.data == 'deletable_element':
+      out = self.handle_deletable_element(tree.children)
+    elif tree.data == 'deletable_attribute':
+      out = self.handle_deletable_attribute(tree.children)
     
     elif tree.data == 'assignment':
       out = self.handle_instruction(tree.children[0])
@@ -488,11 +490,14 @@ class Visitor(object):
       out = False
     return out
   
-  def handle_delete_variable(self, children):
+  def handle_multiple_deletion(self, children):
+    return tuple(self.process_operands(children))
+  
+  def handle_deletable_variable(self, children):
     ident = self.handle_instruction(children[0])
     return ident.drop()
 
-  def handle_delete_element(self, children):
+  def handle_deletable_element(self, children):
     '''Construct a Python code string that will delete from the possibly-
     nested dict object, and exec it to remove the key-value pair from the
     dict. The value is returned.'''
@@ -508,7 +513,7 @@ class Visitor(object):
     ident.put(target)
     return out
 
-  def handle_delete_attribute(self, children):
+  def handle_deletable_attribute(self, children):
     '''Similar to delete element, but this results from a chain of `.`
     accesses, and not `[x]` indexes.'''
     ident = self.handle_instruction(children[0])

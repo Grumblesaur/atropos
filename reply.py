@@ -120,7 +120,6 @@ def build(interpreter, author, channel, result):
     help_string = helptable.lookup(argument, option)
     raw_reply = help_string
     reply = f'Help for `{argument}`:\n{help_string}'
-  
   return (reply, raw_reply)
 
  
