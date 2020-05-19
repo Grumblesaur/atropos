@@ -23,10 +23,10 @@ def dice_reply(interpreter, author, server, argument):
   except (ParseError, LexError) as e:
     evaluated = f'{e.__class__.__name__}: {e!s}'
   except NameError as e:
-    evaluated = f'(Dicelang error) Missing internal identifier: {e!s}'
+    evaluated = f'(Interpreter Error) Missing internal identifier: {e!s}'
     traceback.print_tb(e.__traceback__)
   except Exception as e:
-    evaluated = f'(Dicelang error) {e.__class__.__name__}: {e!s}'
+    evaluated = f'{e.__class__.__name__}: {e!s}'
     traceback.print_tb(e.__traceback__)
   
   if is_error:
