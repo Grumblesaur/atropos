@@ -123,7 +123,7 @@ class Visitor(object):
       out = self.handle_as_getattr_import(tree.children)
     
     elif tree.data == 'deletion':
-      out = self.handle_multiple_deletion(tree.children)
+      out = self.handle_deletion(tree.children)
     elif tree.data == 'deletable':
       out = self.handle_instruction(tree.children[0])
     elif tree.data == 'deletable_variable':
@@ -490,8 +490,11 @@ class Visitor(object):
       out = False
     return out
   
-  def handle_multiple_deletion(self, children):
-    return tuple(self.process_operands(children))
+  def handle_deletion(self, children):
+    out = tuple(self.process_operands(children))
+    if len(out) == 1:
+      out = out[0]
+    return out
   
   def handle_deletable_variable(self, children):
     ident = self.handle_instruction(children[0])
