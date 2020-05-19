@@ -11,38 +11,13 @@ from dicelang import util
 
 from dicelang.float_special import inf
 from dicelang.float_special import nan
+from dicelang.exceptions import ExecutionTimeout, WhileLoopTimeout, DoWhileLoopTimeout
+from dicelang.exceptions import DiceRollTimeout, ExponentiationTimeout, OperationError
 from dicelang.function import Function
 from dicelang.identifier import Identifier
 from dicelang.ownership import ScopingData
 from dicelang.undefined import Undefined
 from dicelang.validator import IntegerValidator
-
-class ExecutionTimeout(Exception):
-  pass
-
-loop_error = ' '.join(['{do1}while loop iterated %s times without terminating.',
-  'This can happen when using a while loop outside a function,',
-  "or your loop's condition never changed state.",
-  'You may need to mark certain variables with "our" in front.',
-  '\nSee "+help {do2}while" for more information.'
-])
-
-class LoopTimeout(ExecutionTimeout):
-  pass
-
-class WhileLoopTimeout(LoopTimeout):
-  def __init__(self, msg=loop_error.format(do1='', do2=''), *args, **kwargs):
-    super().__init__(self, msg % kwargs['times'], *args, **kwargs)
-
-class DoWhileLoopTimeout(LoopTimeout):
-  def __init__(self, msg=loop_error.format(do1='do ', do2='do'), *args, **kwargs):
-    super().__init(self, msg % kwargs['times'], *args, **kwargs)
-
-class ExponentiationTimeout(ExecutionTimeout):
-  pass
-
-class DiceRollTimeout(ExecutionTimeout):
-  pass
 
 class Visitor(object):
   def __init__(self, data, timeout=12):
@@ -545,7 +520,7 @@ class Visitor(object):
     for s in subscripts:
       if isinstance(s, Function):
         error = f'Functions cannot be used as keys or indices. ({s!r})'
-        raise TypeError(error)
+        raise OperationError(error)
     subscripts = ''.join([f'[{s!r}]' for s in subscripts])
     target = ident.get()
     Function.use_serializable_function_repr(True)
@@ -691,7 +666,7 @@ class Visitor(object):
           if x in minuend:
             result.remove(x)
       except:
-        raise e
+        raise OperationError(str(e))
     return result
 
   def handle_catenation(self, children):  
@@ -772,7 +747,7 @@ class Visitor(object):
         else:
           out = 1 # nonzero to the power zero is always 1
     else:
-      raise TypeError('Operands to exponentiation (**) must be numeric!')
+      raise OperationError('Operands to exponentiation (**) must be numeric!')
     return out
   
   def handle_logarithm(self, children):
@@ -902,7 +877,7 @@ class Visitor(object):
     elif slice_type == 'not_a_slice':
       if isinstance(args[0], Function):
         e = f'Functions cannot be used as keys or indices. ({args[0]!r})'
-        raise TypeError(e)
+        raise OperationError(e)
       out = v[args[0]]
     return out
 

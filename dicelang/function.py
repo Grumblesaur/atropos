@@ -1,15 +1,7 @@
 import lark
 from dicelang import decompiler
 from dicelang import grammar
-
-class FunctionError(Exception):
-  pass
-
-class DefinitionError(FunctionError):
-  pass
-
-class CallError(FunctionError):
-  pass
+from dicelang.exceptions import DefinitionError, CallError
 
 class Function(object):
   parser = lark.Lark(grammar.raw_text, start='function', parser='earley')
