@@ -1,15 +1,7 @@
 import os
 from dicelang.ownership import NotLocal
 from dicelang.undefined import Undefined
-
-class StorageError(Exception):
-  pass
-
-class PrivilegeError(StorageError):
-  pass
-
-def error(mode):
-  raise StorageError(f'Unknown identifier type: {mode!r}')
+from dicelang.exceptions import PrivilegeError, StorageError
 
 def load_core_editors():
   core_editors = []
@@ -63,7 +55,7 @@ class Identifier(object):
         lookup = self.datastore.get(self.scoping_data.server, self.name, 'server')
       out = lookup
     else:
-      error()
+      raise StorageError(f'Unknown identifier type: "{self.mode}".')
     return out if out is not None else Undefined
   
   def put(self, value):
@@ -85,7 +77,7 @@ class Identifier(object):
         put = self.datastore.put(self.scoping_data.server, self.name, value, 'server')
       out = put
     else:
-      error()
+      raise StorageError(f'Unknown identifier type: "{self.mode}".')
     return out if out is not None else Undefined
 
   def drop(self):
@@ -99,7 +91,7 @@ class Identifier(object):
     elif self.mode == 'core':
       if self.scoping_data.user not in Identifier.core_editors:
         raise PrivilegeError('non-privileged user cannot delete core library')
-      out = self.self.datastore.drop(-1, self.name)
+      out = self.datastore.drop(-1, self.name)
     elif self.mode == 'scoped':
       if self.scoping_data:
         drop = self.scoping_data.drop(self.name)
@@ -107,7 +99,7 @@ class Identifier(object):
         drop = self.datastore.drop(self.scoping_data.server, self.name, 'server')
       out = drop
     else:
-      error()
+      raise StorageError(f'Unknown identifier type: "{self.mode}".')
     return out if out is not None else Undefined
 
 

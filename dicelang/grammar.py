@@ -30,10 +30,10 @@ conditional: "if" expression "then" [block | short_body] -> if
 
 short_body: expression
 
-import: KW_IMPORT identifier                                      -> standard_import
-      | KW_IMPORT identifier ("." identifier)+                    -> standard_getattr_import
-      | KW_IMPORT identifier "as" identifier                      -> as_import
-      | KW_IMPORT identifier ("." identifier)+  "as" identifier   -> as_getattr_import
+import: KW_IMPORT identifier                    -> standard_import
+      | KW_IMPORT identifier ("." identifier)+  -> standard_getattr_import
+      | KW_IMPORT identifier "as" identifier                     -> as_import
+      | KW_IMPORT identifier ("." identifier)+ "as" identifier   -> as_getattr_import
 
 expression: assignment
           | deletion
@@ -159,10 +159,10 @@ string_literal:    STRING
 boolean_literal:   TRUE | FALSE
 
 list_literal: "[" expression ("," expression)* (",")? "]"  -> populated_list
-  | "[" "]"                                              -> empty_list
-  | "[" expression "to" expression "]"                   -> range_list
-  | "[" expression "to" expression "by" expression "]"   -> range_list_stepped
-  | "[" expression ("through"|"thru") expression   "]"   -> closed_list
+  | "[" "]"                                                -> empty_list
+  | "[" expression "to" expression "]"                     -> range_list
+  | "[" expression "to" expression "by" expression "]"     -> range_list_stepped
+  | "[" expression ("through"|"thru") expression   "]"     -> closed_list
   | "[" expression ("through"|"thru") expression "by" expression "]" -> closed_list_stepped
 
 tuple_literal: "(" expression                    ","   ")" -> mono_tuple
@@ -181,11 +181,11 @@ identifier: scoped_identifier
           | global_identifier
           | core_identifier
 
-scoped_identifier:              IDENT
-private_identifier:   KW_MY     IDENT
-server_identifier:    KW_OUR    IDENT
-global_identifier.2:  KW_GLOBAL IDENT
-core_identifier:      KW_CORE   IDENT
+scoped_identifier:             IDENT
+private_identifier:  KW_MY     IDENT
+server_identifier:   KW_OUR    IDENT
+global_identifier:   KW_GLOBAL IDENT
+core_identifier:     KW_CORE   IDENT
 
 TRUE:      "True"
 FALSE:     "False"
@@ -229,8 +229,8 @@ obj_comp:  IS | IS NOT
 %import common.NEWLINE
 %ignore WS
 %ignore "`"
-COMMENT_INLINE: /\~[^(\n|\r\n|\r)]+/
-COMMENT_BLOCK:  /\~\[(.|\n|\r\n|\r)+\]\~/
+COMMENT_INLINE: /~.*/
+COMMENT_BLOCK:  "~[" /(.|\n)+/ "]~"
 %ignore COMMENT_INLINE
 %ignore COMMENT_BLOCK
 

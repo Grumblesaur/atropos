@@ -163,12 +163,13 @@ class DataStore(object):
     return eval(variable)
 
   def drop(self, owner_tag, key, mode):
-    drop = self.cache.drop(owner_tag, key, mode)
-    if drop is not None:
-      variable = Variable.objects.get(owner_id=owner_tag, var_type=mode, name=key)
-      out = eval(variable.value_string)
-      variable.delete()
+    self.cache.drop(owner_tag, key, mode)
+    try:
+      var = Variable.objects.get(owner_id=owner_tag, var_type=mode, name=key)
+    except Variable.DoesNotExist:
+      out = None
     else:
-      out = drop
+      out = eval(var.value_string)
+      var.delete()
     return out
 
