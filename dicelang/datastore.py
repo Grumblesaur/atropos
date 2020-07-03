@@ -49,6 +49,7 @@ class Cache(object):
   def drop(self, owner_id, key, mode):
     if owner_id in self.vars[mode] and key in self.vars[mode][owner_id]:
       out = copy.copy(self.vars[mode][owner_id][key])
+      del self.vars[mode][owner_id][key]
       del self.uses[mode][owner_id][key]
     else:
       out = None
