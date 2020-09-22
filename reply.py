@@ -13,6 +13,7 @@ def _fold(names):
 def dice_reply(interpreter, author, server, argument):
   context_size = max(15, len(argument) // 10)
   is_error = True
+  printout = ''
   try:
     evaluated, printout = interpreter.execute(argument, author.id, server.id)
     is_error = False

@@ -45,9 +45,10 @@ class Visitor(object):
     # we don't want to erase our scoping data since we're still
     # pushing and popping stack frames. When depth is zero, we
     # are finished executing.
+    tmp_user = self.scoping_data.user
     if not self.depth:
       self.scoping_data = None
-    return (out, self.print_queue.flush(self.scoping_data.user))
+    return (out, self.print_queue.flush(tmp_user))
   
   def process_operands(self, children):
     '''Avoid typing the following list comprehension in a majority
@@ -965,7 +966,7 @@ class Visitor(object):
   def handle_print(self, children, trailer):
     '''Adds the value of an expression to the print queue
     and returns the value of the expression.'''
-    value = self.process_operands(children)
+    value = self.process_operands(children[1:])[0]
     msg = str(value) + trailer
     self.print_queue.append(self.scoping_data.user, msg)
     return value
