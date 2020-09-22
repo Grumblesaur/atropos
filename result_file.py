@@ -6,12 +6,13 @@ FILE_AREA = os.path.join(ROOT_PATH, 'tmp')
 if not os.path.isdir(FILE_AREA):
   os.mkdir(FILE_AREA)
 
-def get(raw_result_text, user_name):
+def get(raw_result_text, user_name, printout):
   timestamp = time.strftime("%Y-%m-%d-%H:%M:%S")
   filename = f'{user_name}-{timestamp}.txt'
   full_path = os.path.join(FILE_AREA, filename)
   with open(full_path, 'w') as f:
-    f.write(f'{raw_result_text}')
+    printout = printout + '\n' if printout else ''
+    f.write(f'{printout}{raw_result_text}')
   return full_path
   
   

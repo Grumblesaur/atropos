@@ -141,7 +141,11 @@ regex: reflection KW_SEEK reflection -> search
      | reflection
 
 reflection: KW_TYPEOF reflection -> typeof
-          | atom
+          | print
+
+print: KW_PRINTLN print -> printline
+     | KW_PRINT   print -> printword
+     | atom
 
 atom: number_literal
     | boolean_literal
@@ -202,19 +206,21 @@ NE:  "!="
 LE:  "<="
 LT:  "<"
 
-KW_IMPORT: "import"
-KW_FORMAT: "format"
-KW_TYPEOF: "typeof"
-KW_GLOBAL: "global"
-KW_LIKE:   "like"
-KW_SEEK:   "seek"
-KW_CORE:   "core"
-KW_OUR:    "our" 
-KW_MY:     "my" 
-KW_R:      "r"
-KW_D:      "d"
-KW_H:      "h"
-KW_L:      "l"
+KW_PRINTLN: "println"
+KW_IMPORT:  "import"
+KW_FORMAT:  "format"
+KW_TYPEOF:  "typeof"
+KW_GLOBAL:  "global"
+KW_PRINT:   "print"
+KW_LIKE:    "like"
+KW_SEEK:    "seek"
+KW_CORE:    "core"
+KW_OUR:     "our" 
+KW_MY:      "my" 
+KW_R:       "r"
+KW_D:       "d"
+KW_H:       "h"
+KW_L:       "l"
 
 IS:  /\bis\b/
 NOT: /\bnot\b/

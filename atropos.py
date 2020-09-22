@@ -43,7 +43,7 @@ async def on_message(msg):
   else:
     server = msg.channel.guild
   
-  reply_text, raw_reply_text = reply.build(
+  reply_text, raw_reply_text, printout = reply.build(
     interpreter,
     msg.author,
     server,
@@ -56,7 +56,7 @@ async def on_message(msg):
       if e.code == 50035: # Message too long to send
         note1 = f"The response to `{user_name}`'s request was too large,"
         note2 = f"so I've uploaded it as a file:"
-        path = result_file.get(raw_reply_text, msg.author.name)
+        path = result_file.get(raw_reply_text, msg.author.name, printout)
         await msg.channel.send(
           content=f'{note1} {note2}',
           file=discord.File(path))

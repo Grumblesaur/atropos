@@ -16,6 +16,7 @@ from dicelang.exceptions import DiceRollTimeout, ExponentiationTimeout, Operatio
 from dicelang.function import Function
 from dicelang.identifier import Identifier
 from dicelang.ownership import ScopingData
+from dicelang.print_queue import PrintQueue
 from dicelang.undefined import Undefined
 from dicelang.validator import IntegerValidator
 
@@ -23,12 +24,11 @@ class Visitor(object):
   def __init__(self, data, timeout=12):
     self.variable_data = data
     self.scoping_data = None
-    self.user = None
-    self.server = None
     self.loop_timeout = timeout
     self.execution_timeout = timeout * 3
     self.depth = 0
     self.must_finish_by = None
+    self.print_queue = PrintQueue()
     
   def walk(self, parse_tree, user_id, server_id, scoping_data=None):
     '''Start execution of a syntax tree.'''
@@ -47,10 +47,11 @@ class Visitor(object):
     # are finished executing.
     if not self.depth:
       self.scoping_data = None
-    return out
+    return (out, self.print_queue.flush(self.scoping_data.user))
   
   def process_operands(self, children):
-    '''Avoid typing the following list comprehension in a majority of handlers.'''
+    '''Avoid typing the following list comprehension in a majority
+    of handlers.'''
     return [self.handle_instruction(c) for c in children]
   
   def handle_instruction(self, tree):
@@ -261,6 +262,13 @@ class Visitor(object):
       out = self.handle_instruction(tree.children[0])
     elif tree.data == 'typeof':
       out = self.handle_typeof(tree.children)
+    
+    elif tree.data == 'print':
+      out = self.handle_instruction(tree.children[0])
+    elif tree.data == 'printline':
+      out = self.handle_print(tree.children, '\n')
+    elif tree.data == 'printword':
+      out = self.handle_print(tree.children, ' ')
     
     elif tree.data == 'atom' or tree.data == 'priority':
       out = self.handle_instruction(tree.children[0])
@@ -953,6 +961,14 @@ class Visitor(object):
     else:
       out = type(obj).__name__
     return out
+  
+  def handle_print(self, children, trailer):
+    '''Adds the value of an expression to the print queue
+    and returns the value of the expression.'''
+    value = self.process_operands(children)
+    msg = str(value) + trailer
+    self.print_queue.append(self.scoping_data.user, msg)
+    return value
    
   def handle_number_literal(self, children):
     '''Constructs an int or float from a numeric literal.'''

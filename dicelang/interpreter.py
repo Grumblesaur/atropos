@@ -29,9 +29,9 @@ class Interpreter(object):
     on that server, and the public `_` is intended to be the last result
     by any command passed to the interpreter.'''
     tree = self.parser.parse(command)
-    out = self.visitor.walk(tree, user, server)
-    self.datastore.put(user, '_', out, 'private')
-    self.datastore.put(server, '_', out, 'server')
-    self.datastore.put(Interpreter.GLOBAL_ID, '_', out, 'global')
-    return out
+    value, printout = self.visitor.walk(tree, user, server)
+    self.datastore.put(user, '_', value, 'private')
+    self.datastore.put(server, '_', value, 'server')
+    self.datastore.put(Interpreter.GLOBAL_ID, '_', value, 'global')
+    return (value, printout)
 

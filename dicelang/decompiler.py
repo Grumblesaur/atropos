@@ -317,6 +317,13 @@ class Decompiler(object):
     elif tree.data == 'typeof':
       out = f'typeof {self.decompile(tree.children[1])}'
     
+    elif tree.data == 'print':
+      out = self.decompile(tree.children[0])
+    elif tree.data == 'printline':
+      out = f'println {self.decompile(tree.children[1])}'
+    elif tree.data == 'printword':
+      out = f'print {self.decompile(tree.children[1])}'
+    
     elif tree.data == 'atom':
       out = self.decompile(tree.children[0])
     elif tree.data == 'number_literal':

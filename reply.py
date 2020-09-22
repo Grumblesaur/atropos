@@ -14,7 +14,7 @@ def dice_reply(interpreter, author, server, argument):
   context_size = max(15, len(argument) // 10)
   is_error = True
   try:
-    evaluated = interpreter.execute(argument, author.id, server.id)
+    evaluated, printout = interpreter.execute(argument, author.id, server.id)
     is_error = False
   except (UnexpectedCharacters, UnexpectedToken, UnexpectedInput) as e:
     evaluated = e.get_context(argument, context_size)
@@ -29,11 +29,15 @@ def dice_reply(interpreter, author, server, argument):
     evaluated = f'{e.__class__.__name__}: {e!s}'
     traceback.print_tb(e.__traceback__)
   
+  user = author.display_name
   if is_error:
-    fmt = '{user} received error:\n```{value}```'
+    msg = f'{user} received error:\n```{evaluated}```'
   else:
-    fmt = '{user} received:\n```diff\n{value}```'
-  return (fmt.format(user=author.display_name, value=evaluated), evaluated)
+    if not printout:
+      msg = f'{user} received:\n```diff\n{evaluated}```'
+    else:
+      msg = f'{user} received:\n```{printout}```\n```diff\n{evaluated}```'
+  return (msg, evaluated, printout)
   
 def view_globals_reply(lang, user):
   names = _fold(lang.keys('global'))
@@ -76,6 +80,7 @@ def view_core_reply(lang, user):
 
 def build(interpreter, author, channel, result):
   raw_reply = ''
+  po = ''
   response = result.rtype
   argument = result.value.strip()
   if result.other:
@@ -87,7 +92,7 @@ def build(interpreter, author, channel, result):
     reply = ''
   
   elif response == Response.DICE:
-    reply, raw_reply = dice_reply(interpreter, author, channel, argument)
+    reply, raw_reply, po = dice_reply(interpreter, author, channel, argument)
   elif response == Response.DICE_HELP:
     reply = '[dice help message unimplemented]'
   
@@ -120,6 +125,6 @@ def build(interpreter, author, channel, result):
     help_string = helptable.lookup(argument, option)
     raw_reply = help_string
     reply = f'Help for `{argument}`:\n{help_string}'
-  return (reply, raw_reply)
+  return (reply, raw_reply, po)
 
  
