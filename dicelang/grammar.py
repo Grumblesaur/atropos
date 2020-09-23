@@ -43,8 +43,12 @@ expression: assignment
           | while_loop
           | do_while_loop
           | conditional
-          | if_expr
+          | print
           | import
+
+print: KW_PRINTLN print -> printline
+     | KW_PRINT   print -> printword
+     | if_expr
 
 if_expr: repeat "if" repeat "else" if_expr -> inline_if
        | repeat "if"        "else" if_expr -> inline_if_binary
@@ -141,11 +145,7 @@ regex: reflection KW_SEEK reflection -> search
      | reflection
 
 reflection: KW_TYPEOF reflection -> typeof
-          | print
-
-print: KW_PRINTLN print -> printline
-     | KW_PRINT   print -> printword
-     | atom
+          | atom
 
 atom: number_literal
     | boolean_literal
