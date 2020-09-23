@@ -32,7 +32,10 @@ def dice_reply(interpreter, author, server, argument):
   
   user = author.display_name
   if is_error:
-    msg = f'{user} received error:\n```{evaluated}```'
+    if not printout:
+      msg = f'{user} received error:\n```diff\n{evaluated}```'
+    else:
+      msg = f'{user} received error:\n```{printout}```\n```{evaluated}```'
   else:
     if not printout:
       msg = f'{user} received:\n```diff\n{evaluated}```'

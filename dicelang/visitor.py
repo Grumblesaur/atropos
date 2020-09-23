@@ -48,7 +48,8 @@ class Visitor(object):
     tmp_user = self.scoping_data.user
     if not self.depth:
       self.scoping_data = None
-    return (out, self.print_queue.flush(tmp_user))
+      return (out, self.print_queue.flush(tmp_user))
+    return out
   
   def process_operands(self, children):
     '''Avoid typing the following list comprehension in a majority
