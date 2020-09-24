@@ -34,4 +34,7 @@ class Interpreter(object):
     self.datastore.put(server, '_', value, 'server')
     self.datastore.put(Interpreter.GLOBAL_ID, '_', value, 'global')
     return (value, printout)
+  
+  def get_print_queue_on_error(self, user):
+    return self.visitor.get_print_queue(user)
 

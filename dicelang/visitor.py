@@ -29,6 +29,9 @@ class Visitor(object):
     self.depth = 0
     self.must_finish_by = None
     self.print_queue = PrintQueue()
+  
+  def get_print_queue(self, user):
+    return self.print_queue.flush(user)
     
   def walk(self, parse_tree, user_id, server_id, scoping_data=None):
     '''Start execution of a syntax tree.'''

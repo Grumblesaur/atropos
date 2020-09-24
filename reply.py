@@ -28,8 +28,10 @@ def dice_reply(interpreter, author, server, argument):
     evaluated = f'(Interpreter Error) Missing internal identifier: {e!s}'
     traceback.print_tb(e.__traceback__)
   except DicelangError as e:
+    printout = interpreter.get_print_queue_on_error(author.id)
     evaluated = f'{e.__class__.__name__}: {e.args[1]}'
   except Exception as e:
+    printout = interpreter.get_print_queue_on_error(author.id)
     evaluated = f'{e.__class__.__name__}: {e!s}'
     traceback.print_tb(e.__traceback__)
   

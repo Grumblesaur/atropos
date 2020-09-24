@@ -8,7 +8,7 @@ class LoopTimeout(ExecutionTimeout):
   pass
 
 loop_msg = '\n'.join([
-  '{do1} while loop iterated %s times without terminating,',
+  '\n{do1} while loop iterated %s times without terminating,',
   "or your loop's condition never changed state. You may",
   'need to mark certain variables with "our" in front.',
   '\nSee "+help {do1}while" for more information.'
