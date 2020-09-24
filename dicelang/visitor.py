@@ -56,7 +56,6 @@ class Visitor(object):
       self.scoping_data = None
     else:
       out = result
-    print('depth =', self.depth)
     return out
   
   def process_operands(self, children):
