@@ -36,5 +36,5 @@ class Interpreter(object):
     return (value, printout)
   
   def get_print_queue_on_error(self, user):
-    return self.visitor.get_print_queue(user)
+    return self.visitor.get_print_queue_on_error(user)
 

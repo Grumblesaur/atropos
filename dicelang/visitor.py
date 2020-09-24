@@ -30,7 +30,9 @@ class Visitor(object):
     self.must_finish_by = None
     self.print_queue = PrintQueue()
   
-  def get_print_queue(self, user):
+  def get_print_queue_on_error(self, user):
+    '''Clean up call depth and return the print queue.'''
+    self.depth = 0
     return self.print_queue.flush(user)
     
   def walk(self, parse_tree, user_id, server_id, scoping_data=None):
@@ -41,7 +43,7 @@ class Visitor(object):
     else:
       self.scoping_data = scoping_data
     self.depth += 1
-    out = self.handle_instruction(parse_tree)
+    result = self.handle_instruction(parse_tree)
     self.depth -= 1
     
     # Reentrancy case -- when a dicelang Function is executed,
@@ -50,8 +52,11 @@ class Visitor(object):
     # are finished executing.
     tmp_user = self.scoping_data.user
     if not self.depth:
+      out = (result, self.print_queue.flush(self.scoping_data.user))
       self.scoping_data = None
-      return (out, self.print_queue.flush(tmp_user))
+    else:
+      out = result
+    print('depth =', self.depth)
     return out
   
   def process_operands(self, children):
