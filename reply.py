@@ -2,6 +2,7 @@ import traceback
 from lark import ParseError, LexError, GrammarError
 from lark.exceptions import UnexpectedEOF
 from lark import UnexpectedToken, UnexpectedCharacters, UnexpectedInput
+from dicelang.exceptions import DicelangError
 from commands import Response
 import helptext
 
@@ -26,6 +27,8 @@ def dice_reply(interpreter, author, server, argument):
   except NameError as e:
     evaluated = f'(Interpreter Error) Missing internal identifier: {e!s}'
     traceback.print_tb(e.__traceback__)
+  except DicelangError as e:
+    evaluated = f'{e.__class__.__name__}: {e.args[1]}'
   except Exception as e:
     evaluated = f'{e.__class__.__name__}: {e!s}'
     traceback.print_tb(e.__traceback__)
