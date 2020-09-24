@@ -46,6 +46,8 @@ xor          | xor
 or           | or
 repeat       | ^
 if           | if else
+print        | print
+println      | println
 for          | for do
 while        | while do
 do           | do while
