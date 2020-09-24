@@ -370,7 +370,7 @@ class Visitor(object):
       results.append(self.handle_instruction(children[1]))
       if time.time() > timeout:
         times = len(results)
-        raise WhileLoopTimeout(e, times=times)
+        raise WhileLoopTimeout(times=times)
     self.scoping_data.pop_scope()
     return results
  
@@ -383,7 +383,7 @@ class Visitor(object):
       results.append(self.handle_instruction(children[0]))
       if time.time() > timeout:
         times = len(results)
-        raise DoWhileLoopTimeout(e, times=times)
+        raise DoWhileLoopTimeout(times=times)
     self.scoping_data.pop_scope()
     return results
 
