@@ -133,7 +133,8 @@ def build(interpreter, author, channel, result):
   elif response == Response.HELP_KEYWORD:
     help_string = helptable.lookup(argument, option)
     raw_reply = help_string
-    reply = f'Help for `{argument}`:\n{help_string}'
+    optstring = (' ' + option) if option else ''
+    reply = f'Help for `{argument}{optstring}`:\n{help_string}'
   return (reply, raw_reply, po)
 
  
