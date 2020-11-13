@@ -15,11 +15,15 @@ Examples:
 
 While the syntax of Dicelang allows to check the lack of membership via
 
-```not (element in collection)```
+```
+not (element in collection)
+```
 
 the more idiomatic way of doing so is
 
-```element not in collection```
+```
+element not in collection
+```
 
 which eliminates a set of parentheses and conveys the point more legibly.
 
