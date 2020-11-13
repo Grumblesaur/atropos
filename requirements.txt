@@ -3,6 +3,7 @@ asgiref==3.2.10
 async-timeout==3.0.1
 attrs==19.3.0
 chardet==3.0.4
+discord==1.0.1
 discord.py==1.4.1
 Django==3.0.7
 idna==2.8
@@ -20,7 +21,8 @@ pytest==5.3.5
 pytz==2020.1
 six==1.14.0
 sqlparse==0.3.1
-tesnames@git+git://github.com/hrmay/tesnames.git
+tesnames @ git+git://github.com/hrmay/tesnames.git@e9dba4258aa064328ac79a016268739781589bb1
+timestamp @ git+https://github.com/Grumblesaur/timestamp.git@048075a28da4b854cc980d3759db823f333068e4
 typing-extensions==3.7.4.1
 Unidecode==1.1.1
 wcwidth==0.1.8

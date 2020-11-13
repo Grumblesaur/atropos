@@ -9,7 +9,9 @@ class _Singleton(object):
   
 class Undefined(_Singleton, object):
   '''A placeholder singleton value like Python's `None` to stand in
-  when a a user references an identifier that does not yet exist.'''
+  when a a user references an identifier that does not yet exist.
+  We specifically avoid using Python's `None` object, so that we can
+  be certain if a `None` appears during testing, it is due to a bug.'''
   def __repr__(self):
     return 'Undefined'
   def __str__(self):
