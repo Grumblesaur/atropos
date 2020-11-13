@@ -14,4 +14,8 @@ Examples:
   
   's' >= 't'
   >>> False
+  
+  's' > 2
+  >>> TypeError: `>=` not supported between instances of 'str' and 'int'
 ```
+
