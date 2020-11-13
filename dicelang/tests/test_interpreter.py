@@ -20,34 +20,14 @@ def get_lines(filename):
         cases.append((command, expected))
   return cases
 
-def get_files():
-  cases = [ ]
-  for filename in files_to_test:
-    with open(f'data/{filename}', 'r') as f:
-      code, result = map(lambda s: s.strip(), f.read().split('===>'))
-      print(code, result)
-      result = Skip if result == '__NO_TEST_CASE__' else eval(result)
-      cases.append((code, result))
-  return cases
-
 class TestInterpreter:
   interpreter = Interpreter()
 
   @pytest.mark.parametrize("command, expected", get_lines('data/lines.txt'))
   def test_lines(self, command, expected):
-    actual = TestInterpreter.interpreter.execute(command, user, server)
+    result = TestInterpreter.interpreter.execute(command, user, server)
+    actual = result[0]
     predicate = actual == expected if expected is not Skip else True
     print(actual)
     assert predicate
 
-  @pytest.mark.parametrize("code, result", get_files())
-  def test_files(self, code, result):
-    actual = TestInterpreter.interpreter.execute(code, user, server)
-    predicate = actual == result if result is not Skip else True
-    assert predicate
-  
-  @pytest.mark.parametrize('arg', ['pass'])
-  def test_files(self, arg):
-    TestInterpreter.interpreter.save()
-  
-  

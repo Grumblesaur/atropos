@@ -739,7 +739,7 @@ class Visitor(object):
     '''Get the arithmetic inverse of a numeric value, or the reverse of
     some ordered iterable.'''
     operand = self.process_operands(children)[0]
-    if isinstance(operand, (list, str)):
+    if isinstance(operand, (list, str, tuple)):
       out = operand[::-1]
     else:
       out = -operand

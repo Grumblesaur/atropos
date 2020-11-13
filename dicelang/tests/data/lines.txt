@@ -97,6 +97,10 @@ x is my x is x ===> True
 del v ===> []
 del my v ===> []
 del my x ===> 1
+del x ===> 1
+del my y ===> 2
+del our z ===> 3
+x ===> Undefined
 
 "double quoted string" ===> 'double quoted string'
 'single quoted string' ===> 'single quoted string'
@@ -106,6 +110,8 @@ del my x ===> 1
 d = {6 : 6.5, 'p' : "q"} ===> {6 : 6.5, 'p' : 'q'}
 d['p'] ===> 'q'
 d['key'] = 'value' ===> 'value'
+d = {} ===> {}
+del d ===> {}
 
 [1,2,3][0] ===> 1
 [[[True]]][0][0][0] ===> True
@@ -116,22 +122,23 @@ nested ===> {'first' : {'second' : Undefined}, 'new' : {}}
 nested['first']['second'] ===> Undefined
 nested['first']['second'] = 'm' ===> 'm'
 nested ===> {'first' : {'second' : 'm'}, 'new' : {}}
+del nested ===> {'first' : {'second' : 'm'}, 'new' : {}}
 
-x ===> 1
-del x ===> 1
-x ===> Undefined
 
 our box = {'a' : {'a' : {'a' : 1} } } ===> {'a' : {'a' : {'a' : 1}}}
 our box ===> {'a' : {'a' : {'a' : 1}}}
 our box['a']['a']['a'] ===> 1
 del our box['a']['a']['a'] ===> 1
 our box ===> {'a' : {'a' : {} }}
+del our box ===> {'a' : {'a' : {} }}
 
 begin block_x = 1; block_y = 2; block_x + block_y end ===> 3
 block_result = begin block_y end ===> Undefined
 
 block_result = begin q = (begin q = 5 end) + 1 end ===> 6
 block_result = begin q = (begin q = 5 end); q = q + (begin q = 5 end) end ===> 10
+
+del block_result ===> 10
 
 none = () -> begin [] end ===> __NO_TEST_CASE__
 one = (first) -> begin [first] end ===> __NO_TEST_CASE__
@@ -140,10 +147,13 @@ add = (left, right) -> left + right ===> __NO_TEST_CASE__
 add(6, 8) ===> 14
 
 none() ===> []
-
 one(1) ===> [1]
-
 two(1, 2) ===> [1, 2]
+
+del none ===> __NO_TEST_CASE__
+del one ===> __NO_TEST_CASE__
+del two ===> __NO_TEST_CASE__
+del add ===> __NO_TEST_CASE__
 
 4d6h3^6 ===> __NO_TEST_CASE__
 "test"^6 ===> ["test"] * 6
@@ -179,9 +189,12 @@ my q = !>my p ===> 9
 #(while my q do my q = my q - 1) ===> 9
 my p = [] ===> []
 #(do begin my p = my p + [4d6h3] end while #my p < 6) ===> 6
+del my q ===> __NO_TEST_CASE__
+del my p ===> __NO_TEST_CASE__
 
-zz = 0 ===> 0
+global zz = 0 ===> 0
 #(do begin global zz = global zz + 1 end while global zz < 3) ===> 3
+del global zz ===> __NO_TEST_CASE__
 
 if True then 'zip' else 'zap' ===> 'zip'
 if False then 'zip' else 'zap' ===> 'zap'
@@ -196,6 +209,17 @@ my result = 'yes' if else 'no' ===> 'yes'
 `1`+`1` ===> 2
 
 ((m) -> m ** 2) -: [0 to 5] ===> [x ** 2 for x in range(5)]
+
+[0 through 10] ===> [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10]
+[0 to 10] ===> [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+[0 through 10 by 2] ===> [0, 2, 4, 6, 8, 10]
+[0 to 10 by 2] ===> [0, 2, 4, 6, 8]
+[10 through 0] ===> [10, 9, 8, 7, 6, 5, 4, 3, 2, 1, 0]
+[10 to 0] ===> [10, 9, 8, 7, 6, 5, 4, 3, 2, 1]
+[10 to 0 by 2] ===> [10, 8, 6, 4, 2]
+[10 through 0 by 2] ===> [10, 8, 6, 4, 2, 0]
+-[1 through 5] ===> [5, 4, 3, 2, 1]
+-(0, 2, 4) ===> (4, 2, 0)
 
 obj = {'x' : 1, 'q' : 2} ===> {'x' : 1, 'q' : 2}
 obj.x == obj['x'] ===> True

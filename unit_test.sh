@@ -1,3 +1,5 @@
+export DICELANG_CORE_EDITORS="/home/$USER/.atropos-vars/editors"
+
 source env/bin/activate
 cd dicelang/tests
 pytest
