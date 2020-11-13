@@ -24,6 +24,9 @@ class Visitor(object):
   def __init__(self, data, timeout=12):
     self.variable_data = data
     self.scoping_data = None
+    
+    # Timeout is parameterized as its value may vary due to load in later
+    # versions of Atropos.
     self.loop_timeout = timeout
     self.execution_timeout = timeout * 3
     self.depth = 0
@@ -31,7 +34,8 @@ class Visitor(object):
     self.print_queue = PrintQueue()
   
   def get_print_queue_on_error(self, user):
-    '''Clean up call depth and return the print queue.'''
+    '''Reset the interpreter for the next command and release all
+    debug output to the user.'''
     self.depth = 0
     return self.print_queue.flush(user)
     
@@ -49,7 +53,9 @@ class Visitor(object):
     # Reentrancy case -- when a dicelang Function is executed,
     # we don't want to erase our scoping data since we're still
     # pushing and popping stack frames. When depth is zero, we
-    # are finished executing.
+    # are finished executing. Furthermore, we only want to return
+    # the current working value to the previous depth level; print
+    # queue output doesn't come until we bottom out at depth=0.
     tmp_user = self.scoping_data.user
     if not self.depth:
       out = (result, self.print_queue.flush(self.scoping_data.user))
@@ -65,6 +71,10 @@ class Visitor(object):
   
   def handle_instruction(self, tree):
     '''Dispatch execution recursively through the syntax tree.'''
+    
+    # Each time we address a new instruction, we check to see if we've
+    # taken longer than we promised to at the start of the interpreter call.
+    # If we have, then we must bail out and report failure to the user.
     now = time.time()
     if now > self.must_finish_by:
       e = ' '.join([
@@ -73,6 +83,8 @@ class Visitor(object):
         'or just used a lot of different operations.'
       ])
       raise ExecutionTimeout(e)
+    
+    
     if tree.data == 'start':
       out = [self.handle_instruction(c) for c in tree.children][-1]
     elif tree.data == 'block' or tree.data == 'short_body':
@@ -901,8 +913,8 @@ class Visitor(object):
     return out
 
   def handle_plugin_call(self, children):
-    '''Find a plugin by the alias provided and execute it with the right
-    operand as an argument.'''
+    '''Find a plugin by the alias provided as the left operand and execute it
+    with the right operand as an argument.'''
     plugin_alias, argument = self.process_operands(children)
     operation = plugins.lookup(plugin_alias)
     return operation(argument)
@@ -916,13 +928,20 @@ class Visitor(object):
     count = operands[2] if len(operands) > 2 else None
     as_sum = result_type == 'scalar'
     
+    # Extremely large rolls (a number of dice with 10+ digits; 10+ digit sides
+    # is fine) will cause the validator to raise an exception, which is written
+    # here, and which will be visible to the user if this occurs.
     e = ' '.join([
-      f'{dice} is too many dice! This operation may take too long, potentially preventing',
-      'other users from being able to roll dice too.'])
+      f'{dice} is too many dice! This operation may take too long,'
+      'potentially preventing other users from being able to roll dice too.'])
     IntegerValidator(10, DiceRollTimeout).validate(dice, e)
+    
     return util.roll(dice, sides, count, keep_mode, as_sum)
   
   def handle_apply(self, children):
+    '''Accepts a function as the left operand, and some iterable (usually a list)
+    as the right operand. The function is executed on each element of the iterable,
+    and the results are returned in a list in the order they were processed.'''
     function, iterable = self.process_operands(children)
     return [function(self.scoping_data, self, x) for x in iterable]
   
