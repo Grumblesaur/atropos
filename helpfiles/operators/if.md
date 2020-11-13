@@ -3,7 +3,9 @@
 `if` is a conditional construct which takes multiple forms. The first is a
 simple clausal form:
 
-```if condition then expression```
+```
+if condition then expression
+```
 
 When `condition` is `True`, then the expression is evaluated, and the if clause
 returns that value. Otherwise, `Undefined` is returned.
@@ -18,7 +20,9 @@ otherwise, it will be set to `Undefined`.
 
 Next is the compound clausal form:
 
-```if condition then expression1 else expression2```
+```
+if condition then expression1 else expression2
+```
 
 When `condition` is `True`, then `expression1` is evaluated, and the if-else
 clause returns that value, otherwise, `expression2` is evaluated, and the if-
@@ -57,7 +61,9 @@ corresponding expression executed, ignoring the rest of the chain.
 The last form is of a Python-like inline form, akin to the more laconic `? :`
 ternary operator of C-like programming languages:
 
-```expression1 if condition else expression2```
+```
+expression1 if condition else expression2
+```
 
 `condition` is evaluated. If it is `True`, then `expression1`'s value is
 returned, otherwise `expression2`'s value is returned.
