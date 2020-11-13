@@ -85,3 +85,25 @@ def string_format(format_string, fields):
     out = format_string.format(fields)
   return out
 
+def range_list(closed, start, stop, step=1):
+  if start > stop:
+    upward = False
+    step = -abs(step)
+  elif start < stop:
+    upward = True
+    step = abs(step)
+  else:
+    return [start]
+  
+  if closed:
+    stop += step
+  
+  out = []
+  i = start
+  while (upward and i < stop) or (not upward and i > stop):
+    out.append(i)
+    i += step
+   
+  return out
+
+

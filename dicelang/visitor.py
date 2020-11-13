@@ -1027,16 +1027,11 @@ class Visitor(object):
   
   def handle_list_range_literal(self, children):
     '''Constructs a list literal on the interval [1, n).'''
-    return [x for x in range(*self.process_operands(children))]
+    return util.range_list(False, *self.process_operands(children))
   
   def handle_closed_list_literal(self, children):
     '''Constructs a list on the interval [1, n].'''
-    operands = self.process_operands(children)
-    step = operands[2] if len(operands) == 3 else 1
-    start, stop = operands[0], operands[1] + 1
-    if start > stop and step == 1:
-      step *= -1
-    return [x for x in range(start, stop, step)]
+    return util.range_list(True, *self.process_operands(children))
   
   def handle_tuple(self, children):
     '''Constructs a tuple from the literal syntax.'''
