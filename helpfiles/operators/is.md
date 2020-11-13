@@ -20,11 +20,15 @@ Examples:
 
 While the syntax of Dicelang allows to check that two objects are different via
 
-```not (obj1 is obj2)```
+```
+not (obj1 is obj2)
+```
 
 the more idiomatic way of doing it is
 
-```obj1 is not obj2```
+```
+obj1 is not obj2
+```
 
 which eliminates a set of parentheses and conveys the point more legibly.
 
