@@ -1,3 +1,4 @@
+import copy
 import lark
 from dicelang import decompiler
 from dicelang import grammar
@@ -28,6 +29,12 @@ class Function(object):
       self.params = param_names
       param_string = ', '.join(param_names)
       self.src = f'({param_string}) -> {self.dcmp.decompile(tree_or_source)}'
+  
+  def __deepcopy__(self, memodict={}):
+    newtree = type(self.code)(
+      copy.deepcopy(self.code.data),
+      copy.deepcopy(self.code.children))
+    return type(self)(newtree, self.params[:])
   
   @staticmethod
   def _ensure_unique(parameters):

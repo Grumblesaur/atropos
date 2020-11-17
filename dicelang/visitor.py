@@ -454,6 +454,7 @@ class Visitor(object):
         name = attr.name
         val = val[name]
       imported = Identifier(name, self.scoping_data, 'server', self.variable_data)
+      print(val)
       imported.put(copy.deepcopy(val))
       out = True
     except (KeyError, AttributeError) as e:
@@ -939,9 +940,10 @@ class Visitor(object):
     return util.roll(dice, sides, count, keep_mode, as_sum)
   
   def handle_apply(self, children):
-    '''Accepts a function as the left operand, and some iterable (usually a list)
-    as the right operand. The function is executed on each element of the iterable,
-    and the results are returned in a list in the order they were processed.'''
+    '''Accepts a function as the left operand, and some iterable (usually a
+    list) as the right operand. The function is executed on each element of the
+    iterable, and the results are returned in a list in the order they were
+    processed.'''
     function, iterable = self.process_operands(children)
     return [function(self.scoping_data, self, x) for x in iterable]
   
