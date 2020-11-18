@@ -20,6 +20,9 @@ class ScopingData(object):
   def pop_closure(self):
     self.closure.pop()
   
+  def clear_closure(self):
+    self.closure = []
+  
   def calling_environment(self):
     frame = self.get_frame()
     if frame is NotLocal:
