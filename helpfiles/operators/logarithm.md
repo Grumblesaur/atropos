@@ -1,3 +1,3 @@
-#### Logarithm
+#### Logarithm / Dict-style format
 
 

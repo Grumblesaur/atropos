@@ -349,7 +349,8 @@ class Visitor(object):
     '''Builds a function object.'''
     code = children[-1]
     params = [c.value for c in children[:-1]]
-    out = Function(code, params)
+    closed = self.scoping_data.calling_environment()
+    out = Function(code, param_names=params, closed_vars=closed)
     out.visitor = self
     return out
 

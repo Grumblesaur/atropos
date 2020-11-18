@@ -17,7 +17,7 @@ Examples
   ~ unintuitive manner, since scoped variables (that is, without `core`, `our`,
   ~ `global`, or `my`) behave as `our` outside of a block or function scope,
   ~ but as a local variable inside a block or function scope.
-  ~ A full explanation available at "+help scope".
+  ~ Full explanation available at "+help scope".
   
   our x = 7;
   do begin

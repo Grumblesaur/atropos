@@ -6,10 +6,17 @@ its left operand's value.
 
 Examples:
 ```
-  1 and 2        ~ Returns 2
-  True and False ~ Returns False
-  False and 'a'  ~ Returns False
-  0 and [ ]      ~ Returns [ ]
+  1 and 2
+  >>> 2
+  
+  True and False
+  >>> False
+  
+  False and 'a'
+  >>> False
+  
+  0 and [ ]
+  >>> 0
 ```
 
 
