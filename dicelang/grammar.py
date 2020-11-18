@@ -2,7 +2,6 @@ raw_text = r"""
 start: expression (";" expression)* (";")?
 
 identifier_get: identifier
-              | KW_FIX identifier
 identifier_set: identifier "=" expression
 identifier_set_subscript: identifier ("[" expression "]")+ "=" expression
 
@@ -196,7 +195,7 @@ TRUE:      "True"
 FALSE:     "False"
 UNDEFINED: "Undefined"
 
-IDENT:  /(?!(global|my|our|core|del|like|seek|format|typeof|fix)\b)[a-zA-Z_]+[a-zA-Z0-9_]*/
+IDENT:  /(?!(global|my|our|core|del|like|seek|format|typeof)\b)[a-zA-Z_]+[a-zA-Z0-9_]*/
 PARAM:  /[a-zA-Z_]+[a-zA-Z0-9_]*/
 STRING: /("(?!"").*?(?<!\\)(\\\\)*?"|'(?!'').*?(?<!\\)(\\\\)*?')/i
 
@@ -217,7 +216,6 @@ KW_LIKE:    "like"
 KW_SEEK:    "seek"
 KW_CORE:    "core"
 KW_OUR:     "our"
-KW_FIX:     "fix"
 KW_MY:      "my" 
 KW_R:       "r"
 KW_D:       "d"
