@@ -21,12 +21,16 @@ class ScopingData(object):
     self.closure.pop()
   
   def calling_environment(self):
-    try:
-      scope = copy.deepcopy(self.get_scope())
-    except IndexError:
-      scope = {}
-    return scope
-  
+    frame = self.get_frame()
+    if frame is NotLocal:
+      try:
+        frame = [copy.deepcopy(self.get_scope())]
+      except IndexError:
+        frame = [{}]
+    else:
+      frame = copy.deepcopy(frame)
+    return frame
+   
   def push_frame(self):
     self.frame_id += 1
     self.frames[self.frame_id] = [ ]
@@ -83,8 +87,9 @@ class ScopingData(object):
     of a function), this attempts to retrieve a key from the innermost scope
     of the stack frame outward.
     
-    In either case, this function will report with the NotLocal object to
-    indicate that a global variable lookup is necessary.'''
+    If applicable, the lookup will search the current frame of closed
+    variables. If this also fails, the function will return NotLocal.
+    Otherwise, a value will be returned.'''
     out = None
     frame = self.get_frame()
     if frame is NotLocal:
@@ -102,11 +107,11 @@ class ScopingData(object):
           break
     
     if out is None:
-      try:
-        out = self.closure[-1][key]
-      except KeyError:
-        out = NotLocal
-    return out
+      for scope in reversed(self.closure[-1]):
+        if key in scope:
+          out = scope[key]
+          break
+    return out if out is not None else NotLocal
   
   def put(self, key, value):
     '''For anonymous scopes, this attempts to emplace a value at a key from

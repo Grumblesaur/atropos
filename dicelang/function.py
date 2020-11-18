@@ -17,7 +17,8 @@ class Function(object):
   def __init__(self, tree_or_source, param_names=None, closed_vars=None):
     self.visitor = None
     self.dcmp = decompiler.Decompiler()
-    self.closed = closed_vars if closed_vars is not None else {}
+    self.closed = closed_vars if closed_vars else [{}]
+    
     if param_names is None:
       tree = Function.parser.parse(tree_or_source)
       self.code = tree.children[-1]
@@ -35,7 +36,7 @@ class Function(object):
     newtree = type(self.code)(
       copy.deepcopy(self.code.data),
       copy.deepcopy(self.code.children))
-    return type(self)(newtree, self.params[:])
+    return type(self)(newtree, self.params[:], copy.deepcopy(self.closed))
   
   @staticmethod
   def _ensure_unique(parameters):
