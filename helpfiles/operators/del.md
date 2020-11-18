@@ -12,16 +12,18 @@ Examples
 ```
   global x = 10;
   del global x;  ~ simple delete with a global variable.
-  
   >>> 10
   
   my z = {'a' : 4, 'z' : 9};
   del my z.a  ~ attribute delete with a private variable.
-  
   >>> 4
   
   foo = {'bar' : 10, 'baz' : 50};
   del foo['bar']  ~ index delete with an untagged variable.
+  >>> 10
+  
+  global foo = del foo ~ Move/rename foo to a global
+  >>> {'baz' : 50}
 ```
 
 

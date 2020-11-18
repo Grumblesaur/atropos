@@ -13,9 +13,10 @@ class Function(object):
     else:
       Function.__repr__ = Function.normal_repr
   
-  def __init__(self, tree_or_source, param_names=None):
+  def __init__(self, tree_or_source, param_names=None, closed_vars=None):
     self.visitor = None
     self.dcmp = decompiler.Decompiler()
+    self.closed = closed_vars if closed_vars is not None else {}
     if param_names is None:
       tree = Function.parser.parse(tree_or_source)
       self.code = tree.children[-1]
@@ -44,7 +45,7 @@ class Function(object):
   
   def file_repr(self):
     flat_source = self.src.replace('\n', '\f')
-    return f'Function({flat_source!r})'
+    return f'Function({flat_source!r}, closed_vars={self.closed!r})'
 
   __repr__ = normal_repr
   
@@ -53,16 +54,20 @@ class Function(object):
       self.visitor = visitor
     if len(self.params) != len(args):
       raise CallError('Arguments mismatch formal parameters in length.')
+    
     arguments_scope = dict(zip(self.params, args))
     scoping_data.push_frame()
     scoping_data.push_scope(arguments_scope)
+    scoping_data.push_closure(self.closed)
     out = self.visitor.walk(
       self.code,
       scoping_data.user,
       scoping_data.server,
       scoping_data)
+    scoping_data.pop_closure()
     scoping_data.pop_scope()
     scoping_data.pop_frame()
+    
     return out
  
 

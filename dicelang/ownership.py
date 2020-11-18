@@ -1,3 +1,5 @@
+import copy
+
 class StackException(Exception):
   pass
 
@@ -10,6 +12,20 @@ class ScopingData(object):
     self.frame_id = 0
     self.frames = { }
     self.anonymous_scopes = [ ]
+    self.closure = []
+  
+  def push_closure(self, saved_environment):
+    self.closure.append(saved_environment)
+  
+  def pop_closure(self):
+    self.closure.pop()
+  
+  def calling_environment(self):
+    try:
+      scope = copy.deepcopy(self.get_scope())
+    except IndexError:
+      scope = {}
+    return scope
   
   def push_frame(self):
     self.frame_id += 1
@@ -84,7 +100,13 @@ class ScopingData(object):
         if key in scope:
           out = scope[key]
           break
-    return out if out is not None else NotLocal
+    
+    if out is None:
+      try:
+        out = self.closure[-1][key]
+      except KeyError:
+        out = NotLocal
+    return out
   
   def put(self, key, value):
     '''For anonymous scopes, this attempts to emplace a value at a key from

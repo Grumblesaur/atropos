@@ -29,6 +29,7 @@ class Interpreter(object):
     on that server, and the public `_` is intended to be the last result
     by any command passed to the interpreter.'''
     tree = self.parser.parse(command)
+    print(tree)
     raw_output = self.visitor.walk(tree, user, server)
     print(raw_output)
     value, printout = raw_output
