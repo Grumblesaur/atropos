@@ -45,4 +45,3 @@ determines the return value.
   >>> -1
 ```
 
-

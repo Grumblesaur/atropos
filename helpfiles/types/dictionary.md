@@ -55,4 +55,12 @@ and are a series of letters, digits, and underscores.
 ```
 
 By using strings as keys and functions as values, you can create a simple
-library of functions.
+library of functions and variables:
+
+```
+  math = {};
+  math.pow = (base, exp) -> base ** exp;
+  math.pi  = 3.14159;
+  math.sqrt = (x) -> x ** 0.5
+```
+
