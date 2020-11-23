@@ -733,17 +733,33 @@ class Visitor(object):
   def handle_division(self, children):
     '''Ordinary floating point division.'''
     dividend, divisor = self.process_operands(children)
-    return dividend / divisor
+    if divisor == 0:
+      sign = 1 if dividend >= 0 else -1
+      sign *= 1 if divisor >= 0 else -1
+      out = sign * inf
+    else:
+      out = dividend / divisor
+    return out
   
   def handle_remainder(self, children):
     '''Remainder for float or int.'''
     dividend, divisor = self.process_operands(children)
-    return dividend % divisor
+    if divisor == 0:
+      out = nan
+    else:
+      out = dividend % divisor
+    return out
   
   def handle_floor_division(self, children):
     '''Divide and always round down, returning integer.'''
     dividend, divisor = self.process_operands(children)
-    return dividend // divisor
+    if divisor == 0:
+      sign = 1 if dividend >= 0 else -1
+      sign *= 1 if divisor >= 0 else -1
+      out = sign * inf
+    else:
+      out = dividend // divisor
+    return out
   
   def handle_negation(self, children):
     '''Get the arithmetic inverse of a numeric value, or the reverse of
@@ -787,7 +803,7 @@ class Visitor(object):
           out = 1 / out
       else:
         if mantissa == 0:
-          out = 0.0 * 9e99999999999 # generate a nan for 0 ** 0
+          out = nan
         else:
           out = 1 # nonzero to the power zero is always 1
     else:
