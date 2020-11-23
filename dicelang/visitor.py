@@ -727,7 +727,7 @@ class Visitor(object):
     elif isinstance(factor1, numeric_types) and isinstance(factor2, array):
       out = util.iterable_repetition(factor1, factor2)
     else:
-      out = multiplier * multiplicand
+      out = factor1 * factor2
     return out
 
   def handle_division(self, children):
