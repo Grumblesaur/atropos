@@ -158,7 +158,7 @@ atom: number_literal
     | "(" expression ")" -> priority
 
 undefined_literal: UNDEFINED
-number_literal:    NUMBER
+number_literal:    REAL | COMPLEX
 string_literal:    STRING
 boolean_literal:   TRUE | FALSE
 
@@ -230,7 +230,8 @@ obj_comp:  IS | IS NOT
 
 
 
-%import common.NUMBER -> NUMBER
+%import common.NUMBER -> REAL
+COMPLEX: REAL ["j"|"J"]
 %import common.WS
 %import common.NEWLINE
 %ignore WS

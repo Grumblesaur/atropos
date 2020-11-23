@@ -1013,13 +1013,28 @@ class Visitor(object):
   def handle_number_literal(self, children):
     '''Constructs an int or float from a numeric literal.'''
     child = children[-1]
-    try:
-      x = int(child.value)
-      f = float(child.value)
-    except ValueError:
-      x = None
-      f = float(child.value)
-    return x if x == f else f
+    
+    def try_parse_as(num_type, value):
+      try:
+        out = num_type(value)
+      except (ValueError, TypeError):
+        out = None
+      return out
+    
+    x = try_parse_as(int, child.value)
+    f = try_parse_as(float, child.value)
+    c = try_parse_as(complex, child.value)
+    
+    if x is not None:
+      return x
+    if f is not None:
+      return f
+    
+    if c is not None:
+      out = c
+    else:
+      raise ValueError(f'{child.value!r} could not be parsed as a numeric!')
+    return out
   
   def handle_boolean_literal(self, children):
     '''Constructs a bool from the literal syntax.'''
