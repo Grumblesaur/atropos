@@ -93,7 +93,7 @@ def range_list(closed, start, stop, step=1):
     upward = True
     step = abs(step)
   else:
-    return [start]
+    return [start] if closed else []
   
   if closed:
     stop += step
