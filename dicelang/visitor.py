@@ -759,8 +759,10 @@ class Visitor(object):
     '''Get the absolute value of a numeric while keeping the same type;
     no-op on non-numerics.'''
     operand = self.process_operands(children)[0]
-    if isinstance(operand, numeric_types):
+    if isinstance(operand, (float, int)):
       out = operand if operand >= 0 else -operand
+    elif isinstance(operand, complex):
+      out = operand.conjugate()
     else:
       out = operand
     return out
@@ -804,7 +806,8 @@ class Visitor(object):
 
   def handle_sum_or_join(self, children):
     '''Sum a list of numbers or concatenate a |list of strings|, or
-    |list of lists/tuples|, or |list of dicts|.'''
+    |list of lists/tuples|, or |list of dicts|. For a complex number,
+    this will give the imaginary part.'''
     operand = self.process_operands(children)[0]
     if isinstance(operand, Iterable) and operand:
       out = operand[0]
@@ -812,17 +815,22 @@ class Visitor(object):
         out += element
     elif isinstance(operand, Iterable) and not operand:
       out = 0
+    elif isinstance(operand, complex):
+      out = operand.imag
     else:
       out = operand
     return out
 
   def handle_length(self, children):
-    '''Obtain the length of an iterable.'''
+    '''Obtain the length of an iterable. For a complex number,
+    this will give the real part.'''
     operand = self.process_operands(children)[0]
     if isinstance(operand, Iterable):
       out = len(operand)
     elif isinstance(operand, Function):
       out = len(operand.params)
+    elif isinstance(operand, complex):
+      out = operand.real
     else:
       out = 0
     return out
