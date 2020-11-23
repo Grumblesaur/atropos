@@ -11,13 +11,22 @@ from dicelang import util
 
 from dicelang.float_special import inf
 from dicelang.float_special import nan
-from dicelang.exceptions import ExecutionTimeout, WhileLoopTimeout, DoWhileLoopTimeout
-from dicelang.exceptions import DiceRollTimeout, ExponentiationTimeout, OperationError
+from dicelang.float_special import numeric_types
+
+from dicelang.exceptions import DiceRollTimeout
+from dicelang.exceptions import DoWhileLoopTimeout
+from dicelang.exceptions import ExecutionTimeout
+from dicelang.exceptions import ExponentiationTimeout
+from dicelang.exceptions import OperationError
+from dicelang.exceptions import WhileLoopTimeout
+
 from dicelang.function import Function
+from dicelang.undefined import Undefined
+
 from dicelang.identifier import Identifier
 from dicelang.ownership import ScopingData
 from dicelang.print_queue import PrintQueue
-from dicelang.undefined import Undefined
+
 from dicelang.validator import IntegerValidator
 
 class Visitor(object):
@@ -711,13 +720,12 @@ class Visitor(object):
   def handle_multiplication(self, children):
     '''Handles multiplication of numerics and the repetition of ordered
     iterables.'''
-    multiplier, multiplicand = self.process_operands(children)
+    factor1, factor2 = self.process_operands(children)
     array = (list, str)
-    numeric = (int, float)
-    if isinstance(multiplier, array) and isinstance(multiplicand, numeric):
-      out = util.iterable_repetition(multiplier, multiplicand)
-    elif isinstance(multiplier, numeric) and isinstance(multiplicand, array):
-      out = util.iterable_repetition(multiplicand, multiplier)
+    if isinstance(factor1, array) and isinstance(factor2, numeric_types):
+      out = util.iterable_repetition(factor1, factor2)
+    elif isinstance(factor1, numeric_types) and isinstance(factor2, array):
+      out = util.iterable_repetition(factor1, factor2)
     else:
       out = multiplier * multiplicand
     return out
@@ -751,7 +759,7 @@ class Visitor(object):
     '''Get the absolute value of a numeric while keeping the same type;
     no-op on non-numerics.'''
     operand = self.process_operands(children)[0]
-    if isinstance(operand, (float, int)):
+    if isinstance(operand, numeric_types):
       out = operand if operand >= 0 else -operand
     else:
       out = operand
@@ -762,9 +770,10 @@ class Visitor(object):
     iterated multiplication for integer powers in order to allow for timeout
     checks for when an extremely large number is being constructed.'''
     mantissa, exponent = self.process_operands(children)
-    if isinstance(exponent, float) and isinstance(mantissa, (int, float)):
+    non_ints = (float, complex)
+    if isinstance(exponent, non_ints) and isinstance(mantissa, numeric_types):
       out = mantissa ** exponent
-    elif isinstance(exponent, int) and isinstance(mantissa, (int, float)):
+    elif isinstance(exponent, int) and isinstance(mantissa, numeric_types):
       e = ExponentiationTimeout('Base or exponent too large in magnitude!')
       out = 1
       if exponent != 0:
@@ -821,7 +830,7 @@ class Visitor(object):
   def handle_selection(self, children):
     '''Select a random element from an iterable.'''
     operand = self.process_operands(children)[0]
-    if isinstance(operand, (float, int)):
+    if isinstance(operand, numeric_types):
       operand = [operand]
     elif isinstance(operand, dict):
       operand = [[key, value] for key, value in operand.items()]
@@ -843,7 +852,7 @@ class Visitor(object):
     '''Generate a number summary from some iterable.'''
     operand = self.process_operands(children)[0]
     out = { }
-    if isinstance(operand, (float, int)):
+    if isinstance(operand, numeric_types):
       operand = [operand]
     elif isinstance(operand, dict):
       operand = operand.values()
@@ -865,7 +874,7 @@ class Visitor(object):
     operand = self.process_operands(children)[0]
     if isinstance(operand, str):
       out = ''.join(sorted(operand))
-    elif isinstance(operand, (int, float)):
+    elif isinstance(operand, numeric_types):
       out = operand
     elif isinstance(operand, dict):
       out = sorted(operand.values())
