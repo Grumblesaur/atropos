@@ -725,7 +725,7 @@ class Visitor(object):
     if isinstance(factor1, array) and isinstance(factor2, numeric_types):
       out = util.iterable_repetition(factor1, factor2)
     elif isinstance(factor1, numeric_types) and isinstance(factor2, array):
-      out = util.iterable_repetition(factor1, factor2)
+      out = util.iterable_repetition(factor2, factor1)
     else:
       out = factor1 * factor2
     return out
