@@ -33,7 +33,7 @@ class ScopingData(object):
     else:
       frame = copy.deepcopy(frame)
     return frame
-   
+  
   def push_frame(self):
     self.frame_id += 1
     self.frames[self.frame_id] = [ ]

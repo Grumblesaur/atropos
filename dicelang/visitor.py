@@ -13,6 +13,8 @@ from dicelang.float_special import inf
 from dicelang.float_special import nan
 from dicelang.float_special import numeric_types
 
+from dicelang.exceptions import BreakSignal
+
 from dicelang.exceptions import DiceRollTimeout
 from dicelang.exceptions import DoWhileLoopTimeout
 from dicelang.exceptions import ExecutionTimeout
@@ -300,6 +302,13 @@ class Visitor(object):
     elif tree.data == 'printword':
       out = self.handle_print(tree.children, ' ')
     
+    elif tree.data == 'break':
+      out = self.handle_instruction(tree.children[0])
+    elif tree.data == 'break_expr':
+      out = self.handle_break(tree.children, bare=False)
+    elif tree.data == 'break_bare':
+      out = self.handle_break(tree.children, bare=True)
+    
     elif tree.data == 'atom' or tree.data == 'priority':
       out = self.handle_instruction(tree.children[0])
     elif tree.data == 'number_literal':
@@ -383,8 +392,12 @@ class Visitor(object):
       results = [ ]
       self.scoping_data.push_scope()
       for element in iterable:
-        self.scoping_data.get_scope()[name] = element
-        results.append(self.handle_instruction(children[2]))
+        try:
+          self.scoping_data.get_scope()[name] = element
+          results.append(self.handle_instruction(children[2]))
+        except BreakSignal as bs:
+          results.append(bs.data)
+          break
       self.scoping_data.pop_scope()
     return results
   
@@ -396,7 +409,11 @@ class Visitor(object):
     results = [ ]
     timeout = time.time() + self.loop_timeout
     while self.handle_instruction(children[0]):
-      results.append(self.handle_instruction(children[1]))
+      try:
+        results.append(self.handle_instruction(children[1]))
+      except BreakSignal as bs:
+        results.append(bs.data)
+        break
       if time.time() > timeout:
         times = len(results)
         raise WhileLoopTimeout(times=times)
@@ -409,7 +426,11 @@ class Visitor(object):
     results = [self.handle_instruction(children[0])]
     timeout = time.time() + self.loop_timeout
     while self.handle_instruction(children[1]):
-      results.append(self.handle_instruction(children[0]))
+      try:
+        results.append(self.handle_instruction(children[0]))
+      except BreakSignal as bs:
+        results.append(bs.data)
+        break
       if time.time() > timeout:
         times = len(results)
         raise DoWhileLoopTimeout(times=times)
@@ -498,7 +519,11 @@ class Visitor(object):
       value = idents[0].get()
       for attr in idents[1:]:
         value = value[attr.name]
-      imported = Identifier(new_name, self.scoping_data, mode, self.variable_data)
+      imported = Identifier(
+        new_name,
+        self.scoping_data,
+        mode,
+        self.variable_data)
       imported.put(copy.deepcopy(value))
       out = True
     except (KeyError, AttributeError):
@@ -1033,6 +1058,10 @@ class Visitor(object):
     msg = str(value) + trailer
     self.print_queue.append(self.scoping_data.user, msg)
     return value
+  
+  def handle_break(self, children, bare):
+    data = Undefined if bare else self.process_operands(children[1:])[0]
+    raise BreakSignal(data)
    
   def handle_number_literal(self, children):
     '''Constructs an int or float from a numeric literal.'''

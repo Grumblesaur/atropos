@@ -43,8 +43,12 @@ expression: assignment
           | while_loop
           | do_while_loop
           | conditional
-          | print
+          | break
           | import
+
+break: KW_BREAK break -> break_expr
+     | KW_BREAK       -> break_bare
+     | print
 
 print: KW_PRINTLN print -> printline
      | KW_PRINT   print -> printword
@@ -211,6 +215,7 @@ KW_IMPORT:  "import"
 KW_FORMAT:  "format"
 KW_TYPEOF:  "typeof"
 KW_GLOBAL:  "global"
+KW_BREAK:   "break"
 KW_PRINT:   "print"
 KW_LIKE:    "like"
 KW_SEEK:    "seek"
