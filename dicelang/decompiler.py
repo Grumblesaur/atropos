@@ -324,6 +324,13 @@ class Decompiler(object):
     elif tree.data == 'printword':
       out = f'print {self.decompile(tree.children[1])}'
     
+    elif tree.data == 'break':
+      out = self.decompile(tree.children[0])
+    elif tree.data == 'break_expr':
+      out = f'break {self.decompile(tree.children[1])}'
+    elif tree.data == 'break_bare':
+      out = 'break'
+    
     elif tree.data == 'atom':
       out = self.decompile(tree.children[0])
     elif tree.data == 'number_literal':
