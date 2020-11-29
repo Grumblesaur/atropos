@@ -1017,11 +1017,11 @@ class Visitor(object):
     if isinstance(function_or_other, Function):
       out = function_or_other(self.scoping_data, self, *arguments)
     elif isinstance(function_or_other, numeric_types):
-      out = tuple([function_or_other * x for x in operands])
+      out = tuple([function_or_other * x for x in arguments])
       out = out[0] if len(out) == 1 else out
     else:
-      e = f'Cannot call object of type {type(function_or_other)!r} as function '
-      e += f'nor multiply it as a coefficient.'
+      e = f'Cannot call object of type {type(function_or_other)!r} as '
+      e += 'function nor multiply it as a coefficient.'
       raise OperationError(e)
     return out
 
