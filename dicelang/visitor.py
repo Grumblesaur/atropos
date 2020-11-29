@@ -1007,11 +1007,23 @@ class Visitor(object):
     return [function(self.scoping_data, self, x) for x in iterable]
   
   def handle_function_call(self, children):
-    '''Evaluate the arguments and call the function with them.'''
+    '''Evaluate the arguments and call the function with them. If the called
+    object is not a function, try to treat the operation as multiplication.
+    e.g. a(x, y) -> (a*x, a*y)'''
     operands = self.process_operands(children)
-    function = operands[0]
+    function_or_other = operands[0]
     arguments = operands[1:]
-    return function(self.scoping_data, self, *arguments)
+    
+    if isinstance(function_or_other, Function):
+      out = function_or_other(self.scoping_data, self, *arguments)
+    elif isinstance(function_or_other, numeric_types):
+      out = tuple([function_or_other * x for x in operands])
+      out = out[0] if len(out) == 1 else out
+    else:
+      e = f'Cannot call object of type {type(function_or_other)!r} as function '
+      e += f'nor multiply it as a coefficient.'
+      raise OperationError(e)
+    return out
 
   def handle_getattr(self, children):
     '''Handle field lookup by `.` operator.'''
