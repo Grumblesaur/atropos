@@ -769,7 +769,7 @@ class Visitor(object):
   def handle_remainder(self, children):
     '''Remainder for float or int.'''
     dividend, divisor = self.process_operands(children)
-    if divisor == 0:
+    if divisor == 0 and isinstance(dividend, numeric_types):
       out = nan
     else:
       out = dividend % divisor
