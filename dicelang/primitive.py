@@ -12,7 +12,7 @@ class Primitive(object):
     self.closed = closed_vars if closed_vars else [{}]
     
     if isinstance(tree_or_src, str):
-      self.code = Primitive.parser.parse(tree_or_src)[0]
+      self.code = Primitive.parser.parse(tree_or_src)
       self.src  = tree_or_src
     else:
       self.code = tree_or_src
@@ -26,6 +26,8 @@ class Primitive(object):
   
   def normal_repr(self):
     return f'{self.src}'
+  
+  __repr__ = normal_repr
   
   def file_repr(self):
     flat_source = self.src.replace('\n', '\f')
@@ -46,3 +48,8 @@ class Primitive(object):
     scoping_data.pop_scope()
     scoping_data.pop_frame()
     return out
+
+  @staticmethod
+  def use_serializable_repr(arg=True):
+    Primitive.__repr__ = Primitive.file_repr if arg else Primitive.normal_repr
+

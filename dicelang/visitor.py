@@ -96,9 +96,6 @@ class Visitor(object):
       ])
       raise ExecutionTimeout(e)
     
-    if isinstance(tree, Primitive):
-      out = tree(self.scoping_data)
-    
     if tree.data == 'start':
       out = [self.handle_instruction(c) for c in tree.children][-1]
     elif tree.data == 'block' or tree.data == 'short_body':
@@ -354,6 +351,10 @@ class Visitor(object):
     else:
       print(tree.data, tree.children)
       out = f'__UNIMPLEMENTED__: {tree.data}'
+    
+    if isinstance(out, Primitive):
+      out = out(self.scoping_data, self)
+    
     return out 
     
     
