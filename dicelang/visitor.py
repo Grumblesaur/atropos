@@ -23,6 +23,7 @@ from dicelang.exceptions import OperationError
 from dicelang.exceptions import WhileLoopTimeout
 
 from dicelang.function import Function
+from dicelang.primitive import Primitive
 from dicelang.undefined import Undefined
 
 from dicelang.identifier import Identifier
@@ -95,6 +96,8 @@ class Visitor(object):
       ])
       raise ExecutionTimeout(e)
     
+    if isinstance(tree, Primitive):
+      out = tree(self.scoping_data)
     
     if tree.data == 'start':
       out = [self.handle_instruction(c) for c in tree.children][-1]
@@ -102,6 +105,8 @@ class Visitor(object):
       out = self.handle_block(tree.children)
     elif tree.data == 'function':
       out = self.handle_function(tree.children)
+    elif tree.data == 'primitive':
+      out = self.handle_primitive(tree.children)
     
     elif tree.data == 'for_loop':
       out = self.handle_for_loop(tree.children)
@@ -371,7 +376,15 @@ class Visitor(object):
     out = Function(code, param_names=params, closed_vars=closed)
     out.visitor = self
     return out
-
+  
+  def handle_primitive(self, children):
+    '''Builds a custom primitive object.'''
+    code = children[0]
+    closed = self.scoping_data.calling_environment()
+    out = Primitive(code, closed_vars=closed)
+    out.visitor = self
+    return out
+  
   def handle_for_loop(self, children):
     '''Executes a block or expression once for each element of its
     iterable. The iterator variable takes the value of each element

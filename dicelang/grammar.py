@@ -35,6 +35,8 @@ import: KW_IMPORT identifier                    -> standard_import
       | KW_IMPORT identifier "as" identifier                     -> as_import
       | KW_IMPORT identifier ("." identifier)+ "as" identifier   -> as_getattr_import
 
+primitive: "do" expression
+
 expression: assignment
           | deletion
           | block
@@ -45,6 +47,7 @@ expression: assignment
           | conditional
           | break
           | import
+          | primitive
 
 break: KW_BREAK break -> break_expr
      | KW_BREAK       -> break_bare

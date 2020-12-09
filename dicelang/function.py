@@ -6,6 +6,7 @@ from dicelang.exceptions import DefinitionError, CallError
 
 class Function(object):
   parser = lark.Lark(grammar.raw_text, start='function', parser='earley')
+  dcmp = decompiler.Decompiler()
   
   @staticmethod
   def use_serializable_function_repr(yes_if_true):
@@ -14,22 +15,21 @@ class Function(object):
     else:
       Function.__repr__ = Function.normal_repr
   
-  def __init__(self, tree_or_source, param_names=None, closed_vars=None):
+  def __init__(self, tree_or_src, param_names=None, closed_vars=None):
     self.visitor = None
-    self.dcmp = decompiler.Decompiler()
     self.closed = closed_vars if closed_vars else [{}]
     if param_names is None:
-      tree = Function.parser.parse(tree_or_source)
+      tree = Function.parser.parse(tree_or_src)
       self.code = tree.children[-1]
       self.params = Function._normalize_params(tree.children[0:-1])
       param_string = ', '.join(self.params)
-      self.src = f'{self.dcmp.decompile(tree)}'
+      self.src = f'{Function.dcmp.decompile(tree)}'
     else:
       Function._ensure_unique(param_names)
-      self.code = tree_or_source
+      self.code = tree_or_src
       self.params = Function._normalize_params(param_names)
       param_string = ', '.join(param_names)
-      self.src = f'({param_string}) -> {self.dcmp.decompile(tree_or_source)}'
+      self.src = f'({param_string}) -> {Function.dcmp.decompile(tree_or_src)}'
   
   def __deepcopy__(self, memodict={}):
     newtree = type(self.code)(
