@@ -16,7 +16,7 @@ from asgiref.sync import sync_to_async
 # PyCharm "optimize" them out.
 from dicelang.undefined import Undefined
 from dicelang.function  import Function
-from dicelang.primitive import Primitive
+from dicelang.alias import Alias
 from dicelang.float_special import inf
 from dicelang.float_special import nan
 
@@ -151,10 +151,8 @@ class DataStore(object):
     self.cache.put(owner_tag, key, value, mode)
     
     Function.use_serializable_function_repr(True)
-    Primitive.use_serializable_repr(True)
     mutating = {'value_string': repr(value)}
     Function.use_serializable_function_repr(False)
-    Primitive.use_serializable_repr(False)
     
     variable = Variable.objects.update_or_create(
       owner_id=owner_tag,

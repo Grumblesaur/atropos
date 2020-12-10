@@ -36,7 +36,7 @@ import: KW_IMPORT identifier                    -> standard_import
       | KW_IMPORT identifier ("." identifier)+ "as" identifier   -> as_getattr_import
 
 alias: identifier "aliases" expression
-inspection: "inspect" identifier
+inspection: KW_INSPECT identifier
 
 expression: assignment
           | deletion
@@ -48,7 +48,8 @@ expression: assignment
           | conditional
           | break
           | import
-          | primitive
+          | alias
+          | inspection
 
 break: KW_BREAK break -> break_expr
      | KW_BREAK       -> break_bare
@@ -203,7 +204,7 @@ TRUE:      "True"
 FALSE:     "False"
 UNDEFINED: "Undefined"
 
-IDENT:  /(?!(global|my|our|core|del|like|seek|format|typeof)\b)[a-zA-Z_]+[a-zA-Z0-9_]*/
+IDENT:  /(?!(global|my|our|core|del|like|seek|format|typeof|inspect)\b)[a-zA-Z_]+[a-zA-Z0-9_]*/
 PARAM:  /[a-zA-Z_]+[a-zA-Z0-9_]*/
 STRING: /("(?!"").*?(?<!\\)(\\\\)*?"|'(?!'').*?(?<!\\)(\\\\)*?')/i
 
@@ -215,6 +216,7 @@ LE:  "<="
 LT:  "<"
 
 KW_PRINTLN: "println"
+KW_INSPECT: "inspect"
 KW_IMPORT:  "import"
 KW_FORMAT:  "format"
 KW_TYPEOF:  "typeof"

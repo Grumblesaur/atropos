@@ -392,11 +392,11 @@ class Visitor(object):
       raise AliasError(e)
     
     out = Alias(aliased)
-    out.visitor = self
-    return out
+    identifier.put(out)
+    return out.aliased
   
   def handle_inspection(self, children):
-    identifier = self.handle_instruction(children[0])
+    identifier = self.handle_instruction(children[1])
     obj = identifier.get()
     if isinstance(obj, Alias):
       out = obj.aliased
