@@ -10,9 +10,18 @@ class ScopingData(object):
     self.user = user
     self.server = server
     self.frame_id = 0
-    self.frames = { }
-    self.anonymous_scopes = [ ]
+    self.frames = {}
+    self.anonymous_scopes = []
     self.closure = []
+  
+  def push_function_call(self, arguments_dict, closed_vars):
+    self.push_frame()
+    self.push_scope(arguments_dict)
+    self.push_closure(closed_vars)
+  
+  def pop_function_call(self):
+    self.pop_closure()
+    self.pop_frame()
   
   def push_closure(self, saved_environment):
     self.closure.append(saved_environment)
@@ -21,7 +30,7 @@ class ScopingData(object):
     self.closure.pop()
   
   def clear_closure(self):
-    self.closure = []
+    self.closure.clear()
   
   def calling_environment(self):
     frame = self.get_frame()

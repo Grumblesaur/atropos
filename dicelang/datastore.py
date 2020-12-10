@@ -88,46 +88,18 @@ class DataStore(object):
   some other key specifying ownership, such as a username or
   server handle.'''
   
-  def __init__(self, migrate=False, cache_time=6*60*60):
+  def __init__(self, cache_time=6*60*60):
     self.cache = Cache()
-    if migrate is True:
-      self.migrate_all()
     
     def pruning_task(cycle_time):
       while True:
         time.sleep(cycle_time)
         pruned = self.cache.prune()
         print(f'{pruned} objects pruned from cache')
+    
     a = (cache_time,)
     self.pruner = threading.Thread(target=pruning_task, args=a, daemon=True)
     self.pruner.start()
-  
-  def migrate_all(self):
-    storage_dir = os.environ['DICELANG_DATASTORE']
-    for prefix in ['core', 'global', 'server', 'private']:
-      self.migrate(storage_dir, prefix)
-    print('migration complete')
-    
-  def migrate(self, storage_directory, prefix):
-    print(f'migrating {prefix} ...')
-    filenames = os.listdir(storage_directory)
-    filenames = filter(lambda s: s.startswith(prefix), filenames)
-    builder = lambda fn: '{}{}{}'.format(storage_directory, os.path.sep, fn)
-    filenames = map(builder, filenames)
-    for filename in filenames:
-      print(f"loading '{filename}' ...")
-      _, owner = filename.rsplit('_', 1)
-      try:
-        with open(filename, 'r') as f:
-          for line in f:
-            try:
-              k_repr, v_repr = line.strip().split(":", 1)
-              self.put(int(owner), eval(k_repr), eval(v_repr), prefix)
-            except Exception as e:
-              print(f'Bad var when loading {filename!r}: {e!s}')
-      except SyntaxError as e:
-        print(e)
-    return
   
   def view(self, mode, owner_id):
     results = Variable.objects.filter(var_type=mode, owner_id=owner_id)
@@ -140,7 +112,11 @@ class DataStore(object):
     out = self.cache.get(owner_tag, key, mode)
     if out is None:
       try:
-        out = eval(Variable.objects.get(owner_id=owner_tag, var_type=mode, name=key).value_string)
+        out_repr = Variable.objects.get(
+          owner_id=owner_tag,
+          var_type=mode,
+          name=key).value_string
+        out = eval(out_repr)
       except Exception as e:
         out = None
       else:
@@ -150,9 +126,8 @@ class DataStore(object):
   def put(self, owner_tag, key, value, mode):
     self.cache.put(owner_tag, key, value, mode)
     
-    Function.use_serializable_function_repr(True)
-    mutating = {'value_string': repr(value)}
-    Function.use_serializable_function_repr(False)
+    with Function.SerializableRepr() as _:
+      mutating = {'value_string': repr(value)}
     
     variable = Variable.objects.update_or_create(
       owner_id=owner_tag,

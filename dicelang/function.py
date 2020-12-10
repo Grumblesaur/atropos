@@ -8,12 +8,13 @@ class Function(object):
   parser = lark.Lark(grammar.raw_text, start='function', parser='earley')
   dcmp = decompiler.Decompiler()
   
-  @staticmethod
-  def use_serializable_function_repr(yes_if_true):
-    if yes_if_true:
-      Function.__repr__ = Function.file_repr
-    else:
-      Function.__repr__ = Function.normal_repr
+  class SerializableRepr:
+    def __init__(self):
+      pass
+    def __enter__(self):
+      Function.__repr__ = Function.serializable_repr
+    def __exit__(self, *args):
+      Function.__repr__ = Function.repl_repr
   
   def __init__(self, tree_or_src, param_names=None, closed_vars=None):
     self.visitor = None
@@ -54,33 +55,27 @@ class Function(object):
       out.append(str(param))
     return out
   
-  def normal_repr(self):
+  def repl_repr(self):
     return f'{self.src}'
   
-  def file_repr(self):
+  def serializable_repr(self):
     flat_source = self.src.replace('\n', '\f')
     return f'Function({flat_source!r}, closed_vars={self.closed!r})'
     
-  __repr__ = normal_repr
+  __repr__ = repl_repr
   
-  def __call__(self, scoping_data, visitor, *args):
+  def __call__(self, visitor, *args):
     if self.visitor is None:
       self.visitor = visitor
     if len(self.params) != len(args):
       raise CallError('Arguments mismatch formal parameters in length.')
     
     arguments_scope = dict(zip(self.params, args))
-    scoping_data.push_frame()
-    scoping_data.push_scope(arguments_scope)
-    scoping_data.push_closure(self.closed)
-    out = self.visitor.walk(
-      self.code,
-      scoping_data.user,
-      scoping_data.server,
-      scoping_data)
-    scoping_data.pop_closure()
-    scoping_data.pop_scope()
-    scoping_data.pop_frame()
+    scoping_data = self.visitor.scoping_data
+    
+    scoping_data.push_function_call(arguments_scope, self.closed)
+    out = self.visitor.walk(self.code, scoping_data)
+    scoping_data.pop_function_call()
     
     return out
  

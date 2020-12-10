@@ -10,20 +10,22 @@ class LoopTimeout(ExecutionTimeout):
 class DicelangSignal(Exception):
   pass
 
-loop_msg = '\n'.join([
-  '\n{do1} while loop iterated %s times without terminating,',
+while_loop_msg = '\n'.join([
+  '\nwhile loop iterated %s times without terminating,',
   "or your loop's condition never changed state. You may",
   'need to mark certain variables with "our" in front.',
-  '\nSee "+help {do1}while" for more information.'
+  '\nSee "+help while" for more information.'
 ])
 
+do_while_loop_msg = while_loop_msg.replace('while', 'do while')
+
 class WhileLoopTimeout(LoopTimeout):
-  def __init__(self, msg=loop_msg.format(do1=''), *args, **kwargs):
-    super().__init__(self, msg % kwargs['times'])
+  def __init__(self, n):
+    self.msg = while_loop_msg % n
   
 class DoWhileLoopTimeout(LoopTimeout):
-  def __init__(self, msg=loop_msg.format(do1='do'), *args, **kwargs):
-    super().__init__(self, msg % kwargs['times'])
+  def __init__(self, n):
+    self.msg = do_while_loop_msg % n
 
 class ExponentiationTimeout(ExecutionTimeout):
   pass

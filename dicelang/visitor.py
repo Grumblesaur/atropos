@@ -52,13 +52,12 @@ class Visitor(object):
     self.depth = 0
     return self.print_queue.flush(user)
     
-  def walk(self, parse_tree, user_id, server_id, scoping_data=None):
+  def walk(self, parse_tree, scoping_data, from_interpreter=False):
     '''Start execution of a syntax tree.'''
-    if scoping_data is None:
+    if from_interpreter:
       self.must_finish_by = self.execution_timeout + time.time()
-      self.scoping_data = ScopingData(user_id, server_id)
-    else:
-      self.scoping_data = scoping_data
+    self.scoping_data = scoping_data
+    
     self.depth += 1
     result = self.handle_instruction(parse_tree)
     self.depth -= 1
@@ -388,7 +387,7 @@ class Visitor(object):
     
     if not isinstance(aliased, Function):
       e = f'Value of type {aliased.__class__.__name__} cannot be aliased.'
-      e += 'Only a Function can be aliased.'
+      e += ' Only a Function can be aliased.'
       raise AliasError(e)
     
     out = Alias(aliased)
@@ -448,7 +447,7 @@ class Visitor(object):
         break
       if time.time() > timeout:
         times = len(results)
-        raise WhileLoopTimeout(times=times)
+        raise WhileLoopTimeout(times)
     self.scoping_data.pop_scope()
     return results
  
@@ -465,7 +464,7 @@ class Visitor(object):
         break
       if time.time() > timeout:
         times = len(results)
-        raise DoWhileLoopTimeout(times=times)
+        raise DoWhileLoopTimeout(times)
     self.scoping_data.pop_scope()
     return results
 
@@ -583,10 +582,11 @@ class Visitor(object):
     subscripts = ''.join([f'[{s!r}]' for s in subscripts])
     target = ident.get()
     val_repr = f'target{subscripts}'
-    Function.use_serializable_function_repr(True)
-    out = eval(val_repr)
-    exec(f'del {val_repr}')
-    Function.use_serializable_function_repr(False)
+    
+    with Function.SerializableRepr() as _:
+      out = eval(val_repr)
+      exec(f'del {val_repr}')
+    
     ident.put(target)
     return out
 
@@ -598,10 +598,9 @@ class Visitor(object):
     subscripts = ''.join([f'[{id_.name!r}]' for id_ in subscripts])
     target = ident.get()
     val_repr = f'target{subscripts}'
-    Function.use_serializable_function_repr(True)
-    out = eval(val_repr)
-    exec(f'del {val_repr}')
-    Function.use_serializable_function_repr(False)
+    with Function.SerializableRepr():
+      out = eval(val_repr)
+      exec(f'del {val_repr}')
     ident.put(target)
     return out
 
@@ -622,13 +621,13 @@ class Visitor(object):
         raise OperationError(error)
     subscripts = ''.join([f'[{s!r}]' for s in subscripts])
     target = ident.get()
-    Function.use_serializable_function_repr(True)
-    stmt = f'target{subscripts} = {value!r}'
-    exec(stmt)
-    Function.use_serializable_function_repr(False)
+    
+    with Function.SerializableRepr() as _:
+      stmt = f'target{subscripts} = {value!r}'
+      exec(stmt)
     ident.put(target) # update the database and not just the cache
     return value
-
+  
   def handle_setattr(self, children):
     '''Handle the assignment of a value to an arbitrarily-chained attribute
     of a variable.'''
@@ -637,21 +636,18 @@ class Visitor(object):
     attr_chain = [self.handle_instruction(c) for c in children[1:-1]]
     subscripts = ''.join([f'[{attr.name!r}]' for attr in attr_chain])
     target = ident.get()
-    Function.use_serializable_function_repr(True)
-    stmt = f'target{subscripts} = {value!r}'
-    exec(stmt)
-    Function.use_serializable_function_repr(False)
+    
+    with Function.SerializableRepr() as _:
+      stmt = f'target{subscripts} = {value!r}'
+      exec(stmt)
     ident.put(target)
     return value
 
   def handle_inline_if(self, children):
     '''Shorthand Python-like inline if-else expression.'''
     condition = self.handle_instruction(children[1])
-    if condition:
-      out = self.handle_instruction(children[0])
-    else:
-      out = self.handle_instruction(children[2])
-    return out
+    i = 0 if condition else 2
+    return self.handle_instruction(children[i])
   
   def handle_inline_if_binary(self, children):
     '''Akin to the inline_if, but there are only two operands, and the first
@@ -1036,7 +1032,7 @@ class Visitor(object):
     iterable, and the results are returned in a list in the order they were
     processed.'''
     function, iterable = self.process_operands(children)
-    return [function(self.scoping_data, self, x) for x in iterable]
+    return [function(self, x) for x in iterable]
   
   def handle_function_call(self, children):
     '''Evaluate the arguments and call the function with them. If the called
@@ -1047,12 +1043,13 @@ class Visitor(object):
     arguments = operands[1:]
     
     if isinstance(function_or_other, Function):
-      out = function_or_other(self.scoping_data, self, *arguments)
+      out = function_or_other(self, *arguments)
     elif isinstance(function_or_other, numeric_types):
       out = tuple([function_or_other * x for x in arguments])
       out = out[0] if len(out) == 1 else out
     else:
-      e = f'Cannot call object of type {type(function_or_other)!r} as '
+      cls_name = function_or_other.__class__.__name__
+      e = f'Cannot call object of type {cls_name} as '
       e += 'function nor multiply it as a coefficient.'
       raise OperationError(e)
     return out

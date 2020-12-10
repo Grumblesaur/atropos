@@ -19,7 +19,7 @@ def dice_reply(interpreter, author, server, argument):
     evaluated, printout = interpreter.execute(argument, author.id, server.id)
     is_error = False
   except (UnexpectedCharacters, UnexpectedToken, UnexpectedInput) as e:
-    evaluated = e.get_context(argument, context_size)
+    evaluated = 'Syntax error:\n' + e.get_context(argument, context_size)
   except UnexpectedEOF as e:
     evaluated = str(e).split('.')[0] + '.'
   except (ParseError, LexError) as e:
@@ -29,7 +29,7 @@ def dice_reply(interpreter, author, server, argument):
     traceback.print_tb(e.__traceback__)
   except DicelangError as e:
     printout = interpreter.get_print_queue_on_error(author.id)
-    evaluated = f'{e.__class__.__name__}: {e.args[0]}'
+    evaluated = f'{e.__class__.__name__}: {e.msg}'
   except Exception as e:
     printout = interpreter.get_print_queue_on_error(author.id)
     evaluated = f'{e.__class__.__name__}: {e!s}'

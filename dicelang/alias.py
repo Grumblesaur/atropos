@@ -8,9 +8,8 @@ class Alias(object):
     self.aliased = aliased_function
     
   def __repr__(self):
-    Function.use_serializable_function_repr(True)
-    out = f'Alias({self.aliased!r})'
-    Function.use_serializable_function_repr(False)
+    with Function.SerializableRepr() as _:
+      out = f'Alias({self.aliased!r})'
     return out
   
   def __call__(self, scoping_data, visitor):
