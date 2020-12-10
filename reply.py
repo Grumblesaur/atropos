@@ -15,6 +15,7 @@ def dice_reply(interpreter, author, server, argument):
   context_size = max(15, len(argument) // 10)
   is_error = True
   printout = ''
+  evaluated = ''
   try:
     evaluated, printout = interpreter.execute(argument, author.id, server.id)
     is_error = False
@@ -29,7 +30,11 @@ def dice_reply(interpreter, author, server, argument):
     traceback.print_tb(e.__traceback__)
   except DicelangError as e:
     printout = interpreter.get_print_queue_on_error(author.id)
-    evaluated = f'{e.__class__.__name__}: {e.msg}'
+    classname = e.__class__.__name__
+    try:
+      evaluated = f'{classname}: {e.msg}'
+    except AttributeError:
+      evaluated = f'{classname}: {e.args[0]!s}'
   except Exception as e:
     printout = interpreter.get_print_queue_on_error(author.id)
     evaluated = f'{e.__class__.__name__}: {e!s}'
