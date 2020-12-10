@@ -34,6 +34,9 @@ class DiceRollTimeout(ExecutionTimeout):
 class FunctionError(DicelangError):
   pass
 
+class AliasError(DicelangError):
+  pass
+
 class DefinitionError(FunctionError):
   pass
 

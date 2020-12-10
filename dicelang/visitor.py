@@ -15,6 +15,7 @@ from dicelang.float_special import numeric_types
 
 from dicelang.exceptions import BreakSignal
 
+from dicelang.exceptions import AliasError
 from dicelang.exceptions import DiceRollTimeout
 from dicelang.exceptions import DoWhileLoopTimeout
 from dicelang.exceptions import ExecutionTimeout
@@ -23,7 +24,7 @@ from dicelang.exceptions import OperationError
 from dicelang.exceptions import WhileLoopTimeout
 
 from dicelang.function import Function
-from dicelang.primitive import Primitive
+from dicelang.alias import Alias
 from dicelang.undefined import Undefined
 
 from dicelang.identifier import Identifier
@@ -102,8 +103,10 @@ class Visitor(object):
       out = self.handle_block(tree.children)
     elif tree.data == 'function':
       out = self.handle_function(tree.children)
-    elif tree.data == 'primitive':
-      out = self.handle_primitive(tree.children)
+    elif tree.data == 'alias':
+      out = self.handle_alias(tree.children)
+    elif tree.data == 'inspection':
+      out = self.handle_inspection(tree.children)
     
     elif tree.data == 'for_loop':
       out = self.handle_for_loop(tree.children)
@@ -352,9 +355,9 @@ class Visitor(object):
       print(tree.data, tree.children)
       out = f'__UNIMPLEMENTED__: {tree.data}'
     
-    if isinstance(out, Primitive):
+    if isinstance(out, Alias):
       out = out(self.scoping_data, self)
-    
+      
     return out 
     
     
@@ -378,12 +381,27 @@ class Visitor(object):
     out.visitor = self
     return out
   
-  def handle_primitive(self, children):
-    '''Builds a custom primitive object.'''
-    code = children[0]
-    closed = self.scoping_data.calling_environment()
-    out = Primitive(code, closed_vars=closed)
+  def handle_alias(self, children):
+    '''Builds a custom alias object.'''
+    identifier = self.handle_instruction(children[0])
+    aliased = self.handle_instruction(children[1])
+    
+    if not isinstance(aliased, Function):
+      e = f'Value of type {aliased.__class__.__name__} cannot be aliased.'
+      e += 'Only a Function can be aliased.'
+      raise AliasError(e)
+    
+    out = Alias(aliased)
     out.visitor = self
+    return out
+  
+  def handle_inspection(self, children):
+    identifier = self.handle_instruction(children[0])
+    obj = identifier.get()
+    if isinstance(obj, Alias):
+      out = obj.aliased
+    else:
+      out = obj
     return out
   
   def handle_for_loop(self, children):

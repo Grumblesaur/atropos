@@ -24,9 +24,10 @@ class Decompiler(object):
       code = self.decompile(tree.children[-1])
       params = ', '.join([child.value for child in tree.children[:-1]])
       out = f'({params}) -> {code}'
-    elif tree.data == 'primitive':
-      code = self.decompile(tree.children[0])
-      out = f'do {code}'
+    elif tree.data == 'alias':
+      ident = self.decompile(tree.children[0])
+      code = self.decompile(tree.children[1])
+      out = f'{ident} "aliases" {code}'
     
     elif tree.data == 'for_loop':
       iterator = self.decompile(tree.children[0])
