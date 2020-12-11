@@ -12,6 +12,6 @@ class Alias(object):
       out = f'Alias({self.aliased!r})'
     return out
   
-  def __call__(self, scoping_data, visitor):
-    return self.aliased(scoping_data, visitor)
+  def __call__(self, visitor):
+    return self.aliased(visitor)
 
