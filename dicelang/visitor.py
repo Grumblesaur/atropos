@@ -369,7 +369,7 @@ class Visitor(object):
       out = f'__UNIMPLEMENTED__: {tree.data}'
     
     if isinstance(out, Alias):
-      out = out(self.scoping_data, self)
+      out = out(self)
       
     return out 
     
