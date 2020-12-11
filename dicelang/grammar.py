@@ -213,7 +213,7 @@ TRUE:      "True"
 FALSE:     "False"
 UNDEFINED: "Undefined"
 
-IDENT:  /(?!(global|my|our|core|del|like|seek|format|typeof|inspect)\b)[a-zA-Z_]+[a-zA-Z0-9_]*/
+IDENT:  /(?!(global|my|our|core|del|like|seek|format|typeof|inspect|skip|break|return)\b)[a-zA-Z_]+[a-zA-Z0-9_]*/
 PARAM:  /[a-zA-Z_]+[a-zA-Z0-9_]*/
 STRING: /("(?!"").*?(?<!\\)(\\\\)*?"|'(?!'').*?(?<!\\)(\\\\)*?')/i
 
@@ -227,6 +227,7 @@ LT:  "<"
 KW_PRINTLN: "println"
 KW_INSPECT: "inspect"
 KW_IMPORT:  "import"
+KW_RETURN:  "return"
 KW_FORMAT:  "format"
 KW_TYPEOF:  "typeof"
 KW_GLOBAL:  "global"
@@ -234,6 +235,7 @@ KW_BREAK:   "break"
 KW_PRINT:   "print"
 KW_LIKE:    "like"
 KW_SEEK:    "seek"
+KW_SKIP:    "skip"
 KW_CORE:    "core"
 KW_OUR:     "our"
 KW_MY:      "my" 

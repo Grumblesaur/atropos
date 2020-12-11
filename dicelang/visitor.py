@@ -18,11 +18,14 @@ from dicelang.exceptions import SkipSignal
 from dicelang.exceptions import ReturnSignal
 
 from dicelang.exceptions import AliasError
+from dicelang.exceptions import BreakError
 from dicelang.exceptions import DiceRollTimeout
 from dicelang.exceptions import DoWhileLoopTimeout
 from dicelang.exceptions import ExecutionTimeout
 from dicelang.exceptions import ExponentiationTimeout
 from dicelang.exceptions import OperationError
+from dicelang.exceptions import ReturnError
+from dicelang.exceptions import SkipError
 from dicelang.exceptions import WhileLoopTimeout
 
 from dicelang.function import Function
@@ -61,7 +64,16 @@ class Visitor(object):
     self.scoping_data = scoping_data
     
     self.depth += 1
-    result = self.handle_instruction(parse_tree)
+    try:
+      result = self.handle_instruction(parse_tree)
+    except BreakSignal:
+      raise BreakError()
+    except SkipSignal:
+      raise SkipError()
+    except ReturnSignal as rs:
+      if self.depth == 1:
+        raise ReturnError()
+      result = rs.data
     self.depth -= 1
     
     # Reentrancy case -- when a dicelang Function is executed,
@@ -308,12 +320,12 @@ class Visitor(object):
     elif tree.data == 'printword':
       out = self.handle_print(tree.children, ' ')
     
-    elif tree.data == 'break':
+    elif tree.data in ('break', 'skip', 'return'):
       out = self.handle_instruction(tree.children[0])
-    elif tree.data == 'break_expr':
-      out = self.handle_break(tree.children, bare=False)
-    elif tree.data == 'break_bare':
-      out = self.handle_break(tree.children, bare=True)
+    elif tree.data in ('break_expr', 'skip_expr', 'return_expr'):
+      out = self.handle_signal(tree.children, bare=False)
+    elif tree.data in ('break_bare', 'skip_bare', 'return_bare'):
+      out = self.handle_signal(tree.children, bare=True)
     
     elif tree.data == 'atom' or tree.data == 'priority':
       out = self.handle_instruction(tree.children[0])
@@ -448,6 +460,9 @@ class Visitor(object):
     results = [ ]
     timeout = time.time() + self.loop_timeout
     while self.handle_instruction(children[0]):
+      if time.time() > timeout:
+        times = len(results)
+        raise WhileLoopTimeout(times)
       try:
         results.append(self.handle_instruction(children[1]))
       except BreakSignal as bs:
@@ -458,10 +473,6 @@ class Visitor(object):
         if ss.is_set:
           results.append(ss.data)
         continue
-      
-      if time.time() > timeout:
-        times = len(results)
-        raise WhileLoopTimeout(times)
     self.scoping_data.pop_scope()
     return results
  
@@ -471,6 +482,9 @@ class Visitor(object):
     results = [self.handle_instruction(children[0])]
     timeout = time.time() + self.loop_timeout
     while self.handle_instruction(children[1]):
+      if time.time() > timeout:
+        times = len(results)
+        raise DoWhileLoopTimeout(times)
       try:
         results.append(self.handle_instruction(children[0]))
       except BreakSignal as bs:
@@ -480,11 +494,7 @@ class Visitor(object):
       except SkipSignal as ss:
         if ss.is_set:
           results.append(ss.data)
-        continue
-      
-      if time.time() > timeout:
-        times = len(results)
-        raise DoWhileLoopTimeout(times)
+        continue 
     self.scoping_data.pop_scope()
     return results
 
@@ -1063,7 +1073,14 @@ class Visitor(object):
     arguments = operands[1:]
     
     if isinstance(function_or_other, Function):
-      out = function_or_other(self, *arguments)
+      try:
+        out = function_or_other(self, *arguments)
+      except ReturnSignal as rs:
+        out = rs.data
+      except BreakSignal as bs:
+        raise BreakError()
+      except SkipSignal as ss:
+        raise SkipError(ss.msg)
     elif isinstance(function_or_other, numeric_types):
       out = tuple([function_or_other * x for x in arguments])
       out = out[0] if len(out) == 1 else out
@@ -1120,10 +1137,15 @@ class Visitor(object):
     self.print_queue.append(self.scoping_data.user, msg)
     return value
   
-  def handle_break(self, children, bare):
+  def handle_signal(self, children, bare):
     data = None if bare else self.process_operands(children[1:])[0]
-    raise BreakSignal(data)
-   
+    sig_type = children[0].value
+    raise {
+      'break'  : BreakSignal,
+      'skip'   : SkipSignal,
+      'return' : ReturnSignal
+    }[sig_type](data)
+  
   def handle_number_literal(self, children):
     '''Constructs an int or float from a numeric literal.'''
     child = children[-1]

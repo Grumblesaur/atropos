@@ -1,3 +1,5 @@
+from dicelang.undefined import Undefined
+
 class DicelangError(Exception):
   pass
 
@@ -63,16 +65,37 @@ class DicelangSignal(Exception):
 
 class BreakSignal(DicelangSignal):
   def __init__(self, data):
-    super().__init__(self, data)
+    super().__init__(data)
     self.msg = f'Break in execution with data: {data!s}'
 
 class ReturnSignal(DicelangSignal):
   def __init__(self, data):
-    super().__init__(self, data)
+    super().__init__(data)
     self.msg = f'Return from function with data: {data!s}'
 
 class SkipSignal(DicelangSignal):
   def __init__(self, data):
-    super().__init__(self, data)
+    super().__init__(data)
     self.msg = f'Skip iteration with data: {data!s}'
+
+
+class SignalError(DicelangError):
+  def __init__(self, msg='Illegal generic signal.'):
+    self.msg = msg
+
+class BreakError(SignalError):
+  def __init__(self, msg='Illegal break outside of loop.'):
+    super().__init__(msg)
+
+class SkipError(SignalError):
+  def __init__(self, msg='Illegal skip outside of loop.'):
+    super().__init__(msg)
+  
+class ReturnError(SignalError):
+  def __init__(self, msg='Illegal return outside of function.'):
+    super().__init__(msg)
+
+
+
+
 
