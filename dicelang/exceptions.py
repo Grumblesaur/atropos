@@ -7,9 +7,6 @@ class ExecutionTimeout(DicelangError):
 class LoopTimeout(ExecutionTimeout):
   pass
 
-class DicelangSignal(Exception):
-  pass
-
 while_loop_msg = '\n'.join([
   '\nwhile loop iterated %s times without terminating,',
   "or your loop's condition never changed state. You may",
@@ -54,11 +51,28 @@ class StorageError(DicelangError):
 class PrivilegeError(StorageError):
   pass
 
-class BreakSignal(DicelangSignal):
-  def __init__(self, data):
-    self.data = data
-    self.msg = f'Break in execution with data: {data!s}'
+
+class DicelangSignal(Exception):
+  def __init__(self, data=None):
+    self.is_set = data is not None
+    self.data = data if data is not None else Undefined
+    self.msg = "Generic Dicelang Signal"
+  
   def __str__(self):
     return self.msg
 
+class BreakSignal(DicelangSignal):
+  def __init__(self, data):
+    super().__init__(self, data)
+    self.msg = f'Break in execution with data: {data!s}'
+
+class ReturnSignal(DicelangSignal):
+  def __init__(self, data):
+    super().__init__(self, data)
+    self.msg = f'Return from function with data: {data!s}'
+
+class SkipSignal(DicelangSignal):
+  def __init__(self, data):
+    super().__init__(self, data)
+    self.msg = f'Skip iteration with data: {data!s}'
 

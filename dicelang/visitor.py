@@ -14,6 +14,8 @@ from dicelang.float_special import nan
 from dicelang.float_special import numeric_types
 
 from dicelang.exceptions import BreakSignal
+from dicelang.exceptions import SkipSignal
+from dicelang.exceptions import ReturnSignal
 
 from dicelang.exceptions import AliasError
 from dicelang.exceptions import DiceRollTimeout
@@ -427,8 +429,14 @@ class Visitor(object):
           self.scoping_data.get_scope()[name] = element
           results.append(self.handle_instruction(children[2]))
         except BreakSignal as bs:
-          results.append(bs.data)
+          if bs.is_set:
+            results.append(bs.data)
           break
+        except SkipSignal as ss:
+          if ss.is_set:
+            results.append(ss.data)
+          continue
+      
       self.scoping_data.pop_scope()
     return results
   
@@ -443,8 +451,14 @@ class Visitor(object):
       try:
         results.append(self.handle_instruction(children[1]))
       except BreakSignal as bs:
-        results.append(bs.data)
+        if bs.is_set:
+          results.append(bs.data)
         break
+      except SkipSignal as ss:
+        if ss.is_set:
+          results.append(ss.data)
+        continue
+      
       if time.time() > timeout:
         times = len(results)
         raise WhileLoopTimeout(times)
@@ -460,8 +474,14 @@ class Visitor(object):
       try:
         results.append(self.handle_instruction(children[0]))
       except BreakSignal as bs:
-        results.append(bs.data)
+        if bs.is_set:
+          results.append(bs.data)
         break
+      except SkipSignal as ss:
+        if ss.is_set:
+          results.append(ss.data)
+        continue
+      
       if time.time() > timeout:
         times = len(results)
         raise DoWhileLoopTimeout(times)
@@ -1101,7 +1121,7 @@ class Visitor(object):
     return value
   
   def handle_break(self, children, bare):
-    data = Undefined if bare else self.process_operands(children[1:])[0]
+    data = None if bare else self.process_operands(children[1:])[0]
     raise BreakSignal(data)
    
   def handle_number_literal(self, children):

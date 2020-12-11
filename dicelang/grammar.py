@@ -46,14 +46,23 @@ expression: assignment
           | while_loop
           | do_while_loop
           | conditional
-          | break
+          | print
           | import
           | alias
           | inspection
+          | return
+          | skip
+          | break
 
-break: KW_BREAK break -> break_expr
-     | KW_BREAK       -> break_bare
-     | print
+
+return: KW_RETURN expression -> return_expr
+      | KW_RETURN            -> return_bare 
+
+skip: KW_SKIP expression -> skip_expr
+    | KW_SKIP            -> skip_bare
+
+break: KW_BREAK expression -> break_expr
+     | KW_BREAK            -> break_bare
 
 print: KW_PRINTLN print -> printline
      | KW_PRINT   print -> printword

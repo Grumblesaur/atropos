@@ -334,6 +334,18 @@ class Decompiler(object):
       out = f'break {self.decompile(tree.children[1])}'
     elif tree.data == 'break_bare':
       out = 'break'
+    elif tree.data == 'return':
+      out = self.decompile(tree.children[0])
+    elif tree.data == 'return_expr':
+      out = f'return {self.decompile(tree.children[0])}'
+    elif tree.data == 'return_bare':
+      out = 'return'
+    elif tree.data == 'skip':
+      out = self.decompile(tree.children[0])
+    elif tree.data == 'skip_expr':
+      out = f'skip {self.decompile(tree.children[0])}'
+    elif tree.data == 'skip_bare':
+      out = 'skip'
     
     elif tree.data == 'atom':
       out = self.decompile(tree.children[0])
