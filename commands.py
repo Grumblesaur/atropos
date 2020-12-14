@@ -32,17 +32,17 @@ class CmdParser(object):
            | help -> command_help
     
     roll: "roll" /(.|\n)+/  -> roll_code
-        | "roll"          -> roll_help
+        | "roll"            -> roll_help
     
-    view: "view"    "all"   ("vars")?               -> view_all
-        | "view" (( "global" "vars") | "globals"  ) -> view_public
-        | "view" (( "our"    "vars") | "shareds"  ) -> view_shared
-        | "view" (( "my"     "vars") | "privates" ) -> view_private
-        | "view" (( "core"   "vars") | "core" | "library") -> view_core
-        | "view"                                    -> view_help
+    view: "view"    "all"   ("vars")?                  -> view_all
+        | "view" (( "global" ("vars")?) | "globals"  ) -> view_public
+        | "view" (( "our"    ("vars")?) | "shareds"  ) -> view_shared
+        | "view" (( "my"     ("vars")?) | "privates" ) -> view_private
+        | "view" (( "core"   ("vars")?) | "library"  ) -> view_core
+        | "view" (/\w+/)?                              -> view_help
     
     help: "help" /\b\w+\b/+ -> help_topic
-        | "help"     -> help_help
+        | "help"            -> help_help
     
     %import common.WS
     %ignore WS
