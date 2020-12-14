@@ -1,7 +1,7 @@
 import os
 import time
 
-ROOT_PATH = os.environ['DICELANG_DATASTORE']
+ROOT_PATH = os.environ['ATROPOS_CONFIG']
 FILE_AREA = os.path.join(ROOT_PATH, 'tmp')
 if not os.path.isdir(FILE_AREA):
   os.mkdir(FILE_AREA)

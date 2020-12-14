@@ -14,7 +14,6 @@ markovify==0.8.0
 more-itertools==8.2.0
 multidict==4.7.4
 packaging==20.1
-pkg-resources==0.0.0
 pluggy==0.13.1
 py==1.8.1
 pyparsing==2.4.6
@@ -22,8 +21,8 @@ pytest==5.3.5
 pytz==2020.1
 six==1.14.0
 sqlparse==0.3.1
--e git+https://github.com/hrmay/tesnames.git@e9dba4258aa064328ac79a016268739781589bb1#egg=tesnames
-timestamp==0.1
+tesnames @ git+https://github.com/hrmay/tesnames.git@3b7eac77613272c3fd25fbf4682aa5ee7f2e3dca
+timestamp @ git+https://github.com/Grumblesaur/timestamp.git@048075a28da4b854cc980d3759db823f333068e4
 typing-extensions==3.7.4.1
 Unidecode==1.1.1
 wcwidth==0.1.8

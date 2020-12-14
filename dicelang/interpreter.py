@@ -1,5 +1,4 @@
 #!/usr/bin/env python3
-import os
 from lark import Lark
 from dicelang import visitor
 from dicelang import grammar
@@ -10,11 +9,6 @@ class Interpreter(object):
   GLOBAL_ID = -1
   def __init__(self):
     self.parser = Lark(grammar.raw_text, start='start', parser='earley')
-    self.vars_directory = os.environ.get('DICELANG_DATASTORE', 'vars')
-
-    if not os.path.isdir(self.vars_directory):
-      os.mkdir(self.vars_directory)
-    
     self.datastore = datastore.DataStore()
     self.visitor = visitor.Visitor(self.datastore)
   

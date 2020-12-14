@@ -61,8 +61,19 @@ async def on_message(msg):
           content=f'{note1} {note2}',
           file=discord.File(path))
         os.remove(path)
+
+
+def initialize():
+  config_dir_path = os.environ.get('ATROPOS_CONFIG')
   
+  if config_dir_path is None:
+    raise Exception('Environment variable "ATROPOS_CONFIG" not set.')
+  
+  if not os.path.isdir(config_dir_path):
+    os.mkdir(config_dir_path)
+
 if __name__ == '__main__':
+  initialize()
   print('atropos initialized')
   client.run(auth.bot_token)
 
