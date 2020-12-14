@@ -23,7 +23,8 @@ class HelpText(object):
       else:
         option_key = help_file_path.split(os.sep)[-1]
         options[option_key] = { }
-        for option_file_path in os.listdir(os.path.join(self.help_path, option_key)):
+        directories = os.listdir(os.path.join(self.help_path, option_key))
+        for option_file_path in directories:
           key = option_file_path.split(os.sep)[-1].replace('.md', '')
           location = os.path.join(self.help_path, option_key, option_file_path)
           options[option_key][key] = location
@@ -98,12 +99,17 @@ class HelpText(object):
     if topic in self.help_options and option in self.help_options[topic]:
       out = (LookupType.PATH, self.help_options[topic][option])
     elif topic in self.help_options and option not in self.help_options[topic]:
-      out = (LookupType.LIST_OF_ARGUMENTS, self._option_initial_substring_for_topic(option, topic))
+      out = (
+        LookupType.LIST_OF_ARGUMENTS,
+        self._option_initial_substring_for_topic(option, topic)
+      )
     else:
       topic_matches  = self._topic_initial_substring(topic)
       option_matches = [ ]
       for tm in topic_matches:
-        option_matches += self._option_initial_substring_for_topic(option, tm[0]) 
+        option_matches.extend(
+          self._option_initial_substring_for_topic(option, tm[0])
+        )
       argument_tuples = [ ]
       for t in topic_matches:
         for o in option_matches:
