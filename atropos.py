@@ -38,30 +38,46 @@ class Atropos(discord.Client):
       return
     
     # Determine if user message was a command.
-    result = self.command_parser.response_to(msg)
+    result = await self.result_of_command(msg)
+    if result.rtype in (commands.Response.ERROR, commands.Response.NONE):
+      return
     
-    # debug prints
-    print(f'{msg.author.display_name} sent: {msg.content}')
-    print(f'type={result.rtype}, value={result.value!r}')
-    
-    if isinstance(msg.channel, (discord.DMChannel, discord.GroupChannel)):
+    # Channel name is for debug purposes only.
+    if isinstance(msg.channel, discord.GroupChannel):
       server_or_dm = msg.channel
+      channel_name = server_or_dm.name
+    elif isinstance(msg.channel, discord.DMChannel):
+      server_or_dm = msg.channel
+      channel_name = f'Atropos-{msg.author.name}'
     else:
       server_or_dm = msg.channel.guild
+      channel_name = f'{server_or_dm.name}:{msg.channel.name}'
     
+    # debug prints
+    print(f'[usr:{msg.author.display_name}] in [chn:{channel_name}] sent:')
+    print(f'{msg.content}')
+    print(f'type={result.rtype}, value={result.value!r}')
+    
+
     # Construct reply data based on the contents of the message, and
     # our copy of the dicelang interpreter.
-    reply_data = reply.build(
-      self.interpreter,
-      msg.author,
-      server_or_dm,
-      result)
+    async with msg.channel.typing():
+      reply_data = await self.reply_for_result(
+        self.interpreter,
+        msg.author,
+        server_or_dm,
+        result)
     
     text, raw, out = reply_data
     
-    # Send the reply.
     await self.send(text, raw, out, msg)
     
+  async def result_of_command(self, msg):
+    return self.command_parser.response_to(msg)
+  
+  async def reply_for_result(self, dicelang, author, channel, result):
+    return reply.build(dicelang, author, channel, result)
+  
   async def send(self, reply_text, raw_reply_text, printout, msg):
     if not reply_text:
       return

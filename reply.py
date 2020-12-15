@@ -102,10 +102,7 @@ def build(interpreter, author, channel, result):
   else:
     option = None
   
-  if response in (Response.ERROR, Response.NONE):
-    reply = ''
-  
-  elif response == Response.DICE:
+  if response == Response.DICE:
     reply, raw_reply, po = dice_reply(interpreter, author, channel, argument)
   elif response == Response.DICE_HELP:
     reply = '[dice help message unimplemented]'
