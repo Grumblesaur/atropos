@@ -25,14 +25,12 @@ class Atropos(discord.Client):
     if not os.path.isdir(config_dir_path):
       os.mkdir(config_dir_path)
 
-  #@client.event
   async def on_ready(self):
     activity_type = discord.ActivityType.listening
     name = "+help quickstart"
     activity = discord.Activity(type=activity_type, name=name)
     await self.change_presence(activity=activity)
 
-  #@client.event
   async def on_message(self, msg):
     # Skip scanning Atropos' own messages, since not doing so can
     # allow for code injection.
