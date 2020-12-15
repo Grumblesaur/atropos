@@ -12,69 +12,74 @@ import result_file
 
 from dicelang.interpreter import Interpreter
 
-# Principal objects.
-client = discord.Client(max_messages=128)
-interpreter = Interpreter()
-command_parser = commands.CmdParser() 
+class Atropos(discord.Client):
+  def __init__(self, *args, **kwargs):
+    super().__init__(*args, **kwargs)
+    self.interpreter = Interpreter()
+    self.command_parser = commands.CmdParser()
+    
+    # Initialize configuration directory if not already established.
+    config_dir_path = os.environ.get('ATROPOS_CONFIG')
+    if config_dir_path is None:
+      raise Exception('Environment variable "ATROPOS_CONFIG" not set.')
+    if not os.path.isdir(config_dir_path):
+      os.mkdir(config_dir_path)
 
-@client.event
-async def on_ready():
-  activity_type = discord.ActivityType.listening
-  name = "+help quickstart"
-  activity = discord.Activity(type=activity_type, name=name)
-  await client.change_presence(activity=activity)
+  #@client.event
+  async def on_ready(self):
+    activity_type = discord.ActivityType.listening
+    name = "+help quickstart"
+    activity = discord.Activity(type=activity_type, name=name)
+    await self.change_presence(activity=activity)
 
-@client.event
-async def on_message(msg):
-  user_id = msg.author.id
-  server_id = msg.channel.id
-  user_name = msg.author.display_name
-  
-  # Skip scanning Atropos' own messages, since not doing so can
-  # allow for code injection.
-  if msg.author.id == auth.bot_id:
-    return
-  
-  print('{} sent: {}'.format(user_name, msg.content))
-  result = command_parser.response_to(msg)
-  print(f'type={result.rtype}, value={result.value!r}')
-  if isinstance(msg.channel, (discord.DMChannel, discord.GroupChannel)):
-    server = msg.channel
-  else:
-    server = msg.channel.guild
-  
-  reply_text, raw_reply_text, printout = reply.build(
-    interpreter,
-    msg.author,
-    server,
-    result)
-  
-  if reply_text:
+  #@client.event
+  async def on_message(self, msg):
+    # Skip scanning Atropos' own messages, since not doing so can
+    # allow for code injection.
+    if msg.author.id == self.user.id:
+      return
+    
+    # Determine if user message was a command.
+    result = self.command_parser.response_to(msg)
+    
+    # debug prints
+    print(f'{msg.author.display_name} sent: {msg.content}')
+    print(f'type={result.rtype}, value={result.value!r}')
+    
+    if isinstance(msg.channel, (discord.DMChannel, discord.GroupChannel)):
+      server_or_dm = msg.channel
+    else:
+      server_or_dm = msg.channel.guild
+    
+    # Construct reply data based on the contents of the message, and
+    # our copy of the dicelang interpreter.
+    reply_data = reply.build(
+      self.interpreter,
+      msg.author,
+      server_or_dm,
+      result)
+    
+    text, raw, out = reply_data
+    
+    # Send the reply.
+    await self.send(text, raw, out, msg)
+    
+  async def send(self, reply_text, raw_reply_text, printout, msg):
+    if not reply_text:
+      return
     try:
       await msg.channel.send(reply_text)
     except discord.errors.HTTPException as e:
-      if e.code == 50035: # Message too long to send
-        note1 = f"The response to `{user_name}`'s request was too large,"
-        note2 = f"so I've uploaded it as a file:"
+      if e.code == 50035: # Message too long.
+        note = f"The response to `{msg.author.display_name}`'s request "
+        note += "was too large, so I've uploaded it as a file instead:"
         path = result_file.get(raw_reply_text, msg.author.name, printout)
-        await msg.channel.send(
-          content=f'{note1} {note2}',
-          file=discord.File(path))
+        await msg.channel.send(content=note, file=discord.File(path))
         os.remove(path)
 
-
-def initialize():
-  config_dir_path = os.environ.get('ATROPOS_CONFIG')
-  
-  if config_dir_path is None:
-    raise Exception('Environment variable "ATROPOS_CONFIG" not set.')
-  
-  if not os.path.isdir(config_dir_path):
-    os.mkdir(config_dir_path)
-
 if __name__ == '__main__':
-  initialize()
+  atropos = Atropos(max_messages=128)
   print('atropos initialized')
-  client.run(auth.bot_token)
+  atropos.run(auth.bot_token)
 
 
