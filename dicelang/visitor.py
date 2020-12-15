@@ -6,12 +6,12 @@ import statistics
 import time
 
 from collections.abc import Iterable
+from numbers import Number
 from dicelang import plugins
 from dicelang import util
 
 from dicelang.float_special import inf
 from dicelang.float_special import nan
-from dicelang.float_special import numeric_types
 
 from dicelang.exceptions import BreakSignal
 from dicelang.exceptions import SkipSignal
@@ -805,9 +805,9 @@ class Visitor(object):
     iterables.'''
     factor1, factor2 = self.process_operands(children)
     array = (list, str)
-    if isinstance(factor1, array) and isinstance(factor2, numeric_types):
+    if isinstance(factor1, array) and isinstance(factor2, Number):
       out = util.iterable_repetition(factor1, factor2)
-    elif isinstance(factor1, numeric_types) and isinstance(factor2, array):
+    elif isinstance(factor1, Number) and isinstance(factor2, array):
       out = util.iterable_repetition(factor2, factor1)
     else:
       out = factor1 * factor2
@@ -827,7 +827,7 @@ class Visitor(object):
   def handle_remainder(self, children):
     '''Remainder for float or int.'''
     dividend, divisor = self.process_operands(children)
-    if divisor == 0 and isinstance(dividend, numeric_types):
+    if divisor == 0 and isinstance(dividend, Number):
       out = nan
     else:
       out = dividend % divisor
@@ -872,9 +872,9 @@ class Visitor(object):
     checks for when an extremely large number is being constructed.'''
     mantissa, exponent = self.process_operands(children)
     non_ints = (float, complex)
-    if isinstance(exponent, non_ints) and isinstance(mantissa, numeric_types):
+    if isinstance(exponent, non_ints) and isinstance(mantissa, Number):
       out = mantissa ** exponent
-    elif isinstance(exponent, int) and isinstance(mantissa, numeric_types):
+    elif isinstance(exponent, int) and isinstance(mantissa, Number):
       e = ExponentiationTimeout('Base or exponent too large in magnitude!')
       out = 1
       if exponent != 0:
@@ -937,7 +937,7 @@ class Visitor(object):
   def handle_selection(self, children):
     '''Select a random element from an iterable.'''
     operand = self.process_operands(children)[0]
-    if isinstance(operand, numeric_types):
+    if isinstance(operand, Number):
       operand = [operand]
     elif isinstance(operand, dict):
       operand = [[key, value] for key, value in operand.items()]
@@ -959,7 +959,7 @@ class Visitor(object):
     '''Generate a number summary from some iterable.'''
     operand = self.process_operands(children)[0]
     out = { }
-    if isinstance(operand, numeric_types):
+    if isinstance(operand, Number):
       operand = [operand]
     elif isinstance(operand, dict):
       operand = operand.values()
@@ -981,7 +981,7 @@ class Visitor(object):
     operand = self.process_operands(children)[0]
     if isinstance(operand, str):
       out = ''.join(sorted(operand))
-    elif isinstance(operand, numeric_types):
+    elif isinstance(operand, Number):
       out = operand
     elif isinstance(operand, dict):
       out = sorted(operand.values())
@@ -1081,7 +1081,7 @@ class Visitor(object):
         raise BreakError()
       except SkipSignal as ss:
         raise SkipError(ss.msg)
-    elif isinstance(function_or_other, numeric_types):
+    elif isinstance(function_or_other, Number):
       out = tuple([function_or_other * x for x in arguments])
       out = out[0] if len(out) == 1 else out
     else:
