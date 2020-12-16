@@ -1,4 +1,15 @@
 import random
+import numbers
+
+from dicelang.function import Function
+
+def is_noninteger(x):
+  p = isinstance(x, numbers.Number)
+  q = isinstance(x, numbers.Integral)
+  return p and not q
+
+def is_nonkey(x):
+  return isinstance(x, (dict, list, Function))
 
 def addition(left, right):
   '''Adds special rules to auto-box scalar items when they are added to

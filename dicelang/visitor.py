@@ -8,6 +8,10 @@ import time
 from collections.abc import Iterable
 from collections.abc import Sequence
 from numbers import Number
+from numbers import Real
+from numbers import Complex
+from numbers import Integral
+
 from dicelang import plugins
 from dicelang import util
 
@@ -243,8 +247,8 @@ class Visitor(object):
       out = self.handle_instruction(tree.children[0])
     elif tree.data == 'negation':
       out = self.handle_negation(tree.children)
-    elif tree.data == 'absolute_value':
-      out = self.handle_absolute_value(tree.children)
+    elif tree.data == 'real_part_or_nop':
+      out = self.handle_real_part_or_nop(tree.children)
     
     elif tree.data == 'power':
       out = self.handle_instruction(tree.children[0])
@@ -263,8 +267,8 @@ class Visitor(object):
       out = self.handle_selection(tree.children)
     elif tree.data in ('minimum', 'maximum'):
       out = self.handle_extrema(tree.children, tree.data)
-    elif tree.data == 'flatten':
-      out = self.handle_flatten(tree.children)
+    elif tree.data == 'flatten_or_abs':
+      out = self.handle_flatten_or_abs(tree.children)
     elif tree.data == 'stats':
       out = self.handle_stats(tree.children)
     elif tree.data == 'sort':
@@ -805,10 +809,9 @@ class Visitor(object):
     '''Handles multiplication of numerics and the repetition of ordered
     iterables.'''
     factor1, factor2 = self.process_operands(children)
-    array = (list, str)
-    if isinstance(factor1, array) and isinstance(factor2, Number):
+    if isinstance(factor1, Sequence) and isinstance(factor2, Number):
       out = util.iterable_repetition(factor1, factor2)
-    elif isinstance(factor1, Number) and isinstance(factor2, array):
+    elif isinstance(factor1, Number) and isinstance(factor2, Sequence):
       out = util.iterable_repetition(factor2, factor1)
     else:
       out = factor1 * factor2
@@ -855,12 +858,12 @@ class Visitor(object):
       out = -operand
     return out
   
-  def handle_absolute_value(self, children):
+  def handle_real_part_or_nop(self, children):
     '''Get the absolute value of a numeric while keeping the same type;
     no-op on non-numerics.'''
     operand = self.process_operands(children)[0]
-    if isinstance(operand, Number):
-      out = abs(operand)
+    if isinstance(operand, Complex):
+      out = operand.real
     else:
       out = operand
     return out
@@ -870,10 +873,9 @@ class Visitor(object):
     iterated multiplication for integer powers in order to allow for timeout
     checks for when an extremely large number is being constructed.'''
     mantissa, exponent = self.process_operands(children)
-    non_ints = (float, complex)
-    if isinstance(exponent, non_ints) and isinstance(mantissa, Number):
+    if util.is_noninteger(exponent) and isinstance(mantissa, Number):
       out = mantissa ** exponent
-    elif isinstance(exponent, int) and isinstance(mantissa, Number):
+    elif isinstance(exponent, Integral) and isinstance(mantissa, Number):
       e = ExponentiationTimeout('Base or exponent too large in magnitude!')
       out = 1
       if exponent != 0:
@@ -913,22 +915,19 @@ class Visitor(object):
         out += element
     elif isinstance(operand, Iterable) and not operand:
       out = 0
-    elif isinstance(operand, complex):
+    elif isinstance(operand, Complex):
       out = operand.imag
     else:
       out = operand
     return out
 
   def handle_length(self, children):
-    '''Obtain the length of an iterable. For a complex number,
-    this will give the real part.'''
+    '''Obtain the length of an iterable, or the arity of a function.'''
     operand = self.process_operands(children)[0]
     if isinstance(operand, Iterable):
       out = len(operand)
     elif isinstance(operand, Function):
       out = len(operand.params)
-    elif isinstance(operand, complex):
-      out = operand.real
     else:
       out = 0
     return out
@@ -949,12 +948,12 @@ class Visitor(object):
       operand = [operand]
     return min(operand) if extremum_type == 'minimum' else max(operand)
   
-  def handle_flatten(self, children):
+  def handle_flatten_or_abs(self, children):
     '''Iterates through an arbitrarily-nested iterable and feeds all the scalar
     values into a new list, which is returned.'''
     operand = self.process_operands(children)[0]
-    if isinstance(operand, complex):
-      out = operand.conjugate()
+    if isinstance(operand, Number):
+      out = abs(operand)
     elif isinstance(operand, Sequence):
       out = util.flatten(operand)
     else:
@@ -1012,6 +1011,11 @@ class Visitor(object):
     operands = self.process_operands(children)
     v = operands[0]
     args = operands[1:]
+    for arg in args: # Raise a more helpful error if we use a non-key obj.
+      if util.is_nonkey(arg):
+        e = f'Objects of type {arg.__class__.__name__} cannot be used '
+        e += f'as keys or indices. ({arg!r})'
+        raise OperationError
     
     if slice_type == 'whole_slice':
       out = v[:]
@@ -1030,9 +1034,6 @@ class Visitor(object):
     elif slice_type == 'step_slice':
       out = v[::args[0]]
     elif slice_type == 'not_a_slice':
-      if isinstance(args[0], Function):
-        e = f'Functions cannot be used as keys or indices. ({args[0]!r})'
-        raise OperationError(e)
       out = v[args[0]]
     return out
 
@@ -1052,14 +1053,12 @@ class Visitor(object):
     count = operands[2] if len(operands) > 2 else None
     as_sum = result_type == 'scalar'
     
-    # Extremely large rolls (a number of dice with 10+ digits; 10+ digit sides
-    # is fine) will cause the validator to raise an exception, which is written
-    # here, and which will be visible to the user if this occurs.
-    e = ' '.join([
-      f'{dice} is too many dice! This operation may take too long,'
-      'potentially preventing other users from being able to roll dice too.'])
+    # Extremely large rolls (a number of dice with 10+ digits; 10+ digit
+    # sides is fine) will cause the validator to raise an exception, which
+    # is written here, and which will be visible to the user if this occurs.
+    e = f'{dice} is too many dice! This operation would take too long,'
+    e += 'and prevent other users from being able to roll dice too.'
     IntegerValidator(10, DiceRollTimeout).validate(dice, e)
-    
     return util.roll(dice, sides, count, keep_mode, as_sum)
   
   def handle_apply(self, children):

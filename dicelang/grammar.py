@@ -109,7 +109,7 @@ term: term "*"  factor -> multiplication
     | factor
 
 factor: "-" factor -> negation
-      | "+" factor -> absolute_value
+      | "+" factor -> real_part_or_nop
       | power
 
 power: reduction "**" power -> exponent
@@ -121,7 +121,7 @@ reduction: "&"  reduction -> sum_or_join
          | "@"  reduction -> selection
          | "!<" reduction -> minimum
          | "!>" reduction -> maximum
-         | "|"  reduction -> flatten
+         | "|"  reduction "|" -> flatten_or_abs
          | "?"  reduction -> stats
          | "<>" reduction -> sort
          | "><" reduction -> shuffle
