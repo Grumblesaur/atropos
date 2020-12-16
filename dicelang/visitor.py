@@ -6,6 +6,7 @@ import statistics
 import time
 
 from collections.abc import Iterable
+from collections.abc import Sequence
 from numbers import Number
 from dicelang import plugins
 from dicelang import util
@@ -848,7 +849,7 @@ class Visitor(object):
     '''Get the arithmetic inverse of a numeric value, or the reverse of
     some ordered iterable.'''
     operand = self.process_operands(children)[0]
-    if isinstance(operand, (list, str, tuple)):
+    if isinstance(operand, Sequence):
       out = operand[::-1]
     else:
       out = -operand
@@ -858,10 +859,8 @@ class Visitor(object):
     '''Get the absolute value of a numeric while keeping the same type;
     no-op on non-numerics.'''
     operand = self.process_operands(children)[0]
-    if isinstance(operand, (float, int)):
-      out = operand if operand >= 0 else -operand
-    elif isinstance(operand, complex):
-      out = operand.conjugate()
+    if isinstance(operand, Number):
+      out = abs(operand)
     else:
       out = operand
     return out
@@ -953,7 +952,14 @@ class Visitor(object):
   def handle_flatten(self, children):
     '''Iterates through an arbitrarily-nested iterable and feeds all the scalar
     values into a new list, which is returned.'''
-    return util.flatten(self.process_operands(children)[0])
+    operand = self.process_operands(children)[0]
+    if isinstance(operand, complex):
+      out = operand.conjugate()
+    elif isinstance(operand, Sequence):
+      out = util.flatten(operand)
+    else:
+      out = operand
+    return out
   
   def handle_stats(self, children):
     '''Generate a number summary from some iterable.'''
