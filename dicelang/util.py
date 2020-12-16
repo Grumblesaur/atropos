@@ -77,10 +77,16 @@ def roll(dice, sides, count=0, mode='all', return_sum=True):
   return sum(out) if return_sum else out
 
 def flatten(items, seqtypes=(list, tuple)):
+  if isinstance(items, tuple):
+    revert_to_tuple = True
+    items = list(items)
+  else:
+    revert_to_tuple = False
+  
   for i, x in enumerate(items):
     while i < len(items) and isinstance(items[i], seqtypes):
       items[i:i+1] = items[i]
-  return items
+  return tuple(items) if revert_to_tuple else items
 
 def log(msg):
   with open('out.txt', 'a') as f:
