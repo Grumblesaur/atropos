@@ -69,12 +69,12 @@ class Visitor(object):
     self.depth += 1
     try:
       result = self.handle_instruction(parse_tree)
-    except BreakSignal:
+    except BreakSignal: # Occurs when break is used outside a loop
       raise BreakError()
-    except SkipSignal:
+    except SkipSignal:  # Occurs when skip is used outside a loop
       raise SkipError()
     except ReturnSignal as rs:
-      if self.depth == 1:
+      if self.depth == 1: # Case when return is used outside a function
         raise ReturnError()
       result = rs.data
     self.depth -= 1
@@ -91,7 +91,6 @@ class Visitor(object):
       self.scoping_data = None
     else:
       out = result
-    print('interpreter depth:', self.depth)
     return out
   
   def process_operands(self, children):
@@ -107,11 +106,9 @@ class Visitor(object):
     # If we have, then we must bail out and report failure to the user.
     now = time.time()
     if now > self.must_finish_by:
-      e = ' '.join([
-        'Dicelang command took too long! You may have chained',
-        'too many dice together, constructed an extremely large number,',
-        'or just used a lot of different operations.'
-      ])
+      e = 'Dicelang command took too long! You may have chained '
+      e += 'too many dice together, constructed an extremely large '
+      e += 'number, or just tried to do too much at once.'
       raise ExecutionTimeout(e)
     
     if tree.data == 'start':

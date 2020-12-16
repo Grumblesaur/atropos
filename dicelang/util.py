@@ -68,7 +68,7 @@ def iterable_repetition(iterable, repetitions):
     out = (iterable[::-1]) * times
   return out
 
-def roll(dice, sides, count=0, mode='all', return_sum, must_finish_by):
+def roll(dice, sides, count, mode, return_sum, must_finish_by):
   results = []
   for die in range(dice):
     if time.time() > must_finish_by:
