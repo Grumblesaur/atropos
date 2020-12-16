@@ -1,7 +1,9 @@
+import time
 import random
 import numbers
 
 from dicelang.function import Function
+from dicelang.exceptions import DiceRollTimeout
 
 def is_noninteger(x):
   p = isinstance(x, numbers.Number)
@@ -66,8 +68,13 @@ def iterable_repetition(iterable, repetitions):
     out = (iterable[::-1]) * times
   return out
 
-def roll(dice, sides, count=0, mode='all', return_sum=True):
-  results = [random.randint(1, sides) for die in range(dice)]
+def roll(dice, sides, count=0, mode='all', return_sum, must_finish_by):
+  results = []
+  for die in range(dice):
+    if time.time() > must_finish_by:
+      raise DiceRollTimeout('Took too long rolling dice!')
+    results.append(random.randint(1, sides))
+  
   if mode == 'lowest':
     out = sorted(results)[:count]
   elif mode == 'highest':

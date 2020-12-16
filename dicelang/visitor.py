@@ -41,8 +41,6 @@ from dicelang.identifier import Identifier
 from dicelang.ownership import ScopingData
 from dicelang.print_queue import PrintQueue
 
-from dicelang.validator import IntegerValidator
-
 class Visitor(object):
   def __init__(self, data, timeout=12):
     self.variable_data = data
@@ -1053,14 +1051,8 @@ class Visitor(object):
     dice, sides = operands[:2]
     count = operands[2] if len(operands) > 2 else None
     as_sum = result_type == 'scalar'
-    
-    # Extremely large rolls (a number of dice with 10+ digits; 10+ digit
-    # sides is fine) will cause the validator to raise an exception, which
-    # is written here, and which will be visible to the user if this occurs.
-    e = f'{dice} is too many dice! This operation would take too long,'
-    e += 'and prevent other users from being able to roll dice too.'
-    IntegerValidator(10, DiceRollTimeout).validate(dice, e)
-    return util.roll(dice, sides, count, keep_mode, as_sum)
+    d = util.roll(dice, sides, count, keep_mode, as_sum, self.must_finish_by)
+    return d
   
   def handle_apply(self, children):
     '''Accepts a function as the left operand, and some iterable (usually a
