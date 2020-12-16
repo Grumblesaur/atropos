@@ -198,7 +198,7 @@ class Decompiler(object):
       out = self.decompile(tree.children[0])
     elif tree.data == 'negation':
       out = f'-{self.decompile(tree.children[0])}'
-    elif tree.data == 'absolute_value':
+    elif tree.data == 'real_part_or_nop':
       out = f'+{self.decompile(tree.children[0])}'
     
     elif tree.data == 'power':
@@ -222,8 +222,6 @@ class Decompiler(object):
       out = f'!<{self.decompile(tree.children[0])}'
     elif tree.data == 'maximum':
       out = f'!>{self.decompile(tree.children[0])}'
-    elif tree.data == 'flatten':
-      out = f'|{self.decompile(tree.children[0])}'
     elif tree.data == 'stats':
       out = f'?{self.decompile(tree.children[0])}'
     elif tree.data == 'sort':
@@ -416,6 +414,8 @@ class Decompiler(object):
       out = f'core {tree.children[-1].value}'
     elif tree.data == 'priority':
       out = f'({self.decompile(tree.children[0])})'
+    elif tree.data == 'flatten_or_abs':
+      out = f'|{self.decompile(tree.children[0])}|'
     else:
       print('missed decompiling:', tree.data)
       out = f'__UNIMPLEMENTED__: {tree.data}'

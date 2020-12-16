@@ -38,23 +38,6 @@ import: KW_IMPORT identifier                    -> standard_import
 alias: identifier "aliases" expression
 inspection: KW_INSPECT identifier
 
-expression: assignment
-          | deletion
-          | block
-          | function
-          | for_loop
-          | while_loop
-          | do_while_loop
-          | conditional
-          | print
-          | import
-          | alias
-          | inspection
-          | return
-          | skip
-          | break
-
-
 return: KW_RETURN expression -> return_expr
       | KW_RETURN            -> return_bare 
 
@@ -63,6 +46,22 @@ skip: KW_SKIP expression -> skip_expr
 
 break: KW_BREAK expression -> break_expr
      | KW_BREAK            -> break_bare
+
+expression: assignment
+          | deletion
+          | block
+          | function
+          | for_loop
+          | while_loop
+          | do_while_loop
+          | conditional
+          | import
+          | alias
+          | inspection
+          | return
+          | skip
+          | break
+          | print
 
 print: KW_PRINTLN print -> printline
      | KW_PRINT   print -> printword
@@ -121,7 +120,6 @@ reduction: "&"  reduction -> sum_or_join
          | "@"  reduction -> selection
          | "!<" reduction -> minimum
          | "!>" reduction -> maximum
-         | "|"  reduction "|" -> flatten_or_abs
          | "?"  reduction -> stats
          | "<>" reduction -> sort
          | "><" reduction -> shuffle
@@ -174,6 +172,7 @@ atom: number_literal
     | undefined_literal
     | identifier_get
     | "(" expression ")" -> priority
+    | "|" expression "|" -> flatten_or_abs
 
 undefined_literal: UNDEFINED
 number_literal:    REAL | COMPLEX
