@@ -36,7 +36,7 @@ class Atropos(discord.Client):
     
     # Determine if user message was a command.
     result = await self.result_of_command(msg)
-    if result.rtype in (commands.Response.ERROR, commands.Response.NONE):
+    if not result:
       return
     
     # Channel name is for debug purposes only.

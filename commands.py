@@ -8,6 +8,9 @@ class Result(object):
     self.rtype = response_type
     self.value = value
     self.other = other
+  
+  def __bool__(self):
+    return self.rtype not in (Response.ERROR, Response.NONE)
 
 class Response(enum.Enum):
   ERROR            = -1
