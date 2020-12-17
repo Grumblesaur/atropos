@@ -5,7 +5,7 @@ import discord
 import auth
 import commands
 import reply
-import result_file
+from result_file import ResultFile
 
 from dicelang.interpreter import Interpreter
 
@@ -13,7 +13,7 @@ class Atropos(discord.Client):
   def __init__(self, *args, **kwargs):
     super().__init__(*args, **kwargs)
     self.interpreter = Interpreter()
-    self.command_parser = commands.CmdParser()
+    self.command_parser = commands.CommandParser()
     
     # Initialize configuration directory if not already established.
     config_dir_path = os.environ.get('ATROPOS_CONFIG')
@@ -23,10 +23,10 @@ class Atropos(discord.Client):
       os.mkdir(config_dir_path)
 
   async def on_ready(self):
-    activity_type = discord.ActivityType.listening
-    name = "+help quickstart"
-    activity = discord.Activity(type=activity_type, name=name)
-    await self.change_presence(activity=activity)
+    a = discord.Activity(
+      type=discord.ActivityType.listening,
+      name="+help quickstart")
+    await self.change_presence(activity=a)
 
   async def on_message(self, msg):
     # Skip scanning Atropos' own messages, since not doing so can
@@ -84,9 +84,8 @@ class Atropos(discord.Client):
       if e.code == 50035: # Message too long.
         note = f"The response to `{msg.author.display_name}`'s request "
         note += "was too large, so I've uploaded it as a file instead:"
-        path = result_file.get(raw_reply_text, msg.author.name, printout)
-        await msg.channel.send(content=note, file=discord.File(path))
-        os.remove(path)
+        with ResultFile(raw_reply_text, msg.author.name, printout) as rf:
+          await msg.channel.send(content=note, file=rf)
 
 if __name__ == '__main__':
   atropos = Atropos(max_messages=128)

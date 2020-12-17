@@ -27,7 +27,7 @@ class Response(enum.Enum):
   HELP_KEYWORD     = 10
 
 
-class CmdParser(object):
+class CommandParser(object):
   grammar = r'''
     start: "+" ("atropos")? command
     command: roll -> command_roll
@@ -53,7 +53,7 @@ class CmdParser(object):
   
   def __init__(self):
     self.parser = lark.Lark(
-      CmdParser.grammar,
+      self.__class__.grammar,
       start='start',
       parser='earley',
       lexer='dynamic_complete')
