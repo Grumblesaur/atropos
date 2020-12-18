@@ -1091,8 +1091,12 @@ class Visitor(object):
     operands = self.process_operands(children)
     obj = operands[0]
     out = obj
+    last = None
     for attr in operands[1:]:
+      last = out
       out = out[attr.name]
+    if isinstance(out, Function):
+      out.this = last
     return out
 
   def handle_search(self, children):

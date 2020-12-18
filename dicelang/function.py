@@ -2,6 +2,7 @@ import copy
 import lark
 from dicelang import decompiler
 from dicelang import grammar
+from dicelang.undefined import Undefined
 from dicelang.exceptions import DefinitionError, CallError
 
 class Function(object):
@@ -19,6 +20,7 @@ class Function(object):
   def __init__(self, tree_or_src, param_names=None, closed_vars=None):
     self.visitor = None
     self.closed = closed_vars if closed_vars else [{}]
+    self.this = Undefined
     if param_names is None:
       tree = Function.parser.parse(tree_or_src)
       self.code = tree.children[-1]
@@ -71,12 +73,13 @@ class Function(object):
       raise CallError('Arguments mismatch formal parameters in length.')
     
     arguments_scope = dict(zip(self.params, args))
+    arguments_scope['this'] = self.this
     scoping_data = self.visitor.scoping_data
     
     scoping_data.push_function_call(arguments_scope, self.closed)
     out = self.visitor.walk(self.code, scoping_data)
     scoping_data.pop_function_call()
-    
+    self.this = Undefined
     return out
  
 
