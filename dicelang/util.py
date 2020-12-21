@@ -6,11 +6,16 @@ from dicelang.function import Function
 from dicelang.exceptions import DiceRollTimeout
 
 def is_noninteger(x):
+  '''Used to detect float and complex numbers as numbers.Real will also
+  include integers.'''
   p = isinstance(x, numbers.Number)
   q = isinstance(x, numbers.Integral)
   return p and not q
 
 def is_nonkey(x):
+  '''We don't allow dicts to be keyed by these non-hashable objects.
+  This function is used instead to allow the Visitor to raise a more
+  useful error for users than Python would raise itself.'''
   return isinstance(x, (dict, list, Function))
 
 def addition(left, right):
@@ -69,6 +74,13 @@ def iterable_repetition(iterable, repetitions):
   return out
 
 def roll(dice, sides, count, mode, return_sum, must_finish_by):
+  '''Rolls `dice` dice each with `sides` sides numbered `1` through `sides`.
+  When `mode` is "highest", the highest `count` dice are kept; when `mode`
+  is "lowest", the lowest `count` dice are kept; oetherwise, all dice are
+  kept. `return_sum` is a boolean which causes the dice to be summed if True
+  and returned as a list of individual rolls otherwise. `must_finish_by` is
+  a time in seconds since the epoch by which the die rolling loop must finish
+  executing or else time out.'''
   results = []
   for die in range(dice):
     if time.time() > must_finish_by:
@@ -84,6 +96,8 @@ def roll(dice, sides, count, mode, return_sum, must_finish_by):
   return sum(out) if return_sum else out
 
 def flatten(items, seqtypes=(list, tuple)):
+  '''Flattens an arbitrarily nested list or tuple down into a single-depth
+  vector (tuple or list, depending on input).'''
   if isinstance(items, tuple):
     revert_to_tuple = True
     items = list(items)
@@ -101,6 +115,7 @@ def log(msg):
 
 
 def string_format(format_string, fields):
+  '''Handles string formatting for %% operator.'''
   if isinstance(fields, dict):
     out = format_string.format(**fields)
   elif isinstance(fields, (list, tuple)):
@@ -110,6 +125,10 @@ def string_format(format_string, fields):
   return out
 
 def range_list(closed, start, stop, step=1):
+  '''Generates a list of integers from start to stop by step. Step is always
+  corrected to the correct sign depending on whether start>stop or not. As
+  such, the sign of step does not matter. Closed is a boolean variable that
+  determines whether stop should be included in the list.'''
   if start > stop:
     upward = False
     step = -abs(step)
