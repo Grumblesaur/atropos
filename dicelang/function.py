@@ -66,6 +66,11 @@ class Function(object):
     
   __repr__ = repl_repr
   
+  def __eq__(self, other):
+    if not isinstance(other, Function):
+      return False
+    return self.params == other.params and self.code == other.code
+  
   def __call__(self, visitor, *args):
     if self.visitor is None:
       self.visitor = visitor

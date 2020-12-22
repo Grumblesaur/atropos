@@ -34,11 +34,6 @@ class Atropos(discord.Client):
     if msg.author.id == self.user.id:
       return
     
-    # Determine if user message was a command.
-    result = await self.result_of_command(msg)
-    if not result:
-      return
-    
     # Channel name is for debug purposes only.
     if isinstance(msg.channel, discord.GroupChannel):
       server_or_dm = msg.channel
@@ -50,11 +45,21 @@ class Atropos(discord.Client):
       server_or_dm = msg.channel.guild
       channel_name = f'{server_or_dm.name}:{msg.channel.name}'
     
-    # debug prints
-    print(f'[usr:{msg.author.display_name}] in [chn:{channel_name}] sent:')
-    print(f'{msg.content}')
-    print(f'type={result.rtype}, value={result.value!r}')
+    # Process the message to determine if it is a command.
+    result = await self.result_of_command(msg)
     
+    # Construct a debug message to print out, stating the user, message
+    # location, message content, and the type of command it evaluated as.
+    db = '\n'.join([
+      f'[usr:{msg.author.display_name}] in [chn:{channel_name}] sent:',
+      f'  {msg.content}',
+      f'  [type:{result.rtype}] [value={result.value!r}]',
+    ])
+    print(db)
+    
+    # If the command was not valid, terminate processing here.
+    if not result:
+      return
 
     # Construct reply data based on the contents of the message, and
     # our copy of the dicelang interpreter.
@@ -86,6 +91,7 @@ class Atropos(discord.Client):
         note += "was too large, so I've uploaded it as a file instead:"
         with ResultFile(raw_reply_text, msg.author.name, printout) as rf:
           await msg.channel.send(content=note, file=rf)
+    
 
 if __name__ == '__main__':
   atropos = Atropos(max_messages=128)
