@@ -2,11 +2,13 @@ aiohttp==3.6.2
 asgiref==3.2.10
 async-timeout==3.0.1
 attrs==19.3.0
-chardet==3.0.4
+behindthename @ git+https://github.com/Grumblesaur/behindthename.git@daa96835137bf056844e991b64cfd8740168cd2c
+certifi==2020.12.5
+chardet==4.0.0
 discord==1.0.1
 discord.py==1.4.1
 Django==3.0.7
-idna==2.8
+idna==2.10
 idna-ssl==1.1.0
 importlib-metadata==1.5.0
 lark-parser==0.8.1
@@ -19,12 +21,14 @@ py==1.8.1
 pyparsing==2.4.6
 pytest==5.3.5
 pytz==2020.1
+requests==2.25.1
 six==1.14.0
 sqlparse==0.3.1
 tesnames @ git+https://github.com/hrmay/tesnames.git@3b7eac77613272c3fd25fbf4682aa5ee7f2e3dca
 timestamp @ git+https://github.com/Grumblesaur/timestamp.git@048075a28da4b854cc980d3759db823f333068e4
 typing-extensions==3.7.4.1
 Unidecode==1.1.1
+urllib3==1.26.2
 wcwidth==0.1.8
 websockets==6.0
 yarl==1.4.2

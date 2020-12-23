@@ -4,6 +4,7 @@ export DICELANG_CORE_EDITORS="$ATROPOS_CONFIG/editors"
 export ATROPOS_TOKEN_FILE="$ATROPOS_CONFIG/token"
 export ATROPOS_ID_FILE="$ATROPOS_CONFIG/id"
 export DJANGO_ALLOW_ASYNC_UNSAFE="true"
+export BEHINDTHENAME_API_KEY_FILE="$ATROPOS_CONFIG/btn_key"
 ./build-readme.sh
 while true; do
   python3 atropos.py
