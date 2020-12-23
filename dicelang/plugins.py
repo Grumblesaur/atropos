@@ -20,7 +20,11 @@ def btn_name_requestor():
   def name_generator(d):
     random = RandomName(api_key=key, **d)
     data = random.get()
-    return ' '.join(data['names'])
+    try:
+      names = data['names']
+    except KeyError:
+      return data['error']
+    return ' '.join(names)
   
   return name_generator
 
