@@ -4,6 +4,8 @@ from lark.exceptions import UnexpectedEOF
 from lark import UnexpectedToken, UnexpectedCharacters, UnexpectedInput
 from dicelang.exceptions import DicelangError
 from commands import Response
+
+import discord
 import helptext
 
 helptable = helptext.HelpText()
@@ -11,16 +13,16 @@ helptable = helptext.HelpText()
 def _fold(names):
   return '  '.join(names)
 
-def dice_reply(interpreter, author, server, argument):
-  context_size = max(15, len(argument) // 10)
-  is_error = True
+def dice_execute(code, author_id, server_id):
   printout = ''
   evaluated = ''
+  is_error = True
+  context_size = max(15, len(argument) // 10)
   try:
-    evaluated, printout = interpreter.execute(argument, author.id, server.id)
+    evaluated, printout = interpreter.execute(argument, author_id, server_id)
     is_error = False
   except (UnexpectedCharacters, UnexpectedToken, UnexpectedInput) as e:
-    evaluated = 'Syntax error:\n' + e.get_context(argument, context_size)
+    evaluated = 'Syntax error:\n' + e.get_context(code, context_size)
   except UnexpectedEOF as e:
     evaluated = str(e).split('.')[0] + '.'
   except (ParseError, LexError) as e:
@@ -29,28 +31,40 @@ def dice_reply(interpreter, author, server, argument):
     evaluated = f'(Interpreter Error) Missing internal identifier: {e!s}'
     traceback.print_tb(e.__traceback__)
   except DicelangError as e:
-    printout = interpreter.get_print_queue_on_error(author.id)
+    printout = interpreter.get_print_queue_on_error(author_id)
     classname = e.__class__.__name__
     try:
       evaluated = f'{classname}: {e.msg}'
     except AttributeError:
       evaluated = f'{classname}: {e.args[0]!s}'
   except Exception as e:
-    printout = interpreter.get_print_queue_on_error(author.id)
+    printout = interpreter.get_print_queue_on_error(author_id)
     evaluated = f'{e.__class__.__name__}: {e!s}'
     traceback.print_tb(e.__traceback__)
-  
+  return evaluated, printout, is_error
+
+def dice_reply_literate(interpreter, author, server, argument):
+  value, printout, is_error = dice_execute(interpreter, author.id, server.id)
   user = author.display_name
-  if is_error:
-    if not printout:
-      msg = f'{user} received error:\n```diff\n{evaluated}```'
-    else:
-      msg = f'{user} received error:\n```{printout}```\n```{evaluated}```'
+  kw = {
+    'title' : f'Roll result for {user}',
+    'description' : f'```{argument}```',
+    'color' : author.color,
+  }
+  embed = discord.Embed(**kw)
+  if printout:
+    embed.add_field(name='Action', value=printout, inline=False)
+  embed.add_field(name='Result', value=value, inline=False)
+  return embed, value, printout
+  
+def dice_reply(interpreter, author, server, argument):
+  value, printout, is_error = dice_execute(interpreter, author.id, server.id)
+  user = author.display_name
+  error = is_error * ' error'
+  if not printout:
+    msg = f'{user} received{error}:\n```diff\n{value}```'
   else:
-    if not printout:
-      msg = f'{user} received:\n```diff\n{evaluated}```'
-    else:
-      msg = f'{user} received:\n```{printout}```\n```diff\n{evaluated}```'
+    msg = f'{user} received{error}:\n```{printout}```\n```{value}```'
   return (msg, evaluated, printout)
   
 def view_globals_reply(lang, user):
@@ -93,6 +107,7 @@ def view_core_reply(lang, user):
   return head + body
 
 def build(interpreter, author, channel, result):
+  reply = ''
   raw_reply = ''
   po = ''
   response = result.rtype
@@ -103,7 +118,11 @@ def build(interpreter, author, channel, result):
     option = None
   
   if response == Response.DICE:
-    reply, raw_reply, po = dice_reply(interpreter, author, channel, argument)
+    args = (interpreter, author, channel, argument)
+    if option == 'literate':
+      reply, raw_reply, po = dice_reply_literate(*args)
+    else:
+      reply, raw_reply, po = dice_reply(*args)
   elif response == Response.DICE_HELP:
     reply = '[dice help message unimplemented]'
   

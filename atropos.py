@@ -71,14 +71,23 @@ class Atropos(discord.Client):
         result)
     
     text, raw, out = reply_data
-    
-    await self.send(text, raw, out, msg)
+    if isinstance(text, discord.Embed):
+      for user in msg.channel.members:
+        if user.id == self.id:
+          text.set_author(name='{user.display_name}')
+          break
+      await self.send_embed(text)
+    else: 
+      await self.send(text, raw, out, msg)
     
   async def result_of_command(self, msg):
     return self.command_parser.response_to(msg)
   
   async def reply_for_result(self, dicelang, author, channel, result):
     return reply.build(dicelang, author, channel, result)
+  
+  async def send_embed(self, embed, msg):
+    await msg.channel.send(embed=embed)
   
   async def send(self, reply_text, raw_reply_text, printout, msg):
     if not reply_text:

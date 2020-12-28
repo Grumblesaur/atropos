@@ -35,6 +35,7 @@ class CommandParser(object):
            | help -> command_help
     
     roll: "roll" /(.|\n)+/  -> roll_code
+        | "roll-lit" /(.|\n)+/ -> roll_lit
         | "roll"            -> roll_help
     
     view: "view"    "all"   ("vars")?                  -> view_all
@@ -89,6 +90,8 @@ class CommandParser(object):
       out = self._handle(tree.children[0])
     elif tree.data == 'roll_code':
       out = Result(Response.DICE, tree.children[0].value)
+    elif tree.data == 'roll_lit':
+      out = Result(Response.DICE, tree.children[0].value, other='literate')
     elif tree.data == 'roll_help':
       out = Result(Response.DICE_HELP)
     elif tree.data == 'view_all':
