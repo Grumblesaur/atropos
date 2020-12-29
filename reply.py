@@ -13,13 +13,13 @@ helptable = helptext.HelpText()
 def _fold(names):
   return '  '.join(names)
 
-def dice_execute(code, author_id, server_id):
+def dice_execute(interpreter, code, author_id, server_id):
   printout = ''
   evaluated = ''
   is_error = True
-  context_size = max(15, len(argument) // 10)
+  context_size = max(15, len(code) // 10)
   try:
-    evaluated, printout = interpreter.execute(argument, author_id, server_id)
+    evaluated, printout = interpreter.execute(code, author_id, server_id)
     is_error = False
   except (UnexpectedCharacters, UnexpectedToken, UnexpectedInput) as e:
     evaluated = 'Syntax error:\n' + e.get_context(code, context_size)
@@ -44,7 +44,8 @@ def dice_execute(code, author_id, server_id):
   return evaluated, printout, is_error
 
 def dice_reply_literate(interpreter, author, server, argument):
-  value, printout, is_error = dice_execute(interpreter, author.id, server.id)
+  args = (interpreter, argument, author.id, server.id)
+  value, printout, is_error = dice_execute(*args)
   user = author.display_name
   kw = {
     'title' : f'Roll result for {user}',
@@ -53,19 +54,20 @@ def dice_reply_literate(interpreter, author, server, argument):
   }
   embed = discord.Embed(**kw)
   if printout:
-    embed.add_field(name='Action', value=printout, inline=False)
-  embed.add_field(name='Result', value=value, inline=False)
+    embed.add_field(name='Action', value=f'```{printout}```', inline=False)
+  embed.add_field(name='Result', value=f'```{value}```', inline=False)
   return embed, value, printout
   
 def dice_reply(interpreter, author, server, argument):
-  value, printout, is_error = dice_execute(interpreter, author.id, server.id)
+  args = (interpreter, argument, author.id, server.id)
+  value, printout, is_error = dice_execute(*args)
   user = author.display_name
   error = is_error * ' error'
   if not printout:
     msg = f'{user} received{error}:\n```diff\n{value}```'
   else:
     msg = f'{user} received{error}:\n```{printout}```\n```{value}```'
-  return (msg, evaluated, printout)
+  return (msg, value, printout)
   
 def view_globals_reply(lang, user):
   names = _fold(lang.keys('global'))

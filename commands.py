@@ -35,7 +35,7 @@ class CommandParser(object):
            | help -> command_help
     
     roll: "roll" /(.|\n)+/  -> roll_code
-        | "roll-lit" /(.|\n)+/ -> roll_lit
+        | "lit" /(.|\n)+/ -> roll_lit
         | "roll"            -> roll_help
     
     view: "view"    "all"   ("vars")?                  -> view_all

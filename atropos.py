@@ -70,16 +70,17 @@ class Atropos(discord.Client):
         server_or_dm,
         result)
     
-    text, raw, out = reply_data
-    if isinstance(text, discord.Embed):
-      for user in msg.channel.members:
-        if user.id == self.id:
-          text.set_author(name='{user.display_name}')
-          break
-      await self.send_embed(text)
-    else: 
-      await self.send(text, raw, out, msg)
-    
+    text_or_embed, raw, out = reply_data
+    if isinstance(text_or_embed, discord.Embed):
+      text_or_embed.set_author(name=self.get_display_name(msg))
+    await self.send(text_or_embed, raw, out, msg)
+  
+  def get_display_name(self, msg):
+    for user in msg.channel.members:
+      if user.id == self.user.id:
+        return f'{user.display_name}'
+    return 'Atropos'  
+  
   async def result_of_command(self, msg):
     return self.command_parser.response_to(msg)
   
@@ -89,11 +90,15 @@ class Atropos(discord.Client):
   async def send_embed(self, embed, msg):
     await msg.channel.send(embed=embed)
   
-  async def send(self, reply_text, raw_reply_text, printout, msg):
-    if not reply_text:
+  async def send(self, reply_body, raw_reply_text, printout, msg):
+    if not reply_body:
       return
+    
     try:
-      await msg.channel.send(reply_text)
+      if isinstance(reply_body, discord.Embed):
+        await msg.channel.send(embed=reply_body)
+      else:
+        await msg.channel.send(reply_body)
     except discord.errors.HTTPException as e:
       if e.code == 50035: # Message too long.
         note = f"The response to `{msg.author.display_name}`'s request "
