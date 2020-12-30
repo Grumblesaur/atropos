@@ -76,9 +76,12 @@ class Atropos(discord.Client):
     await self.send(text_or_embed, raw, out, msg)
   
   def get_display_name(self, msg):
-    for user in msg.channel.members:
-      if user.id == self.user.id:
-        return f'{user.display_name}'
+    try:
+      for user in msg.channel.members:
+        if user.id == self.user.id:
+          return f'{user.display_name}'
+    except AttributeError:
+      pass
     return 'Atropos'  
   
   async def result_of_command(self, msg):
