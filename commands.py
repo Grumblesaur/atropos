@@ -120,8 +120,14 @@ class Command(object):
       out = tree.data, {'value': f'UNIMPLEMENTED: {tree.data}'}
     return out
 
-  
   async def send_reply_as(self, client):
+    if not self:
+      return
+    async with self.originator.channel.typing():
+      await self.reply(client)
+  
+  
+  async def reply(self, client):
     if not self:
       return # Don't send a reply if we're an invalid command.
     username = self.originator.author.display_name

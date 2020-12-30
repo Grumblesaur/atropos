@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
+import sys
 import os
-import asyncio
 import discord
 import auth
 import commands
@@ -21,14 +21,8 @@ class Atropos(discord.Client):
       type=discord.ActivityType.listening,
       name="+help quickstart")
     await self.change_presence(activity=a)
-
-  async def on_message(self, msg):
-    # Skip scanning Atropos' own messages, since not doing so can
-    # allow for code injection.
-    if msg.author.id == self.user.id:
-      return
-    
-    # Channel name is for debug purposes only.
+  
+  def console_log(self, msg, command):
     if isinstance(msg.channel, discord.GroupChannel):
       server_or_dm = msg.channel
       channel_name = server_or_dm.name
@@ -38,28 +32,33 @@ class Atropos(discord.Client):
     else:
       server_or_dm = msg.channel.guild
       channel_name = f'{server_or_dm.name}:{msg.channel.name}'
+    s = '\n'.join([
+      f'[usr:{msg.author.display_name}] in [chn:{channel_name}] sent:',
+      f'  {msg.content}',
+      f'  {command!r}',
+    ])
+    print(s)
+    return
+
+  async def on_message(self, msg):
+    # Skip scanning Atropos' own messages to prevent code injection.
+    if msg.author.id == self.user.id:
+      return
     
     # Process the message to determine if it is a command.
     possible_command = commands.Command(msg)
+    self.console_log(msg, possible_command)
     
-    # Construct a debug message to print out, stating the user, message
-    # location, message content, and the type of command it evaluated as.
-    db = '\n'.join([
-      f'[usr:{msg.author.display_name}] in [chn:{channel_name}] sent:',
-      f'  {msg.content}',
-      f'  {possible_command!r}',
-    ])
-    print(db)
+    # Send a reply if it was a valid command, else this operation is a no-op..
+    await possible_command.send_reply_as(self)
     
-    # Construct reply data based on the contents of the message, and
-    # our copy of the dicelang interpreter.
-    if possible_command:
-      async with msg.channel.typing():
-        await possible_command.send_reply_as(self)
-    
-if __name__ == '__main__':
+
+def main(*argv):
   atropos = Atropos(max_messages=128)
-  print('atropos initialized')
+  print('Atropos initialized.')
   atropos.run(auth.bot_token)
+
+if __name__ == '__main__':
+  main(*sys.argv)
 
 
