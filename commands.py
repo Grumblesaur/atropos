@@ -220,20 +220,16 @@ class Builder(object):
     server_id = self.get_server_id(msg)
     user_id = msg.author.id
     cores, pubs, servs, privs = ('',) * 4
-    if command_type == CommandType.view_all:
-      cores = '  '.join(self.dicelang.keys('core'))
-      pubs  = '  '.join(self.dicelang.keys('global'))
-      servs = '  '.join(self.dicelang.keys('server', server_id))
-      privs = '  '.join(self.dicelang.keys('private', user_id))
-    elif command_type == CommandType.view_public:
+    if command_type in (CommandType.view_public, CommandType.view_all):
       pubs = '  '.join(self.dicelang.keys('global'))
-    elif command_type == CommandType.view_shared:
+    if command_type in (CommandType.view_shared, CommandType.view_all):
       servs = '  '.join(self.dicelang.keys('server', server_id))
-    elif command_type == CommandType.view_private:
+    if command_type in (CommandType.view_private, CommandType.view_all):
       privs = '  '.join(self.dicelang.keys('private', user_id))
-    elif command_type == CommandType.view_core:
+    if command_type in (CommandType.view_core, Commandtype.view_all):
       cores = '  '.join(self.dicelang.keys('core'))
-    elif command_type == CommandType.view_help:
+    
+    if command_type == CommandType.view_help:
       return {
         'action': 'Possible options',
         'result': '\n'.join(
