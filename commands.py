@@ -9,7 +9,7 @@ from dicelang import interpreter
 from dicelang.exceptions import DicelangError
 from result_file import ResultFile
 
-command_grammar = r'''
+syntax = r'''
   start: "+" ("atropos")? command
   command: roll -> command_roll
          | view -> command_view
@@ -60,11 +60,9 @@ class CommandType:
 
 
 class Command(object):
-  parser = lark.Lark(
-    command_grammar,
-    start='start',
-    parser='earley',
-    lexer='dynamic_complete')
+  _parser_kw = {'start':'start', 'parser':'earley', 'lexer':'dynamic_complete'}
+  parser = lark.Lark(syntax, **_parser_kw)
+  builder = Builder(interpreter.Interpreter(), helptext.HelpText())
   
   def __init__(self, message):
     parser_output = self.parse(message.content)
@@ -74,7 +72,6 @@ class Command(object):
     else:
       self.type, self.kwargs = self.visit(parser_output['tree'])
     self.originator = message
-    self.builder = Builder()
   
   def __repr__(self):
     return f'{self.__class__.__name__}<{self.type}:{self.kwargs!r}>'
@@ -128,11 +125,14 @@ class Command(object):
   
   
   async def reply(self, client):
+    '''Construct a reply for the type of command we are. If no valid Command
+    type was identified, this function is a no-op.'''
     if not self:
-      return # Don't send a reply if we're an invalid command.
+      return
+    
     username = self.originator.author.display_name
     if self.type == CommandType.roll_code:
-      d = self.builder.dice_reply(self.kwargs['value'], self.originator)
+      d = Command.builder.dice_reply(self.kwargs['value'], self.originator)
       action = d['action']
       result = d['result']
       error = d['error'] * ' error'
@@ -142,7 +142,7 @@ class Command(object):
       c += f'```{result}```'
       reply = {'content' : c}
     elif self.type == CommandType.roll_lit:
-      d = self.builder.dice_reply(self.kwargs['value'], self.originator)
+      d = Command.builder.dice_reply(self.kwargs['value'], self.originator)
       action = d['action']
       result = d['result']
       error = 'Error' if d['error'] else 'Roll'
@@ -159,7 +159,7 @@ class Command(object):
     elif self.type == CommandType.roll_help:
       reply = {'content' : 'See `+atropos help quickstart` for more info.'}
     elif self.type in CommandType.views:
-      embed_fields = self.builder.view_reply(self.type, self.originator)
+      embed_fields = Command.builder.view_reply(self.type, self.originator)
       noun = 'help' if embed_fields['help'] else 'view'
       title = f'Database {noun} for {username}'
       embed_kw = {
@@ -173,9 +173,9 @@ class Command(object):
       reply = {'embed' : embed}
     elif self.type in CommandType.helps:
       if self.type == CommandType.help_help:
-        data = self.builder.help_reply(None, None, True)
+        data = Command.builder.help_reply(None, None, True)
       else:
-        data = self.builder.help_reply(self.kwargs['value'], self.kwargs['option'])
+        data = Command.builder.help_reply(self.kwargs['value'], self.kwargs['option'])
       
       embed_kw = {
         'title' : f'Help for {username}',
@@ -207,9 +207,9 @@ class Command(object):
       
     
 class Builder(object):
-  def __init__(self):
-    self.dicelang = interpreter.Interpreter()
-    self.helptable = helptext.HelpText()
+  def __init__(self, dicelang_interpreter, helptext_engine):
+    self.dicelang = dicelang_interpreter
+    self.helptable = helptext_engine
   
   def get_server_id(self, msg):
     if isinstance(msg.channel, (discord.GroupChannel, discord.DMChannel)):

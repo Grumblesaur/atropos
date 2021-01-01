@@ -75,22 +75,28 @@ class Function(object):
     
   __repr__ = repl_repr
   
+  def marshal(self, args):
+    scope = dict(zip(self.params, args))
+    scope['this'] = self.this
+    return scope
+  
   def __eq__(self, other):
     if not isinstance(other, Function):
       return False
     return self.params == other.params and self.code == other.code
   
   def __call__(self, visitor, *args):
+    n = len(args), m = len(self.params)
+    if n != m:
+      e = f'Arguments mismatch formal parameters in length. '
+      e += f'(Got {n}, expected {m}.)'
+      raise CallError(e)
+    
     if self.visitor is None:
       self.visitor = visitor
-    if len(self.params) != len(args):
-      raise CallError('Arguments mismatch formal parameters in length.')
     
-    arguments_scope = dict(zip(self.params, args))
-    arguments_scope['this'] = self.this
     scoping_data = self.visitor.scoping_data
-    
-    scoping_data.push_function_call(arguments_scope, self.closed)
+    scoping_data.push_function_call(self.marshal(args), self.closed)
     out = self.visitor.walk(self.code, scoping_data)
     scoping_data.pop_function_call()
     self.this = Undefined
