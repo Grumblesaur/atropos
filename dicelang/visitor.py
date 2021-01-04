@@ -119,9 +119,7 @@ class Visitor(object):
       out = self.handle_function(tree.children)
     elif tree.data == 'alias':
       out = self.handle_alias(tree.children)
-    elif tree.data == 'inspection':
-      out = self.handle_inspection(tree.children)
-    
+   
     elif tree.data == 'for_loop':
       out = self.handle_for_loop(tree.children)
     elif tree.data == 'while_loop':
@@ -212,13 +210,6 @@ class Visitor(object):
     elif tree.data == 'absent':
       out = self.handle_present(tree.children, negate=True)
     
-    elif tree.data == 'shift':
-      out = self.handle_instruction(tree.children[0])
-    elif tree.data == 'left_shift':
-      out = self.handle_left_shift(tree.children)
-    elif tree.data == 'right_shift':
-      out = self.handle_right_shift(tree.children)
-    
     elif tree.data == 'arithm':
       out = self.handle_instruction(tree.children[0])
     elif tree.data == 'addition':
@@ -238,6 +229,10 @@ class Visitor(object):
       out = self.handle_remainder(tree.children)
     elif tree.data == 'floor_division':
       out = self.handle_floor_division(tree.children)
+    elif tree.data == 'left_shift':
+      out = self.handle_left_shift(tree.children)
+    elif tree.data == 'right_shift':
+      out = self.handle_right_shift(tree.children)
     
     elif tree.data == 'factor':
       out = self.handle_instruction(tree.children[0])
@@ -314,19 +309,19 @@ class Visitor(object):
     elif tree.data == 'typeof':
       out = self.handle_typeof(tree.children)
     
-    elif tree.data == 'print':
+    elif tree.data == 'keyword_expr':
       out = self.handle_instruction(tree.children[0])
     elif tree.data == 'printline':
       out = self.handle_print(tree.children, '\n')
     elif tree.data == 'printword':
       out = self.handle_print(tree.children, ' ')
-    
-    elif tree.data in ('break', 'skip', 'return'):
-      out = self.handle_instruction(tree.children[0])
     elif tree.data in ('break_expr', 'skip_expr', 'return_expr'):
       out = self.handle_signal(tree.children, bare=False)
     elif tree.data in ('break_bare', 'skip_bare', 'return_bare'):
       out = self.handle_signal(tree.children, bare=True)
+    elif tree.data == 'inspection':
+      out = self.handle_inspection(tree.children)
+ 
     
     elif tree.data == 'atom' or tree.data == 'priority':
       out = self.handle_instruction(tree.children[0])
@@ -530,7 +525,12 @@ class Visitor(object):
     new_name = ident.name
     mode = 'server'
     if value is not Undefined:
-      imported = Identifier(new_name, self.scoping_data, mode, self.variable_data)
+      imported = Identifier(
+        new_name,
+        self.scoping_data,
+        mode,
+        self.variable_data)
+      
       imported.put(value)
       out = True
     else:
@@ -546,7 +546,12 @@ class Visitor(object):
       for attr in operands[1:]:
         name = attr.name
         val = val[name]
-      imported = Identifier(name, self.scoping_data, 'server', self.variable_data)
+      
+      imported = Identifier(name,
+        self.scoping_data,
+        'server',
+        self.variable_data)
+      
       print(val)
       imported.put(copy.deepcopy(val))
       out = True

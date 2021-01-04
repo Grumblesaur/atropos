@@ -143,8 +143,8 @@ class Decompiler(object):
     elif tree.data == 'comp':
       out = self.decompile(tree.children[0])
     elif tree.data == 'comp_math':
-      operands_and_operators = [self.decompile(child) for child in tree.children]
-      out = ' '.join(operands_and_operators)
+      tokens = [self.decompile(child) for child in tree.children]
+      out = ' '.join(tokens)
     elif tree.data == 'math_comp':
       out = tree.children[0].value
     elif tree.data == 'comp_obj':
@@ -157,15 +157,6 @@ class Decompiler(object):
     elif tree.data == 'absent':
       left, right = self.decompile_all(tree.children)
       out = f'{left} not in {right}'
-    
-    elif tree.data == 'shift':
-      out = self.decompile(tree.children[0])
-    elif tree.data == 'left_shift':
-      left, right = self.decompile_all(tree.children)
-      out = f'{left} << {right}'
-    elif tree.data == 'right_shift':
-      left, right = self.decompile_all(tree.children)
-      out = f'{left} >> {right}'
     
     elif tree.data == 'arithm':
       out = self.decompile(tree.children[0])
@@ -193,7 +184,13 @@ class Decompiler(object):
     elif tree.data == 'floor_division':
       left, right = self.decompile_all(tree.children)
       out = f'{left} // {right}'
-    
+    elif tree.data == 'left_shift':
+      left, right = self.decompile_all(tree.children)
+      out = f'{left} << {right}'
+    elif tree.data == 'right_shift':
+      left, right = self.decompile_all(tree.children)
+      out = f'{left} >> {right}'
+     
     elif tree.data == 'factor':
       out = self.decompile(tree.children[0])
     elif tree.data == 'negation':
@@ -321,29 +318,20 @@ class Decompiler(object):
     elif tree.data == 'typeof':
       out = f'typeof {self.decompile(tree.children[1])}'
     
-    elif tree.data == 'print':
+    elif tree.data == 'keyword_expr':
       out = self.decompile(tree.children[0])
     elif tree.data == 'printline':
       out = f'println {self.decompile(tree.children[1])}'
     elif tree.data == 'printword':
       out = f'print {self.decompile(tree.children[1])}'
-    
-    elif tree.data == 'break':
-      out = self.decompile(tree.children[0])
     elif tree.data == 'break_expr':
       out = f'break {self.decompile(tree.children[1])}'
     elif tree.data == 'break_bare':
       out = 'break'
-    
-    elif tree.data == 'return':
-      out = self.decompile(tree.children[0])
     elif tree.data == 'return_expr':
       out = f'return {self.decompile(tree.children[1])}'
     elif tree.data == 'return_bare':
       out = 'return'
-    
-    elif tree.data == 'skip':
-      out = self.decompile(tree.children[0])
     elif tree.data == 'skip_expr':
       out = f'skip {self.decompile(tree.children[1])}'
     elif tree.data == 'skip_bare':

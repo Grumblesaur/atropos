@@ -86,7 +86,7 @@ class Builder(object):
       options = 'all core global my our'.split()
       return {
         'action' : 'Possible options',
-        'result' : '\n'.join(map(lambda o: f'  {o}', options))
+        'result' : '\n'.join(map(lambda o: f'  {o}', options)),
         'help'   : True,
       }
     

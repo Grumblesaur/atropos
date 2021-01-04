@@ -109,11 +109,6 @@ def flatten(items, seqtypes=(list, tuple)):
       items[i:i+1] = items[i]
   return tuple(items) if revert_to_tuple else items
 
-def log(msg):
-  with open('out.txt', 'a') as f:
-    f.write(f'{msg}\n')
-
-
 def string_format(format_string, fields):
   '''Handles string formatting for %% operator.'''
   if isinstance(fields, dict):

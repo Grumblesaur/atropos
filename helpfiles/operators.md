@@ -27,11 +27,11 @@ times        | *         |
 divide       | /         |
 modulo       | %         | interpolate
 floordiv     | //        |
+lshift       | <<        |
+rshift       | >>        |
 plus         | +         |
 minus        | -         |
 catenate     | $         | 
-lshift       | <<        |
-rshift       | >>        |
 greaterthan  | >         |
 lessthan     | <         |
 greaterequal | >=        |

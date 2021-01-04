@@ -36,16 +36,6 @@ import: KW_IMPORT identifier                    -> standard_import
       | KW_IMPORT identifier ("." identifier)+ "as" identifier   -> as_getattr_import
 
 alias: identifier "aliases" expression
-inspection: KW_INSPECT identifier
-
-return: KW_RETURN expression -> return_expr
-      | KW_RETURN            -> return_bare 
-
-skip: KW_SKIP expression -> skip_expr
-    | KW_SKIP            -> skip_bare
-
-break: KW_BREAK expression -> break_expr
-     | KW_BREAK            -> break_bare
 
 expression: assignment
           | deletion
@@ -57,15 +47,18 @@ expression: assignment
           | conditional
           | import
           | alias
-          | inspection
-          | return
-          | skip
-          | break
-          | print
+          | if_expr
+          | keyword_expr
 
-print: KW_PRINTLN print -> printline
-     | KW_PRINT   print -> printword
-     | if_expr
+keyword_expr: KW_PRINTLN expression -> printline
+            | KW_PRINT              -> printword
+            | KW_BREAK expression   -> break_expr
+            | KW_BREAK              -> break_bare
+            | KW_SKIP  expression   -> skip_expr
+            | KW_SKIP               -> skip_bare
+            | KW_RETURN expression  -> return_expr
+            | KW_RETURN             -> return_bare
+            | KW_INSPECT identifier -> inspection
 
 if_expr: repeat "if" repeat "else" if_expr -> inline_if
        | repeat "if"        "else" if_expr -> inline_if_binary
@@ -86,15 +79,11 @@ bool_and: bool_and "and" bool_not -> logical_and
 bool_not: NOT bool_not -> logical_not
         | comp
 
-comp: shift (math_comp shift)+ -> comp_math
-    | shift (obj_comp shift)+  -> comp_obj
-    | shift "in" shift         -> present
-    | shift "not" "in" shift   -> absent
-    | shift
-
-shift: shift "<<" arithm -> left_shift
-     | shift ">>" arithm -> right_shift
-     | arithm
+comp: arithm (math_comp arithm)+ -> comp_math
+    | arithm (obj_comp arithm)+  -> comp_obj
+    | arithm "in" arithm         -> present
+    | arithm "not" "in" arithm   -> absent
+    | arithm
 
 arithm: arithm "+" term -> addition
       | arithm "-" term -> subtraction
@@ -105,6 +94,8 @@ term: term "*"  factor -> multiplication
     | term "/"  factor -> division
     | term "%"  factor -> remainder
     | term "//" factor -> floor_division
+    | term "<<" factor -> left_shift
+    | term ">>" factor -> right_shift
     | factor
 
 factor: "-" factor -> negation
