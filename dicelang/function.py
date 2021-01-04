@@ -86,7 +86,7 @@ class Function(object):
     return self.params == other.params and self.code == other.code
   
   def __call__(self, visitor, *args):
-    n = len(args), m = len(self.params)
+    n, m = len(args), len(self.params)
     if n != m:
       e = f'Arguments mismatch formal parameters in length. '
       e += f'(Got {n}, expected {m}.)'
