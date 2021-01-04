@@ -142,6 +142,6 @@ class HelpText(object):
       with open(self.help_topics['topics']) as f:
         standard = f.read()
       out = 'Your search did not yield any results. Try the `+help` command '
-      out += f'with one of the standard topics:\n```{standard}```'
+      out += f'with one of the standard topics:\n{standard}'
     return out
   

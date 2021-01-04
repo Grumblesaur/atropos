@@ -84,10 +84,6 @@ class Cache(object):
     return 1
  
 class DataStore(object):
-  '''Specialization of _DataStore where keys are associated by
-  some other key specifying ownership, such as a username or
-  server handle.'''
-  
   def __init__(self, cache_time=6*60*60):
     self.cache = Cache()
     
@@ -97,8 +93,10 @@ class DataStore(object):
         pruned = self.cache.prune()
         print(f'{pruned} objects pruned from cache')
     
-    a = (cache_time,)
-    self.pruner = threading.Thread(target=pruning_task, args=a, daemon=True)
+    self.pruner = threading.Thread(
+      target=pruning_task,
+      args=(cache_time,),
+      daemon=True)
     self.pruner.start()
   
   def view(self, mode, owner_id):

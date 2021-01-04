@@ -3,17 +3,17 @@ class Decompiler(object):
     self.indent = ' ' * 2
     self.level  = 0
 
-  def binop_decompile(self, children):
-    return (self.decompile(children[0]), self.decompile(children[1]))
+  def decompile_all(self, children):
+    return [self.decompile(child) for child in children]
 
   def decompile(self, tree):
     '''Recursively reconstruct a normalized source code form for an abstract
     syntax tree.'''
     if tree.data == 'start':
-      out = '; '.join([self.decompile(child) for child in tree.children])
+      out = '; '.join(self.decompile_all(tree.children))
     elif tree.data == 'block':
       self.level += 1
-      expressions = [self.decompile(child) for child in tree.children]
+      expressions = self.decompile_all(tree.children)
       indent = self.indent * self.level
       endent = self.indent * (self.level - 1)
       exprs = indent + f';\n{indent}'.join(expressions)
@@ -35,7 +35,7 @@ class Decompiler(object):
       code = self.decompile(tree.children[2])
       out = f'for {iterator} in {expression} do {code}'
     elif tree.data == 'while_loop':
-      expression, code = self.binop_decompile(tree.children)
+      expression, code = self.decompile_all(tree.children)
       out = f'while {expression} do {code}'
     elif tree.data == 'do_while_loop':
       code = self.decompile(tree.children[0])
@@ -45,7 +45,7 @@ class Decompiler(object):
     elif tree.data == 'conditional':
       out = self.decompile(tree.children[0])
     elif tree.data == 'if':
-      condition, code = self.binop_decompile(tree.children)
+      condition, code = self.decompile_all(tree.children)
       out = f'if {condition} then {code}'
     elif tree.data == 'if_else':
       condition, if_code, else_code = [self.decompile(child) for child in tree.children]
@@ -61,7 +61,7 @@ class Decompiler(object):
       ident = self.decompile(tree.children[1])
       out = f'import {ident}'
     elif tree.data == 'standard_getattr_import':
-      idents = [self.decompile(c) for c in tree.children[1:]]
+      idents = self.decompile_all(tree.children[1:])
       chain = '.'.join(idents)
       out = f'import {chain}'
     elif tree.data == 'as_import':
@@ -69,13 +69,13 @@ class Decompiler(object):
       alias = self.decompile(tree.children[2])
       out = f'import {ident} as {alias}'
     elif tree.data == 'as_getattr_import':
-      items = [self.decompile(c) for c in tree.children[1:]]
+      items = self.decompile_all(tree.children[1:])
       chain = '.'.join(items[:-1])
       ident = items[-1]
       out = f'import {chain} as {ident}'
     
     elif tree.data == 'deletion':
-      chain = ', '.join([self.decompile(c) for c in tree.children])
+      chain = ', '.join(self.decompile_all(tree.children))
       out = f'del {chain}'
     elif tree.data == 'deletable':
       out = self.decompile(tree.children[0])
@@ -85,16 +85,18 @@ class Decompiler(object):
     elif tree.data == 'assignment':
       out = self.decompile(tree.children[0])
     elif tree.data == 'setattr':
-      chain = '.'.join([self.decompile(child) for child in tree.children[:-1]])
-      expression = self.decompile(tree.children[-1])
+      parts = self.decompile_all(tree.children)
+      chain = '.'.join(exprs[:-1])
+      expression = parts[-1]
       out = f'{chain} = {expression}'
     elif tree.data == 'identifier_set':
-      ident, expr = self.binop_decompile(tree.children)
+      ident, expr = self.decompile_all(tree.children)
       out = f'{ident} = {expr}'
     elif tree.data == 'identifier_set_subscript':
-      identifier = self.decompile(tree.children[0])
-      subscripts = ''.join([f'[{self.decompile(c)}]' for c in tree.children[1:-1]])
-      expression = self.decompile(tree.children[-1])
+      parts = self.decompile_all(tree.children)
+      identifier = parts[0]
+      subscripts = ''.join([f'[{c}]' for c in parts[1:-1]])
+      expression = parts[-1]
       out = f'{identifier}{subscripts} = {expression}'
     
     elif tree.data == 'identifier_get':
@@ -103,35 +105,33 @@ class Decompiler(object):
     elif tree.data == 'if_expr':
       out = self.decompile(tree.children[0])
     elif tree.data == 'inline_if':
-      if_expr = self.decompile(tree.children[0])
-      condition = self.decompile(tree.children[1])
-      else_expr = self.decompile(tree.children[2])
+      if_expr, condition, else_expr = self.decompile_all(tree.children)
       out = f'{if_expr} if {condition} else {else_expr}'
     elif tree.data == 'inline_if_binary':
-      if_expr, else_expr = self.binop_decompile(tree.children)
+      if_expr, else_expr = self.decompile_all(tree.children)
       out = f'{if_expr} if else {else_expr}'
     
     elif tree.data == 'repeat':
       out = self.decompile(tree.children[0])
     elif tree.data == 'repetition':
-      left, right = self.binop_decompile(tree.children)
+      left, right = self.decompile_all(tree.children)
       out = f'{left} ^ {right}'
     elif tree.data == 'bool_or':
       out = self.decompile(tree.children[0])
     elif tree.data == 'logical_or':
-      left, right = self.binop_decompile(tree.children)
+      left, right = self.decompile_all(tree.children)
       out = f'{left} or {right}'
 
     elif tree.data == 'bool_xor':
       out = self.decompile(tree.children[0])
     elif tree.data == 'logical_xor':
-      left, right = self.binop_decompile(tree.children)
+      left, right = self.decompile_all(tree.children)
       out = f'{left} xor {right}'
 
     elif tree.data == 'bool_and':
       out = self.decompile(tree.children[0])
     elif tree.data == 'logical_and':
-      left, right = self.binop_decompile(tree.children)
+      left, right = self.decompile_all(tree.children)
       out = f'{left} and {right}'
 
     elif tree.data == 'bool_not':
@@ -152,46 +152,46 @@ class Decompiler(object):
     elif tree.data == 'obj_comp':
       out = "is" if len(tree.children) == 1 else "is not"
     elif tree.data == 'present':
-      left, right = self.binop_decompile(tree.children)
+      left, right = self.decompile_all(tree.children)
       out = f'{left} in {right}'
     elif tree.data == 'absent':
-      left, right = self.binop_decompile(tree.children)
+      left, right = self.decompile_all(tree.children)
       out = f'{left} not in {right}'
     
     elif tree.data == 'shift':
       out = self.decompile(tree.children[0])
     elif tree.data == 'left_shift':
-      left, right = self.binop_decompile(tree.children)
+      left, right = self.decompile_all(tree.children)
       out = f'{left} << {right}'
     elif tree.data == 'right_shift':
-      left, right = self.binop_decompile(tree.children)
+      left, right = self.decompile_all(tree.children)
       out = f'{left} >> {right}'
     
     elif tree.data == 'arithm':
       out = self.decompile(tree.children[0])
     elif tree.data == 'addition':
-      left, right = self.binop_decompile(tree.children)
+      left, right = self.decompile_all(tree.children)
       out = f'{left} + {right}'
     elif tree.data == 'subtraction':
-      left, right = self.binop_decompile(tree.children)
+      left, right = self.decompile_all(tree.children)
       out = f'{left} - {right}'
     elif tree.data == 'catenation':
-      left, right = self.binop_decompile(tree.children)
+      left, right = self.decompile_all(tree.children)
       out = f'{left} $ {right}'
     
     elif tree.data == 'term':
       out = self.decompile(tree.children[0])
     elif tree.data == 'multiplication':
-      left, right = self.binop_decompile(tree.children)
+      left, right = self.decompile_all(tree.children)
       out = f'{left} * {right}'
     elif tree.data == 'division':
-      left, right = self.binop_decompile(tree.children)
+      left, right = self.decompile_all(tree.children)
       out = f'{left} / {right}'
     elif tree.data == 'remainder':
-      left, right = self.binop_decompile(tree.children)
+      left, right = self.decompile_all(tree.children)
       out = f'{left} % {right}'
     elif tree.data == 'floor_division':
-      left, right = self.binop_decompile(tree.children)
+      left, right = self.decompile_all(tree.children)
       out = f'{left} // {right}'
     
     elif tree.data == 'factor':
@@ -204,10 +204,10 @@ class Decompiler(object):
     elif tree.data == 'power':
       out = self.decompile(tree.children[0])
     elif tree.data == 'exponent':
-      left, right = self.binop_decompile(tree.children)
+      left, right = self.decompile_all(tree.children)
       out = f'{left} ** {right}'
     elif tree.data == 'logarithm':
-      left, right = self.binop_decompile(tree.children)
+      left, right = self.decompile_all(tree.children)
       out = f'{left} %% {right}'
     
     elif tree.data == 'reduction':
@@ -232,86 +232,88 @@ class Decompiler(object):
     elif tree.data == 'slice':
       out = self.decompile(tree.children[0])
     elif tree.data == 'whole_slice':
-      out = f'{decompile(tree.children[0])}[:]'
+      out = f'{self.decompile(tree.children[0])}[:]'
     elif tree.data == 'start_slice':
-      indexable, start = self.binop_decompile(tree.children)
+      indexable, start = self.decompile_all(tree.children)
       out = f'{indexable}[{start}:]'
     elif tree.data == 'start_step_slice':
-      indexable, start, step = [self.decompile(child) for child in tree.children]
+      indexable, start, step = self.decompile_all(tree.children)
       out = f'{indexable}[{start}::{step}]'
     elif tree.data == 'start_stop_slice':
-      indexable, start, stop = [self.decompile(child) for child in tree.children]
+      indexable, start, stop = self.decompile_all(tree.children)
       out = f'{indexable}[{start}:{stop}]'
     elif tree.data == 'fine_slice':
-      indexable, start, stop, step = [self.decompile(child) for child in tree.children]
+      indexable, start, stop, step = self.decompile_all(tree.children)
       out = f'{indexable}[{start}:{stop}:{step}]'
     elif tree.data == 'stop_slice':
-      indexable, stop = self.binop_decompile(tree.children)
+      indexable, stop = self.decompile_all(tree.children)
       out = f'{indexable}[:{stop}]'
     elif tree.data == 'stop_step_slice':
-      indexable, stop, step = [self.decompile(child) for child in tree.children]
+      indexable, stop, step = self.decompile_all(tree.children)
       out = f'{indexable}[:{stop}:{step}]'
     elif tree.data == 'step_slice':
-      indexable, step = self.binop_decompile(tree.children)
+      indexable, step = self.decompile_all(tree.children)
       out = f'{indexable}[::{step}]'
     elif tree.data == 'not_a_slice':
-      indexable, index = self.binop_decompile(tree.children)
+      indexable, index = self.decompile_all(tree.children)
       out = f'{indexable}[{index}]'
     
     elif tree.data == 'application':
       out = self.decompile(tree.children[0])
     elif tree.data == 'apply':
-      left, right = self.binop_decompile(tree.children)
+      left, right = self.decompile_all(tree.children)
       out = f'{left} -: {right}'
     
     elif tree.data == 'die':
       out = self.decompile(tree.children[0])
     elif tree.data == 'scalar_die_all':
-      dice, sides = self.binop_decompile(tree.children[::2])
+      dice, sides = self.decompile_all(tree.children[::2])
       out = f'{dice} d {sides}'
     elif tree.data == 'scalar_die_highest':
-      dice, sides, keep = [self.decompile(child) for child in tree.children[::2]]
+      dice, sides, keep = self.decompile_all(tree.children[::2])
       out = f'{dice} d {sides} h {keep}'
     elif tree.data == 'scalar_die_lowest':
-      dice, sides, keep = [self.decompile(child) for child in tree.children[::2]]
+      dice, sides, keep = self.decompile_all(tree.children[::2])
       out = f'{dice} d {sides} l {keep}'
     elif tree.data == 'vector_die_all':
-      dice, sides = self.binop_decompile(tree.children[::2])
+      dice, sides = self.decompile_all(tree.children[::2])
       out = f'{dice} r {sides}'
     elif tree.data == 'vector_die_highest':
-      dice, sides, keep = [self.decompile(child) for child in tree.children[::2]]
+      dice, sides, keep = self.decompile_all(tree.children[::2])
       out = f'{dice} r {sides} h {keep}'
     elif tree.data == 'vector_die_lowest':
-      dice, sides, keep = [self.decompile(child) for child in tree.children[::2]]
+      dice, sides, keep = self.decompile_all(tree.children[::2])
       out = f'{dice} r {sides} l {keep}'
     
     elif tree.data == 'plugin_op':
       out = self.decompile(tree.children[0])
     elif tree.data == 'plugin_call':
-      name, operand = self.binop_decompile(tree.children)
+      name, operand = self.decompile_all(tree.children)
       out = f'{name} :: {operand}'
     
     elif tree.data == 'call_or_atom':
       out = self.decompile(tree.children[0])
     elif tree.data == 'function_call':
-      handle = self.decompile(tree.children[0])
-      arguments = ', '.join([self.decompile(child) for child in tree.children[1:]])
+      parts = self.decompile_all(tree.children)
+      handle = parts[0]
+      arguments = ', '.join(parts[1:])
       out = f'{handle}({arguments})'
     
     elif tree.data == 'get_attribute':
       out = self.decompile(tree.children[0])
     elif tree.data == 'getattr':
-      obj = self.decompile(tree.children[0])
-      chain = '.'.join([self.decompile(child) for child in tree.children[1:]])
+      parts = self.decompile_all(tree.children)
+      obj = parts[0]
+      chain = '.'.join(parts[1:])
       out = f'{obj}.{chain}'
     
     elif tree.data == 'regex':
       out = self.decompile(tree.children[0])
     elif tree.data == 'match':
-      text, pattern = [self.decompile(c) for c in tree.children[0::2]]
+      text, pattern = self.decompile_all(tree.children[0::2])
       out = f'{text} like {pattern}'
     elif tree.data == 'search':
-      text, pattern = [self.decompile(c) for c in tree.children[0::2]]
+      text, pattern = self.decompile_all(tree.children[0::2])
       out = f'{text} seek {pattern}'
     
     elif tree.data == 'reflection':
@@ -361,7 +363,7 @@ class Decompiler(object):
     elif tree.data == 'list_literal':
       out = self.decompile(tree.children[0])
     elif tree.data == 'populated_list':
-      chain = ', '.join([self.decompile(child) for child in tree.children])
+      chain = ', '.join(self.decompile_all(tree.children))
       out = f'[{chain}]'
     elif tree.data == 'empty_list':
       out = '[]'
@@ -371,22 +373,22 @@ class Decompiler(object):
     elif tree.data == 'mono_tuple':
       out = f'({self.decompile(tree.children[0])},)'
     elif tree.data == 'multi_tuple':
-      chain = ', '.join([self.decompile(child) for child in tree.children])
+      chain = ', '.join(self.decompile_all(tree.children))
       out = f'({chain})'
     elif tree.data == 'empty_tuple':
       out = '()'
     
     elif tree.data == 'range_list':
-      start, stop = self.binop_decompile(tree.children)
+      start, stop = self.decompile_all(tree.children)
       out = f'[{start} to {stop}]'
     elif tree.data == 'range_list_stepped':
-      start, stop, step = [self.decompile(child) for child in tree.children]
+      start, stop, step = self.decompile_all(tree.children)
       out = f'[{start} to {stop} by {step}]'
     elif tree.data == 'closed_list':
-      start, stop = [self.decompile(child) for child in tree.children]
+      start, stop = self.decompile_all(tree.children)
       out = f'[{start} through {stop}]'
     elif tree.data == 'closed_list_stepped':
-      start, stop, step = [self.decompile(child) for child in tree.children]
+      start, stop, step = self.decompile_all(tree.children)
       out = f'[{start} through {stop} by {step}]'
     
     elif tree.data == 'dict_literal':
@@ -394,10 +396,10 @@ class Decompiler(object):
     elif tree.data == 'empty_dict':
       out = '{}'
     elif tree.data == 'populated_dict':
-      chain = ', '.join([self.decompile(child) for child in tree.children])
+      chain = ', '.join(self.decompile_all(tree.children))
       out = '{' + f'{chain}' + '}'
     elif tree.data == 'key_value_pair':
-      key, value = self.binop_decompile(tree.children)
+      key, value = self.decompile_all(tree.children)
       out = f'{key}: {value}'
     
     elif tree.data == 'identifier':

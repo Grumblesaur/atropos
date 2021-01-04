@@ -7,7 +7,7 @@ from dicelang.exceptions import DefinitionError, CallError
 
 class Function(object):
   parser = lark.Lark(grammar.raw_text, start='function', parser='earley')
-  dcmp = decompiler.Decompiler()
+  deparser = decompiler.Decompiler()
   
   class SerializableRepr:
     def __init__(self):
@@ -18,53 +18,67 @@ class Function(object):
       Function.__repr__ = Function.repl_repr
   
   def __init__(self, tree_or_src, param_names=None, closed_vars=None):
+    if param_names is None:
+      tree = self.parse(tree_or_src)
+      self.code = tree.children[-1]
+      self.params = tree.children[0:-1]
+      self.src = self.decompile(tree)
+    else:
+      self.code = tree_or_src
+      self.params = param_names
+      signature, body = ', '.join(param_names), self.decompile(tree_or_src)
+      self.src = f'({signature}) -> {body}'
+    
+    self.normalize()
     self.visitor = None
     self.closed = closed_vars if closed_vars else [{}]
     self.this = Undefined
-    if param_names is None:
-      tree = Function.parser.parse(tree_or_src)
-      self.code = tree.children[-1]
-      self.params = Function._normalize_params(tree.children[0:-1])
-      param_string = ', '.join(self.params)
-      self.src = f'{Function.dcmp.decompile(tree)}'
-    else:
-      Function._ensure_unique(param_names)
-      self.code = tree_or_src
-      self.params = Function._normalize_params(param_names)
-      param_string = ', '.join(param_names)
-      self.src = f'({param_string}) -> {Function.dcmp.decompile(tree_or_src)}'
   
   def __deepcopy__(self, memodict={}):
+    '''Override __deepcopy__ to prevent bugs when function objects are moved
+    or deleted by users.'''
     newtree = type(self.code)(
       copy.deepcopy(self.code.data),
       copy.deepcopy(self.code.children))
     return type(self)(newtree, self.params[:], copy.deepcopy(self.closed))
   
-  @staticmethod
-  def _ensure_unique(parameters):
-    parameters = sorted(parameters)
+  def normalize(self):
+    '''Ensure that all parameters are strings and not Lark Tokens, then check
+    for duplicated parameter names. If a parameter name is duplicated, raise
+    an error indicating which.'''
+    normalized_params = []
+    for param in self.params:
+      normalized_params.append(str(param))
     last = None
-    for parameter in parameters:
-      if parameter == last:
-        raise DefinitionError(f'Parameter name duplicated: "{parameter}".')
-      last = parameter
-    return True
+    for param in sorted(normalized_params):
+      if param == last:
+        raise DefinitionError(f'Parameter name duplicated: "{param}".')
+      last = param
+    self.params = normalized_params
   
-  @staticmethod
-  def _normalize_params(parameters):
-    out = []
-    for param in parameters:
-      out.append(str(param))
-    return out
+  def parse(self, src):
+    '''Proxy method for parsing a function source string.'''
+    return Function.parser.parse(src)
+  
+  def decompile(self, tree):
+    '''Proxy method for decompiling a function source tree.'''
+    return Function.deparser.decompile(tree)
   
   def repl_repr(self):
+    '''The representation shown to users of the language.'''
     return f'{self.src}'
   
   def serializable_repr(self):
+    '''The representation used for serializing function objects.'''
     flat_source = self.src.replace('\n', '\f')
     return f'Function({flat_source!r}, closed_vars={self.closed!r})'
     
   __repr__ = repl_repr
+  
+  def marshal(self, args):
+    scope = dict(zip(self.params, args))
+    scope['this'] = self.this
+    return scope
   
   def __eq__(self, other):
     if not isinstance(other, Function):
@@ -72,16 +86,17 @@ class Function(object):
     return self.params == other.params and self.code == other.code
   
   def __call__(self, visitor, *args):
+    n = len(args), m = len(self.params)
+    if n != m:
+      e = f'Arguments mismatch formal parameters in length. '
+      e += f'(Got {n}, expected {m}.)'
+      raise CallError(e)
+    
     if self.visitor is None:
       self.visitor = visitor
-    if len(self.params) != len(args):
-      raise CallError('Arguments mismatch formal parameters in length.')
     
-    arguments_scope = dict(zip(self.params, args))
-    arguments_scope['this'] = self.this
     scoping_data = self.visitor.scoping_data
-    
-    scoping_data.push_function_call(arguments_scope, self.closed)
+    scoping_data.push_function_call(self.marshal(args), self.closed)
     out = self.visitor.walk(self.code, scoping_data)
     scoping_data.pop_function_call()
     self.this = Undefined

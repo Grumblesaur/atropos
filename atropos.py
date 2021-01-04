@@ -1,19 +1,13 @@
 #!/usr/bin/env python3
+import sys
 import os
-import asyncio
 import discord
 import auth
 import commands
-import reply
-from result_file import ResultFile
-
-from dicelang.interpreter import Interpreter
 
 class Atropos(discord.Client):
   def __init__(self, *args, **kwargs):
     super().__init__(*args, **kwargs)
-    self.interpreter = Interpreter()
-    self.command_parser = commands.CommandParser()
     
     # Initialize configuration directory if not already established.
     config_dir_path = os.environ.get('ATROPOS_CONFIG')
@@ -27,14 +21,8 @@ class Atropos(discord.Client):
       type=discord.ActivityType.listening,
       name="+help quickstart")
     await self.change_presence(activity=a)
-
-  async def on_message(self, msg):
-    # Skip scanning Atropos' own messages, since not doing so can
-    # allow for code injection.
-    if msg.author.id == self.user.id:
-      return
-    
-    # Channel name is for debug purposes only.
+  
+  def console_log(self, msg, command):
     if isinstance(msg.channel, discord.GroupChannel):
       server_or_dm = msg.channel
       channel_name = server_or_dm.name
@@ -44,75 +32,33 @@ class Atropos(discord.Client):
     else:
       server_or_dm = msg.channel.guild
       channel_name = f'{server_or_dm.name}:{msg.channel.name}'
-    
-    # Process the message to determine if it is a command.
-    result = await self.result_of_command(msg)
-    
-    # Construct a debug message to print out, stating the user, message
-    # location, message content, and the type of command it evaluated as.
-    db = '\n'.join([
+    s = '\n'.join([
       f'[usr:{msg.author.display_name}] in [chn:{channel_name}] sent:',
       f'  {msg.content}',
-      f'  [type:{result.rtype}] [value={result.value!r}]',
+      f'  {command!r}',
     ])
-    print(db)
-    
-    # If the command was not valid, terminate processing here.
-    if not result:
-      return
+    print(s)
+    return
 
-    # Construct reply data based on the contents of the message, and
-    # our copy of the dicelang interpreter.
-    async with msg.channel.typing():
-      reply_data = await self.reply_for_result(
-        self.interpreter,
-        msg.author,
-        server_or_dm,
-        result)
-    
-    text_or_embed, raw, out = reply_data
-    if isinstance(text_or_embed, discord.Embed):
-      text_or_embed.set_author(name=self.get_display_name(msg))
-    await self.send(text_or_embed, raw, out, msg)
-  
-  def get_display_name(self, msg):
-    try:
-      for user in msg.channel.members:
-        if user.id == self.user.id:
-          return f'{user.display_name}'
-    except AttributeError:
-      pass
-    return 'Atropos'  
-  
-  async def result_of_command(self, msg):
-    return self.command_parser.response_to(msg)
-  
-  async def reply_for_result(self, dicelang, author, channel, result):
-    return reply.build(dicelang, author, channel, result)
-  
-  async def send_embed(self, embed, msg):
-    await msg.channel.send(embed=embed)
-  
-  async def send(self, reply_body, raw_reply_text, printout, msg):
-    if not reply_body:
+  async def on_message(self, msg):
+    # Skip scanning Atropos' own messages to prevent code injection.
+    if msg.author.id == self.user.id:
       return
     
-    try:
-      if isinstance(reply_body, discord.Embed):
-        await msg.channel.send(embed=reply_body)
-      else:
-        await msg.channel.send(reply_body)
-    except discord.errors.HTTPException as e:
-      if e.code == 50035: # Message too long.
-        note = f"The response to `{msg.author.display_name}`'s request "
-        note += "was too large, so I've uploaded it as a file instead:"
-        with ResultFile(raw_reply_text, msg.author.name, printout) as rf:
-          await msg.channel.send(content=note, file=rf)
+    # Process the message to determine if it is a command.
+    possible_command = commands.Command(msg)
+    self.console_log(msg, possible_command)
     
+    # Send a reply if it was a valid command, else this operation is a no-op..
+    await possible_command.send_reply_as(self)
+    
+
+def main(*argv):
+  atropos = Atropos(max_messages=128)
+  print('Atropos initialized.')
+  atropos.run(auth.bot_token)
 
 if __name__ == '__main__':
-  atropos = Atropos(max_messages=128)
-  print('atropos initialized')
-  atropos.run(auth.bot_token)
+  main(*sys.argv)
 
 
