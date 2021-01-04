@@ -15,8 +15,8 @@ syntax = r'''
          | view -> command_view
          | help -> command_help
   
-  roll: "roll" /(.|\n)+/  -> roll_code
-      | "lit" /(.|\n)+/ -> roll_lit
+  roll: "old" /(.|\n)+/  -> roll_code
+      | "roll" /(.|\n)+/ -> roll_lit
       | "roll"            -> roll_help
   
   view: "view"    "all"   ("vars")?                  -> view_all
