@@ -60,8 +60,8 @@ class CommandType:
 
 
 class Command(object):
-  _parser_kw = {'start':'start', 'parser':'earley', 'lexer':'dynamic_complete'}
-  parser = lark.Lark(syntax, **_parser_kw)
+  pkw = {'start':'start', 'parser':'earley', 'lexer':'dynamic_complete'}
+  parser = lark.Lark(syntax, **pkw)
   builder = Builder(interpreter.Interpreter(), helptext.HelpText())
   
   def __init__(self, message):
@@ -77,11 +77,14 @@ class Command(object):
     return f'{self.__class__.__name__}<{self.type}:{self.kwargs!r}>'
   
   def __bool__(self):
-    return not self.type == CommandType.error
+    '''Invalid commands evaluate False, otherwise True.'''
+    return self.type != CommandType.error
   
-  def get_client_alias(self, msg, client):
+  def get_client_alias(self, client):
+    '''Retrives the client's display name for the channel whence the message
+    originated.'''
     try:
-      for user in msg.channel.members:
+      for user in self.originator.channel.members:
         if user.id == client.user.id:
           return user.display_name
     except AttributeError:
@@ -89,6 +92,7 @@ class Command(object):
     return 'Atropos'
     
   def parse(self, message_text):
+    '''Parses the text to decide whether it is a valid command.'''
     try:
       tree_or_error = self.__class__.parser.parse(message_text)
     except (UnexpectedCharacters, UnexpectedToken, UnexpectedInput) as e:
@@ -102,6 +106,7 @@ class Command(object):
     return {'error' : error, 'tree' : tree_or_error}
 
   def visit(self, tree):
+    '''Retrieves the command's parameters from the parse tree.'''
     if tree.data in CommandType.pass_by:
       out = self.visit(tree.children[0])
     elif tree.data in CommandType.no_args:
@@ -118,13 +123,20 @@ class Command(object):
     return out
 
   async def send_reply_as(self, client):
+    '''Called from the bot's event handlers. Accepts the object representing
+    the bot's client instance, and sends a reply to the correctly-parsed
+    command as that client for the particular server and channel where the
+    message originated from. If this command instance is invalid, this
+    operation is a no-op.'''
     if not self:
       return
     async with self.originator.channel.typing():
       reply = await self.reply(client)
-    await self.send(client, reply)
+    await self.send(reply)
   
-  async def send(self, client, reply):
+  async def send(self, reply):
+    '''Directly handles sending the message, changing the message to a file
+    attachment if it exceeds Discord's maximum size.'''
     try:
       await self.originator.channel.send(**reply)
     except discord.errors.HTTPException as e:
@@ -136,108 +148,98 @@ class Command(object):
         with ResultFile(content, self.originator.author.name, extra) as rf:
           await msg.channel.send(content=note, file=rf)
   
+  def pack_embed(self, client, title, description, **kwargs):
+    '''Helper method for building embed-style replies.'''
+    embed = discord.Embed(title, description, self.originator.author.color)
+    action = kwargs.get('action', None)
+    result = kwargs.get('result', 'Something went wrong.')
+    if action:
+      embed.add_field(name='Action', value=f'```{action}```', inline=False)
+    embed.add_field(name='Action', value=f'```{result}```', inline=False)
+    embed.set_author(name=self.get_client_alias(client))
+    return {'embed' : embed}
+  
+  def pack_content(self, header, **kwargs):
+    '''Helper method for building message-style replies.'''
+    action = kwargs.get('action', None)
+    result = kwargs.get('result')
+    content = header
+    if action:
+      content += f'\n```{action}```'
+    content += f'\n```{result}```'
+    return {'content' : content}
+  
   async def reply(self, client):
-    '''Construct a reply for the type of command we are. If no valid Command
-    type was identified, this function is a no-op.'''
-    if not self:
-      return
-    
+    '''Construct a reply for the type of command we are.'''
     username = self.originator.author.display_name
     if self.type == CommandType.roll_code:
       d = Command.builder.dice_reply(self.kwargs['value'], self.originator)
-      action = d['action']
-      result = d['result']
       error = d['error'] * ' error'
-      c = f'{username} received{error}:\n'
-      if d['action']:
-        c += f'```{action}```\n'
-      c += f'```{result}```'
-      reply = {'content' : c}
+      header = f'{username} received{error}:'
+      reply = self.pack_content(header, **d)
+    
     elif self.type == CommandType.roll_lit:
       d = Command.builder.dice_reply(self.kwargs['value'], self.originator)
-      action = d['action']
-      result = d['result']
-      error = 'Error' if d['error'] else 'Roll'
-      embed_kw = {
-        'title' : f'{error} result for {username}',
-        'description': f'```{self.originator.content}```',
-        'color' : self.originator.author.color,
-      }
-      embed = discord.Embed(**embed_kw)
-      if action:
-        embed.add_field(name='Action', value=f'```{action}```', inline=False)
-      embed.add_field(name='Result', value=f'```{result}```', inline=False)
-      reply = {'embed' : embed}
+      titletype = 'Error' if d['error'] else 'Roll'
+      title = f'{error} result for {username}'
+      desc = f'```{self.originator.content}```'
+      reply = self.pack_embed(client, title, desc, **d)
+    
     elif self.type == CommandType.roll_help:
       reply = {'content' : 'See `+atropos help quickstart` for more info.'}
+    
     elif self.type in CommandType.views:
       embed_fields = Command.builder.view_reply(self.type, self.originator)
       noun = 'help' if embed_fields['help'] else 'view'
       title = f'Database {noun} for {username}'
-      embed_kw = {
-        'title' : title,
-        'description' : f'```{self.originator.content}```',
-        'color' : self.originator.author.color,
-      }
-      embed = discord.Embed(**embed_kw)
-      embed.add_field(name='Action', value=embed_fields["action"], inline=False)
-      embed.add_field(name='Result', value=embed_fields["result"], inline=False)
-      reply = {'embed' : embed}
+      desc = f'```{self.originator.content}```',
+      reply = self.pack_embed(client, title, desc, **embed_fields)
+    
     elif self.type in CommandType.helps:
-      if self.type == CommandType.help_help:
-        data = Command.builder.help_reply(None, None, True)
-      else:
-        data = Command.builder.help_reply(self.kwargs['value'], self.kwargs['option'])
-      
-      embed_kw = {
-        'title' : f'Help for {username}',
-        'description' : f'```{self.originator.content}```',
-        'color' : self.originator.author.color,
-      }
-      embed = discord.Embed(**embed_kw)
-      embed.add_field(name='Action', value=data['action'], inline=False)
-      embed.add_field(name='Result', value=data['result'], inline=False)
-      reply = {'embed' : embed}
+      data = Command.builder.help_reply(
+        self.kwargs.get('value', None),
+        self.kwargs.get('option', None),
+        self.type == CommandType.help_help)
+      title = f'Help for {username}'
+      desc = f'```{self.originator.content}```'
+      reply = self.pack_embed(client, title, desc, **data)
+    
     else:
-      reply = {f'content': 'Unimplemented reply: {self.type}'}
+      reply = {'content': f'Unimplemented reply: {self.type} (This is a bug.)'}
       print(reply)
     
-    client_alias = self.get_client_alias(self.originator, client)
-    try:
-      reply['embed'].set_author(name=client_alias)
-    except KeyError:
-      pass
     return reply      
     
 class Builder(object):
   def __init__(self, dicelang_interpreter, helptext_engine):
+    # Use dependency injection here because we want references to these shared
+    # objects, which are held elsewhere as they may someday be used elsewhere.
     self.dicelang = dicelang_interpreter
     self.helptable = helptext_engine
   
   def get_server_id(self, msg):
-    if isinstance(msg.channel, (discord.GroupChannel, discord.DMChannel)):
-      return msg.channel.id
-    return msg.channel.guild.id
+    is_dm = isinstance(msg.channel, (discord.GroupChannel, discord.DMChannel))
+    return msg.channel.id if is_dm else msg.channel.guild.id
   
   def view_reply(self, command_type, msg):
     server_id = self.get_server_id(msg)
     user_id = msg.author.id
     cores, pubs, servs, privs = ('',) * 4
+    sep = '  '
     if command_type in (CommandType.view_public, CommandType.view_all):
-      pubs = '  '.join(self.dicelang.keys('global'))
+      pubs = sep.join(self.dicelang.keys('global'))
     if command_type in (CommandType.view_shared, CommandType.view_all):
-      servs = '  '.join(self.dicelang.keys('server', server_id))
+      servs = sep.join(self.dicelang.keys('server', server_id))
     if command_type in (CommandType.view_private, CommandType.view_all):
-      privs = '  '.join(self.dicelang.keys('private', user_id))
+      privs = sep.join(self.dicelang.keys('private', user_id))
     if command_type in (CommandType.view_core, Commandtype.view_all):
-      cores = '  '.join(self.dicelang.keys('core'))
+      cores = sep.join(self.dicelang.keys('core'))
     
     if command_type == CommandType.view_help:
+      viewtypes = ['all', 'core', 'global', 'my', 'our']
       return {
         'action': 'Possible options',
-        'result': '\n'.join(
-          map(lambda s:f'  {s}', ['my', 'our', 'global', 'all', 'core'])
-        ),
+        'result': '\n'.join(map(lambda s:f'  {s}', viewtypes)),
         'help' : True,
       }
     
@@ -294,11 +296,12 @@ class Builder(object):
     reply_data = { }
     if meta:
       reply_data['action'] = 'Possible topics'
-      reply_data['result'] = (
-        self.helptable.lookup('help', None) + self.helptable.lookup('topics', None)
-      )
+      reply_data['result'] = ''.join([
+        self.helptable.lookup('help', None),
+        self.helptable.lookup('topics', None)
+      ])
     else:
-      optstring = (' ' + option) if option else ''
+      optstring = f' {option}' * bool(option)
       reply_data['action'] = f'Help for `{argument}{optstring}`'
       reply_data['result'] = self.helptable.lookup(argument, option)
     return reply_data
