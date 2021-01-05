@@ -113,6 +113,8 @@ class Visitor(object):
     
     if tree.data == 'start':
       out = [self.handle_instruction(c) for c in tree.children][-1]
+    elif tree.data == 'body':
+      out = self.handle_instruction(tree.children[0])
     elif tree.data == 'block' or tree.data == 'short_body':
       out = self.handle_block(tree.children)
     elif tree.data == 'function':

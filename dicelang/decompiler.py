@@ -50,7 +50,8 @@ class Decompiler(object):
     elif tree.data == 'if_else':
       condition, if_code, else_code = [self.decompile(child) for child in tree.children]
       out = f'if {condition} then {if_code} else {else_code}'
-    
+    elif tree.data == 'body':
+      out = self.decompile(tree.children[0])
     elif tree.data == 'short_body':
       out = self.decompile(tree.children[0])
     elif tree.data == 'expression':

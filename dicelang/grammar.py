@@ -15,20 +15,21 @@ assignment: identifier_set
           | identifier_set_subscript
           | identifier ("." identifier)+ "=" expression -> setattr
 
+body: block | short_body
 block: "begin" expression (";" expression)* (";")? "end"
-
-function: "(" (PARAM ("," PARAM)* )? ")" "->" [block | short_body]
-
-for_loop: "for" identifier "in" expression "do" [block | short_body]
-
-while_loop: "while" expression "do" [block | short_body]
-
-do_while_loop: "do" [block | short_body] "while" expression
-
-conditional: "if" expression "then" [block | short_body] -> if
- | "if" expression "then" [block | short_body] "else" [block | short_body] -> if_else
-
 short_body: expression
+
+function: "(" (PARAM ("," PARAM)* )? ")" "->" body
+
+for_loop: "for" identifier "in" expression "do" body
+
+while_loop: "while" expression "do" body
+
+do_while_loop: "do" body "while" expression
+
+conditional: "if" expression "then" body             -> if
+           | "if" expression "then" body "else" body -> if_else
+
 
 import: KW_IMPORT identifier                    -> standard_import
       | KW_IMPORT identifier ("." identifier)+  -> standard_getattr_import
