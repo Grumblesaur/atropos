@@ -15,6 +15,8 @@ class Atropos(discord.Client):
       raise Exception('Environment variable "ATROPOS_CONFIG" not set.')
     if not os.path.isdir(config_dir_path):
       os.mkdir(config_dir_path)
+    
+    print('Atropos initialized.')
 
   async def on_ready(self):
     a = discord.Activity(
@@ -54,9 +56,7 @@ class Atropos(discord.Client):
     
 
 def main(*argv):
-  atropos = Atropos(max_messages=128)
-  print('Atropos initialized.')
-  atropos.run(auth.bot_token)
+  Atropos(max_messages=128).run(auth.bot_token)
 
 if __name__ == '__main__':
   main(*sys.argv)
