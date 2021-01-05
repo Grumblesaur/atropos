@@ -121,8 +121,20 @@ class Command(object):
     if not self:
       return
     async with self.originator.channel.typing():
-      await self.reply(client)
+      reply = await self.reply(client)
+    await self.send(client, reply)
   
+  async def send(self, client, reply):
+    try:
+      await self.originator.channel.send(**reply)
+    except discord.errors.HTTPException as e:
+      if e.code == 50035: # Message too long
+        note = f"The response to `{username}`'s request was too large, "
+        note += "so I've uploaded it as a file instead:"
+        content = reply['content'] if 'content' in reply else reply['embed'].fields[-1]
+        extra = reply['embed'].fields[0] if 'embed' in reply else ''
+        with ResultFile(content, self.originator.author.name, extra) as rf:
+          await msg.channel.send(content=note, file=rf)
   
   async def reply(self, client):
     '''Construct a reply for the type of command we are. If no valid Command
@@ -187,24 +199,15 @@ class Command(object):
       embed.add_field(name='Result', value=data['result'], inline=False)
       reply = {'embed' : embed}
     else:
-      print("should this be happening?")
+      reply = {f'content': 'Unimplemented reply: {self.type}'}
+      print(reply)
     
-    if 'embed' in reply:
-      reply['embed'].set_author(
-        name=self.get_client_alias(self.originator, client)
-      )
-    
+    client_alias = self.get_client_alias(self.originator, client)
     try:
-      await self.originator.channel.send(**reply)
-    except discord.errors.HTTPException as e:
-      if e.code == 50035: # Message too long
-        note = f"The response to `{username}`'s request was too large, "
-        note += "so I've uploaded it as a file instead:"
-        content = reply['content'] if 'content' in reply else reply['embed'].fields[-1]
-        extra = reply['embed'].fields[0] if 'embed' in reply else ''
-        with ResultFile(content, self.originator.author.name, extra) as rf:
-          await msg.channel.send(content=note, file=rf)
-      
+      reply['embed'].set_author(name=client_alias)
+    except KeyError:
+      pass
+    return reply      
     
 class Builder(object):
   def __init__(self, dicelang_interpreter, helptext_engine):
