@@ -230,37 +230,31 @@ class Decompiler(object):
     elif tree.data == 'slice':
       out = self.decompile(tree.children[0])
     elif tree.data == 'whole_slice':
-      out = f'{self.decompile(tree.children[0])}[:]'
+      out = '[:]'
     elif tree.data == 'start_slice':
-      indexable, start = self.decompile_all(tree.children)
-      out = f'{indexable}[{start}:]'
+      start = self.decompile_all(tree.children)
+      out = f'[{start}:]'
     elif tree.data == 'start_step_slice':
-      indexable, start, step = self.decompile_all(tree.children)
-      out = f'{indexable}[{start}::{step}]'
+      start, step = self.decompile_all(tree.children)
+      out = f'[{start}::{step}]'
     elif tree.data == 'start_stop_slice':
-      indexable, start, stop = self.decompile_all(tree.children)
-      out = f'{indexable}[{start}:{stop}]'
+      start, stop = self.decompile_all(tree.children)
+      out = f'[{start}:{stop}]'
     elif tree.data == 'fine_slice':
-      indexable, start, stop, step = self.decompile_all(tree.children)
-      out = f'{indexable}[{start}:{stop}:{step}]'
+      start, stop, step = self.decompile_all(tree.children)
+      out = f'[{start}:{stop}:{step}]'
     elif tree.data == 'stop_slice':
-      indexable, stop = self.decompile_all(tree.children)
-      out = f'{indexable}[:{stop}]'
+      stop = self.decompile_all(tree.children)
+      out = f'[:{stop}]'
     elif tree.data == 'stop_step_slice':
-      indexable, stop, step = self.decompile_all(tree.children)
-      out = f'{indexable}[:{stop}:{step}]'
+      stop, step = self.decompile_all(tree.children)
+      out = f'[:{stop}:{step}]'
     elif tree.data == 'step_slice':
-      indexable, step = self.decompile_all(tree.children)
-      out = f'{indexable}[::{step}]'
+      step = self.decompile_all(tree.children)
+      out = f'[::{step}]'
     elif tree.data == 'not_a_slice':
-      indexable, index = self.decompile_all(tree.children)
-      out = f'{indexable}[{index}]'
-    
-    elif tree.data == 'application':
-      out = self.decompile(tree.children[0])
-    elif tree.data == 'apply':
-      left, right = self.decompile_all(tree.children)
-      out = f'{left} -: {right}'
+      index = self.decompile_all(tree.children)
+      out = f'[{index}]'
     
     elif tree.data == 'die':
       out = self.decompile(tree.children[0])
@@ -283,41 +277,33 @@ class Decompiler(object):
       dice, sides, keep = self.decompile_all(tree.children[::2])
       out = f'{dice} r {sides} l {keep}'
     
-    elif tree.data == 'plugin_op':
-      out = self.decompile(tree.children[0])
-    elif tree.data == 'plugin_call':
-      name, operand = self.decompile_all(tree.children)
-      out = f'{name} :: {operand}'
-    
-    elif tree.data == 'call_or_atom':
+    elif tree.data == 'primary':
       out = self.decompile(tree.children[0])
     elif tree.data == 'function_call':
       parts = self.decompile_all(tree.children)
       handle = parts[0]
       arguments = ', '.join(parts[1:])
       out = f'{handle}({arguments})'
-    
-    elif tree.data == 'get_attribute':
-      out = self.decompile(tree.children[0])
+    elif tree.data == 'sliced':
+      iterable, slice_string = self.decompile_all(tree.children)
+      out = f'{iterable}{slice_string}'
     elif tree.data == 'getattr':
-      parts = self.decompile_all(tree.children)
-      obj = parts[0]
-      chain = '.'.join(parts[1:])
-      out = f'{obj}.{chain}'
-    
-    elif tree.data == 'regex':
-      out = self.decompile(tree.children[0])
+      obj, name = self.decompile_all(tree.children)
+      out = f'{obj}.{name}'
+    elif tree.data == 'typeof':
+      out = f'typeof {self.decompile(tree.children[1])}'
     elif tree.data == 'match':
       text, pattern = self.decompile_all(tree.children[0::2])
       out = f'{text} like {pattern}'
     elif tree.data == 'search':
       text, pattern = self.decompile_all(tree.children[0::2])
       out = f'{text} seek {pattern}'
-    
-    elif tree.data == 'reflection':
-      out = self.decompile(tree.children[0])
-    elif tree.data == 'typeof':
-      out = f'typeof {self.decompile(tree.children[1])}'
+    elif tree.data == 'plugin_call':
+      name, operand = self.decompile_all(tree.children)
+      out = f'{name} :: {operand}'
+    elif tree.data == 'apply':
+      left, right = self.decompile_all(tree.children)
+      out = f'{left} -: {right}'
     
     elif tree.data == 'keyword_expr':
       out = self.decompile(tree.children[0])

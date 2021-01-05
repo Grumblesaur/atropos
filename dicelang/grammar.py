@@ -115,45 +115,35 @@ reduction: "&"  reduction -> sum_or_join
          | "?"  reduction -> stats
          | "<>" reduction -> sort
          | "><" reduction -> shuffle
-         | slice
+         | die
 
-slice: slice ("["            ":"             (":")?           "]") -> whole_slice
-     | slice ("[" expression ":"             (":")?           "]") -> start_slice
-     | slice ("[" expression ":"              ":"  expression "]") -> start_step_slice
-     | slice ("[" expression ":" expression  (":")?           "]") -> start_stop_slice
-     | slice ("[" expression ":" expression   ":"  expression "]") -> fine_slice
-     | slice ("["            ":" expression  (":")?           "]") -> stop_slice
-     | slice ("["            ":" expression   ":"  expression "]") -> stop_step_slice
-     | slice ("["            ":"              ":"  expression "]") -> step_slice
-     | slice ("[" expression "]")                                  -> not_a_slice
-     | application
+die: die KW_D primary              -> scalar_die_all
+   | die KW_D primary KW_H primary -> scalar_die_highest
+   | die KW_D primary KW_L primary -> scalar_die_lowest
+   | die KW_R primary              -> vector_die_all
+   | die KW_R primary KW_H primary -> vector_die_highest
+   | die KW_R primary KW_L primary -> vector_die_lowest
+   | primary
 
-application: die "-:" application -> apply
-           | die
+primary: primary "." scoped_identifier -> getattr
+       | primary "(" (expression ("," expression)* (",")?)? ")" -> function_call
+       | primary "[" slice "]" -> sliced
+       | KW_TYPEOF primary -> typeof
+       | atom "-:" primary -> apply
+       | atom "::" primary -> plugin_call
+       | atom KW_SEEK primary -> search
+       | atom KW_LIKE primary -> match
+       | atom
 
-die: die KW_D plugin_op                -> scalar_die_all
-   | die KW_D plugin_op KW_H plugin_op -> scalar_die_highest
-   | die KW_D plugin_op KW_L plugin_op -> scalar_die_lowest
-   | die KW_R plugin_op                -> vector_die_all
-   | die KW_R plugin_op KW_H plugin_op -> vector_die_highest
-   | die KW_R plugin_op KW_L plugin_op -> vector_die_lowest
-   | plugin_op
-
-plugin_op: call_or_atom "::" plugin_op -> plugin_call
-         | call_or_atom
-
-call_or_atom: call_or_atom "(" (expression ("," expression)* )? ")" -> function_call
-            | get_attribute
-
-get_attribute: regex ("." scoped_identifier)+ -> getattr
-             | regex
-
-regex: reflection KW_SEEK reflection -> search
-     | reflection KW_LIKE reflection -> match
-     | reflection
-
-reflection: KW_TYPEOF reflection -> typeof
-          | atom
+slice:  ":" (":")?                                -> whole_slice
+     |  expression ":" (":")?                     -> start_slice
+     |  expression ":" ":" expression             -> start_step_slice
+     |  expression ":" expression (":")?          -> start_stop_slice
+     |  expression ":" expression ":"  expression -> fine_slice
+     |  ":" expression (":")?                     -> stop_slice
+     |  ":" expression  ":" expression            -> stop_step_slice
+     |  ":" ":" expression                        -> step_slice
+     |  expression                                -> not_a_slice
 
 atom: number_literal
     | boolean_literal

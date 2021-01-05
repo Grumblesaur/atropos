@@ -48,6 +48,9 @@ repeat       | ^         |
 if           | if else   |
 print        | print     |
 println      | println   |
+break        | break     |
+skip         | skip      |
+return       | return    |
 for          | for do    |
 while        | while do  |
 do           | do while  |

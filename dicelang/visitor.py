@@ -269,47 +269,34 @@ class Visitor(object):
     elif tree.data == 'shuffle':
       out = self.handle_shuffle(tree.children)
     
-    elif tree.data == 'slice':
-      out = self.handle_instruction(tree.children[0])
-    elif '_slice' in tree.data:
-      out = self.handle_slices(tree.data, tree.children)
-    
-    elif tree.data == 'plugin_op':
-      out = self.handle_instruction(tree.children[0])
-    elif tree.data == 'plugin_call':
-      out = self.handle_plugin_call(tree.children)
-    
     elif tree.data == 'die':
       out = self.handle_instruction(tree.children[0])
     elif 'vector_die' in tree.data or 'scalar_die' in tree.data:
       out = self.handle_dice(tree.data, tree.children)
     
-    elif tree.data == 'application':
+    elif tree.data == 'primary':
       out = self.handle_instruction(tree.children[0])
-    elif tree.data == 'apply':
-      out = self.handle_apply(tree.children)
-
-    elif tree.data == 'call_or_atom':
-      out = self.handle_instruction(tree.children[0])
+    elif tree.data == 'typeof':
+      out = self.handle_typeof(tree.children)
     elif tree.data == 'function_call':
       out = self.handle_function_call(tree.children)
-    
-    elif tree.data == 'get_attribute':
-      out = self.handle_instruction(tree.children[0])
     elif tree.data == 'getattr':
       out = self.handle_getattr(tree.children)
-    
-    elif tree.data == 'regex':
-      out = self.handle_instruction(tree.children[0])
+    elif tree.data == 'apply':
+      out = self.handle_apply(tree.children)
     elif tree.data == 'match':
       out = self.handle_match(tree.children)
     elif tree.data == 'search':
       out = self.handle_search(tree.children)
+    elif tree.data == 'plugin_call':
+      out = self.handle_plugin_call(tree.children)
     
-    elif tree.data == 'reflection':
+    elif tree.data == 'slice':
       out = self.handle_instruction(tree.children[0])
-    elif tree.data == 'typeof':
-      out = self.handle_typeof(tree.children)
+    elif '_slice' in tree.data:
+      out = self.handle_slices(tree.data, tree.children)
+    elif tree.data == 'sliced':
+      out = self.handle_sliced(tree.children)
     
     elif tree.data == 'keyword_expr':
       out = self.handle_instruction(tree.children[0])
@@ -1011,34 +998,35 @@ class Visitor(object):
 
   def handle_slices(self, slice_type, children):
     '''Handle slicing, indexing, and dict value retrieval.'''
-    operands = self.process_operands(children)
-    v = operands[0]
-    args = operands[1:]
-    for arg in args: # Raise a more helpful error if we use a non-key obj.
+    slice_args = self.process_operands(children)
+    for arg in slice_args: # Raise error with non-key objects.
       if util.is_nonkey(arg):
         e = f'Objects of type {arg.__class__.__name__} cannot be used '
         e += f'as keys or indices. ({arg!r})'
-        raise OperationError
-    
+        raise OperationError(e)
     if slice_type == 'whole_slice':
-      out = v[:]
+      args = (None,) * 3
     elif slice_type == 'start_slice':
-      out = v[args[0]:]
+      args = (slice_args[0], None, None)
     elif slice_type == 'start_step_slice':
-      out = v[args[0]::args[1]]
+      args = (slice_args[0], None, slice_args[1])
     elif slice_type == 'start_stop_slice':
-      out = v[args[0]:args[1]]
+      args = (slice_args[0], slice_args[1], None)
     elif slice_type == 'fine_slice':
-      out = v[args[0]:args[1]:args[2]]
+      args = slice_args
     elif slice_type == 'stop_slice':
-      out = v[:args[0]]
+      args = (None, slice_args[0], None)
     elif slice_type == 'stop_step_slice':
-      out = v[:args[0]:args[1]]
+      args = (None, slice_args[0], slice_args[1])
     elif slice_type == 'step_slice':
-      out = v[::args[0]]
+      args = (None, None, slice_args[0])
     elif slice_type == 'not_a_slice':
-      out = v[args[0]]
-    return out
+      return slice_args[0]
+    return slice(*args)
+  
+  def handle_sliced(self, children):
+    iterable, key_index_slice = self.process_operands(children)
+    return iterable[key_index_slice]
 
   def handle_plugin_call(self, children):
     '''Find a plugin by the alias provided as the left operand and execute it
@@ -1095,15 +1083,10 @@ class Visitor(object):
 
   def handle_getattr(self, children):
     '''Handle field lookup by `.` operator.'''
-    operands = self.process_operands(children)
-    obj = operands[0]
-    out = obj
-    last = None
-    for attr in operands[1:]:
-      last = out
-      out = out[attr.name]
+    obj, ident = self.process_operands(children)
+    out = obj[ident.name]
     if isinstance(out, Function):
-      out.this = last
+      out.this = obj
     return out
 
   def handle_search(self, children):
