@@ -60,8 +60,11 @@ class CommandType:
   ]
   
   no_args = views + [help_help] + [roll_help]
-  
+  rolls = [roll_code, roll_lit]
   helps = [help_help, help_topic]
+  
+  all_rolls = [roll_code, roll_lit, roll_help]
+  
 
 class Builder(object):
   def __init__(self, dicelang_interpreter, helptext_engine):
@@ -85,7 +88,7 @@ class Builder(object):
       servs = sep.join(self.dicelang.keys('server', server_id))
     if command_type in (CommandType.view_private, CommandType.view_all):
       privs = sep.join(self.dicelang.keys('private', user_id))
-    if command_type in (CommandType.view_core, Commandtype.view_all):
+    if command_type in (CommandType.view_core, CommandType.view_all):
       cores = sep.join(self.dicelang.keys('core'))
     
     if command_type == CommandType.view_help:
@@ -107,7 +110,7 @@ class Builder(object):
       content += f'  PRIVATES:\n    {privs}'
     
     action = f'{msg.author.display_name} requested to view:\n'
-    result = f'```{content}```'
+    result = content
     return {'action' : action, 'result' : result, 'help' : False}
       
   
@@ -236,7 +239,7 @@ class Command(object):
       reply = await self.reply(client)
     await self.send(reply)
   
-  async def send(self, reply):
+  async def send(self, reply, retry=True):
     '''Directly handles sending the message, changing the message to a file
     attachment if it exceeds Discord's maximum size.'''
     msg = self.originator
@@ -244,13 +247,32 @@ class Command(object):
     try:
       await msg.channel.send(**reply)
     except discord.errors.HTTPException as e:
+      print(e)
       if e.code == 50035: # Message too long
-        note = f"The response to `{username}`'s request was too large, "
-        note += "so I've uploaded it as a file instead:"
-        content = self.stashed.get('result')
-        extra = self.stashed.get('action', '')
-        with ResultFile(content, username, extra) as rf:
-          await msg.channel.send(content=note, file=rf)
+        if retry: # Retry middling-sized messages as standard messages.
+          if self.type in CommandType.all_rolls:
+            noun = 'Roll'
+          elif self.type in CommandType.helps:
+            noun = 'Help'
+          elif self.type in CommandType.views:
+            noun = 'View'
+          else:
+            noun = 'Command'
+          title = f'{noun} result for {username} (too large for embed):'
+          bare = self.type in CommandType.helps
+          new_reply = self.pack_content(title, bare=bare, **self.stashed)
+          await self.send(new_reply, retry=False)
+        else: # If retry failed, attach as file.
+          args = (self.stashed.get('result'), self.stashed.get('action', ''))
+          await self.attach_as_file(*args)
+  
+  async def attach_as_file(self, content, extra):
+    msg = self.originator
+    username = msg.author.display_name
+    note = f"The response to `{username}`'s request was too large, "
+    note += "so I've uploaded it as a file instead:"
+    with ResultFile(content, username, extra) as rf:
+      await msg.channel.send(content=note, file=rf)
   
   def pack_embed(self, client, title, description, **kwargs):
     '''Helper method for building embed-style replies.'''
@@ -273,10 +295,17 @@ class Command(object):
     '''Helper method for building message-style replies.'''
     action = kwargs.get('action', None)
     result = kwargs.get('result')
+    bare = kwargs.get('bare', False)
     content = header
     if action:
-      content += f'\n```{action}```'
-    content += f'\n```{result}```'
+      if bare:
+        content += f'\n{action}'
+      else:
+        content += f'\n```{action}```'
+    if bare:
+      content += f'\n{result}'
+    else:
+      content += f'\n```{result}```'
     return {'content' : content}
   
   async def reply(self, client):
@@ -308,7 +337,7 @@ class Command(object):
       self.stashed = Command.builder.view_reply(self.type, self.originator)
       noun = 'help' if self.stashed['help'] else 'view'
       title = f'Database {noun} for {username}'
-      desc = f'```{self.originator.content}```',
+      desc = f'```{self.originator.content}```'
       reply = self.pack_embed(client, title, desc, **self.stashed)
     
     elif self.type in CommandType.helps:
