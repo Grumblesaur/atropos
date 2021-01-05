@@ -8,7 +8,7 @@ class LookupType(enum.Enum):
   LIST_OF_ARGUMENTS = 1
 
 class HelpText(object):
-  def __init__(self, help_path='helpfiles/'):
+  def __init__(self, help_path=f'{os.getcwd()}/helpfiles/'):
     self.help_path   = help_path
     self.help_topics, self.help_options = self._build_help_table()
     
@@ -125,7 +125,7 @@ class HelpText(object):
   def lookup(self, keyword, option=None):
     keyword = keyword.lower()
     option  = option.lower()  if option is not None else None
-    if option is None:
+    if not option:
       lookup_result = self._unary_lookup(keyword)
     else:
       lookup_result = self._binary_lookup(keyword, option)

@@ -48,18 +48,18 @@ expression: assignment
           | conditional
           | import
           | alias
-          | if_expr
           | keyword_expr
 
-keyword_expr: KW_PRINTLN expression -> printline
-            | KW_PRINT              -> printword
-            | KW_BREAK expression   -> break_expr
+keyword_expr: KW_PRINTLN if_expr    -> printline
+            | KW_PRINT if_expr      -> printword
+            | KW_BREAK if_expr      -> break_expr
             | KW_BREAK              -> break_bare
-            | KW_SKIP  expression   -> skip_expr
+            | KW_SKIP  if_expr      -> skip_expr
             | KW_SKIP               -> skip_bare
-            | KW_RETURN expression  -> return_expr
+            | KW_RETURN if_expr     -> return_expr
             | KW_RETURN             -> return_bare
             | KW_INSPECT identifier -> inspection
+            | if_expr
 
 if_expr: repeat "if" repeat "else" if_expr -> inline_if
        | repeat "if"        "else" if_expr -> inline_if_binary

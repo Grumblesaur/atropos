@@ -95,7 +95,3 @@ class ReturnError(SignalError):
   def __init__(self, msg='Illegal return outside of function.'):
     super().__init__(msg)
 
-
-
-
-
