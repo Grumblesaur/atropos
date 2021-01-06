@@ -237,7 +237,7 @@ class Decompiler(object):
     elif tree.data == 'whole_slice':
       out = '[:]'
     elif tree.data == 'start_slice':
-      start = self.decompile_all(tree.children)
+      start = self.decompile(tree.children[0])
       out = f'[{start}:]'
     elif tree.data == 'start_step_slice':
       start, step = self.decompile_all(tree.children)
@@ -249,13 +249,13 @@ class Decompiler(object):
       start, stop, step = self.decompile_all(tree.children)
       out = f'[{start}:{stop}:{step}]'
     elif tree.data == 'stop_slice':
-      stop = self.decompile_all(tree.children)
+      stop = self.decompile(tree.children[0])
       out = f'[:{stop}]'
     elif tree.data == 'stop_step_slice':
       stop, step = self.decompile_all(tree.children)
       out = f'[:{stop}:{step}]'
     elif tree.data == 'step_slice':
-      step = self.decompile_all(tree.children)
+      step = self.decompile(tree.children[0])
       out = f'[::{step}]'
     elif tree.data == 'not_a_slice':
       index = self.decompile(tree.children[0])

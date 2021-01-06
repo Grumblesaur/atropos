@@ -2,7 +2,7 @@ import os
 from dicelang.ownership import NotLocal
 from dicelang.undefined import Undefined
 from dicelang.exceptions import PrivilegeError, StorageError, ProtectedError
-from dicelang.builtin import variables as Builtins
+from dicelang import builtin
 
 def load_core_editors():
   core_editors = []
@@ -51,7 +51,7 @@ class Identifier(object):
       out = self.datastore.get(-1, self.name, self.mode)
     elif self.mode == 'scoped':
       try:
-        lookup = Builtins[self.name]
+        lookup = builtin.variables[self.name]
       except KeyError:
         lookup = None
         if self.scoping_data:
@@ -76,7 +76,7 @@ class Identifier(object):
         raise PrivilegeError('non-privileged user cannot modify core library')
       out = self.datastore.put(-1, self.name, value, self.mode)
     elif self.mode == 'scoped':
-      if self.name in Builtins:
+      if self.name in builtin.variables:
         e = f'Builtin variable {self.name!r} may not be overwritten.'
         raise ProtectedError(e)
       if self.scoping_data:
@@ -101,7 +101,7 @@ class Identifier(object):
         raise PrivilegeError('non-privileged user cannot delete core library')
       out = self.datastore.drop(-1, self.name, self.mode)
     elif self.mode == 'scoped':
-      if self.name in Builtins:
+      if self.name in builtin.variables:
         e = f'Builtin variable {self.name!r} may not be deleted.'
         raise ProtectedError(e)
       if self.scoping_data:
