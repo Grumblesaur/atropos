@@ -3,20 +3,18 @@ start: expression (";" expression)* (";")?
 
 identifier_get: identifier
 
+assignment: identifier_set | subscript_set
 identifier_set: identifier "=" expression
 subscript_set:  identifier subscript_chain "=" expression
+
 subscript_chain: subscript+
 subscript: "[" expression "]"    -> bracket_subscript
          | "." scoped_identifier -> identifier_subscript
 
-deletable: identifier                       -> deletable_variable
-         | identifier ("[" expression "]")+ -> deletable_element
-         | identifier ("." identifier    )+ -> deletable_attribute
-
 deletion: "del" deletable ("," deletable)*
+deletable: identifier                       -> identifier_deletable
+         | identifier subscript_chain       -> subscript_deletable
 
-assignment: identifier_set
-          | subscript_set
 
 body: block | short_body
 block: "begin" expression (";" expression)* (";")? "end"

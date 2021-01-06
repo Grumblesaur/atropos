@@ -153,12 +153,10 @@ class Visitor(object):
       out = self.handle_deletion(tree.children)
     elif tree.data == 'deletable':
       out = self.handle_instruction(tree.children[0])
-    elif tree.data == 'deletable_variable':
-      out = self.handle_deletable_variable(tree.children)
-    elif tree.data == 'deletable_element':
-      out = self.handle_deletable_element(tree.children)
-    elif tree.data == 'deletable_attribute':
-      out = self.handle_deletable_attribute(tree.children)
+    elif tree.data == 'identifier_deletable':
+      out = self.handle_identifier_deletable(tree.children)
+    elif tree.data == 'subscript_deletable':
+      out = self.handle_subscript_deletable(tree.children)
     
     elif tree.data == 'assignment':
       out = self.handle_instruction(tree.children[0])
@@ -596,69 +594,55 @@ class Visitor(object):
       out = out[0]
     return out
   
-  def handle_deletable_variable(self, children):
+  def handle_identifier_deletable(self, children):
     ident = self.handle_instruction(children[0])
     out = ident.drop()
     print(out)
     return out
-
-  def handle_deletable_element(self, children):
-    '''Construct a Python code string that will delete from the possibly-
-    nested dict object, and exec it to remove the key-value pair from the
-    dict. The value is returned.'''
-    ident = self.handle_instruction(children[0])
-    subscripts = [self.handle_instruction(c) for c in children[1:]]
-    subscripts = ''.join([f'[{s!r}]' for s in subscripts])
-    target = ident.get()
-    val_repr = f'target{subscripts}'
-    
-    with Function.SerializableRepr() as _:
-      out = eval(val_repr)
-      exec(f'del {val_repr}')
-    
-    ident.put(target)
-    return out
-
-  def handle_deletable_attribute(self, children):
-    '''Similar to delete element, but this results from a chain of `.`
-    accesses, and not `[x]` indexes.'''
-    ident = self.handle_instruction(children[0])
-    subscripts = [self.handle_instruction(c) for c in children[1:]]
-    subscripts = ''.join([f'[{id_.name!r}]' for id_ in subscripts])
-    target = ident.get()
-    val_repr = f'target{subscripts}'
-    with Function.SerializableRepr():
-      out = eval(val_repr)
-      exec(f'del {val_repr}')
-    ident.put(target)
-    return out
-
+ 
   def handle_identifier_set(self, children):
+    '''Handle simple assignment.'''
     ident = self.handle_instruction(children[0])
     value = self.handle_instruction(children[1])
     return ident.put(value)
-  
+ 
+  def handle_subscript_deletable(self, children):
+    ident, subscripts = self.process_operands(children)
+    print('subscripts = ', subscripts)
+    chain = ''.join([f'[{s!r}]' for s in subscripts])
+    target = ident.get()
+    val_repr = f'target{chain}'
+    with Function.SerializableRepr():
+      print('val_repr =', val_repr)
+      out = eval(val_repr)
+      exec(f'del {val_repr}')
+    ident.put(target)
+    return out
+
   def handle_subscript_set(self, children):
+    '''Assign a value to an arbitrarily-nested subscript of an object held by
+    an identifier. This allows for mixed index/key and getattr operations.'''
     ident, subscripts, value = self.process_operands(children)
     chain = ''.join([f'[{s!r}]' for s in subscripts])
     target = ident.get()
     with Function.SerializableRepr():
       stmt = f'target{chain} = {value!r}'
-      print(f'stmt = {stmt!r}')
       exec(stmt)
     ident.put(target)
     return value
   
   def handle_subscript_chain(self, children):
+    '''Create a list of subscripts for assignment operations.'''
     return self.process_operands(children)
   
   def handle_subscript(self, nodetype, children):
+    '''Retrieve identifier subscripts by name and index/key subscripts
+    by value.'''
     ss = self.handle_instruction(children[0])
     if isinstance(ss, Function):
       error = f'Functions cannot be used as keys or indices. ({ss!r})'
       raise OperationError(error)
     if nodetype == 'identifier_subscript':
-      print(f'ss = {ss}')
       out = ss.name
     else:
       out = ss

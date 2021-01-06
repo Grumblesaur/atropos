@@ -1,5 +1,6 @@
 import re
 import enum
+import traceback
 import lark
 import discord
 from lark import UnexpectedToken

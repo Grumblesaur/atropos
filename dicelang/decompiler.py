@@ -80,8 +80,14 @@ class Decompiler(object):
       out = f'del {chain}'
     elif tree.data == 'deletable':
       out = self.decompile(tree.children[0])
-    elif tree.data.startswith('deletable_'):
+    elif tree.data == 'identifier_deletable':
       out = self.decompile(tree.children[0])
+      print(f'{tree.data} out: {out}')
+    elif tree.data == 'subscript_deletable':
+      ident, subscripts = self.decompile_all(tree.children)
+      chain = ''.join(subscripts)
+      out = f'{ident}{chain}'
+      print(f'{tree.data} out: {out}')
     
     elif tree.data == 'assignment':
       out = self.decompile(tree.children[0])
@@ -95,12 +101,11 @@ class Decompiler(object):
     elif tree.data == 'subscript_chain':
       out = self.decompile_all(tree.children)
     elif tree.data == 'subscript':
-      ss_node = tree.children[0]
-      if ss_node.data == 'bracket_subscript':
-        s = f'[{self.decompile(ss_node.children[0])}]'
-      else:
-        s = f'.{self.decompile(ss_ncode.children[0])}'
-      out = s
+      out = self.decompile(tree.children[0])
+    elif tree.data == 'bracket_subscript':
+      out = f'[{self.decompile(tree.children[0])}]'
+    elif tree.data == 'identifier_subscript':
+      out = f'.{self.decompile(tree.children[0])}'
     
     elif tree.data == 'identifier_get':
       out = self.decompile(tree.children[0])
