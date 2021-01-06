@@ -53,7 +53,7 @@ class Atropos(discord.Client):
     self.console_log(msg, cmd)
     
     # Reply will be sent if command was valid, or ignored otherwise.
-    await possible_command.send_reply_as(self)
+    await cmd.send_reply_as(self)
     
 
 def main(*argv):
