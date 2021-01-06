@@ -2,8 +2,12 @@ raw_text = r"""
 start: expression (";" expression)* (";")?
 
 identifier_get: identifier
+
 identifier_set: identifier "=" expression
-identifier_set_subscript: identifier ("[" expression "]")+ "=" expression
+subscript_set:  identifier subscript_chain "=" expression
+subscript_chain: subscript+
+subscript: "[" expression "]"    -> bracket_subscript
+         | "." scoped_identifier -> identifier_subscript
 
 deletable: identifier                       -> deletable_variable
          | identifier ("[" expression "]")+ -> deletable_element
@@ -12,8 +16,7 @@ deletable: identifier                       -> deletable_variable
 deletion: "del" deletable ("," deletable)*
 
 assignment: identifier_set
-          | identifier_set_subscript
-          | identifier ("." identifier)+ "=" expression -> setattr
+          | subscript_set
 
 body: block | short_body
 block: "begin" expression (";" expression)* (";")? "end"
@@ -21,22 +24,17 @@ short_body: expression
 
 function: "(" (PARAM ("," PARAM)* )? ")" "->" body
 
-for_loop: "for" identifier "in" expression "do" body
-
-while_loop: "while" expression "do" body
-
-do_while_loop: "do" body "while" expression
+for_loop:      "for"   identifier "in"    expression "do" body
+while_loop:    "while" expression "do"    body
+do_while_loop: "do"    body       "while" expression
 
 conditional: "if" expression "then" body             -> if
            | "if" expression "then" body "else" body -> if_else
 
-
 import: KW_IMPORT identifier                    -> standard_import
-      | KW_IMPORT identifier ("." identifier)+  -> standard_getattr_import
-      | KW_IMPORT identifier "as" identifier                     -> as_import
-      | KW_IMPORT identifier ("." identifier)+ "as" identifier   -> as_getattr_import
-
-alias: identifier "aliases" expression
+ | KW_IMPORT identifier ("." identifier)+  -> standard_getattr_import
+ | KW_IMPORT identifier "as" identifier                     -> as_import
+ | KW_IMPORT identifier ("." identifier)+ "as" identifier   -> as_getattr_import
 
 expression: assignment
           | deletion
@@ -49,6 +47,8 @@ expression: assignment
           | import
           | alias
           | keyword_expr
+
+alias: identifier "aliases" expression
 
 keyword_expr: KW_PRINTLN if_expr    -> printline
             | KW_PRINT if_expr      -> printword

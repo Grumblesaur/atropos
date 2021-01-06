@@ -164,10 +164,14 @@ class Visitor(object):
       out = self.handle_instruction(tree.children[0])
     elif tree.data == 'identifier_set':
       out = self.handle_identifier_set(tree.children)
-    elif tree.data == 'identifier_set_subscript':
-      out = self.handle_identifier_set_subscript(tree.children)
-    elif tree.data == 'setattr':
-      out = self.handle_setattr(tree.children)
+    elif tree.data == 'subscript_set':
+      out = self.handle_subscript_set(tree.children)
+    elif tree.data == 'subscript_chain':
+      out = self.handle_subscript_chain(tree.children)
+    elif tree.data == 'subscript':
+      out = self.handle_instruction(tree.children[0])
+    elif tree.data.endswith('_subscript'):
+      out = self.handle_subscript(tree.data, tree.children)
     
     elif tree.data == 'if_expr':
       out = self.handle_instruction(tree.children[0])
@@ -634,40 +638,32 @@ class Visitor(object):
     value = self.handle_instruction(children[1])
     return ident.put(value)
   
-  def handle_identifier_set_subscript(self, children):
-    '''Handle the assignment of a value to an arbitrarily-chained subscript
-    of a variable.'''
-    value = self.handle_instruction(children[-1])
-    ident = self.handle_instruction(children[0])
-    subscripts = [self.handle_instruction(c) for c in children[1:-1]]
-    for s in subscripts:
-      if isinstance(s, Function):
-        error = f'Functions cannot be used as keys or indices. ({s!r})'
-        raise OperationError(error)
-    subscripts = ''.join([f'[{s!r}]' for s in subscripts])
+  def handle_subscript_set(self, children):
+    ident, subscripts, value = self.process_operands(children)
+    chain = ''.join([f'[{s!r}]' for s in subscripts])
     target = ident.get()
-    
-    with Function.SerializableRepr() as _:
-      stmt = f'target{subscripts} = {value!r}'
-      exec(stmt)
-    ident.put(target) # update the database and not just the cache
-    return value
-  
-  def handle_setattr(self, children):
-    '''Handle the assignment of a value to an arbitrarily-chained attribute
-    of a variable.'''
-    value = self.handle_instruction(children[-1])
-    ident = self.handle_instruction(children[0])
-    attr_chain = [self.handle_instruction(c) for c in children[1:-1]]
-    subscripts = ''.join([f'[{attr.name!r}]' for attr in attr_chain])
-    target = ident.get()
-    
-    with Function.SerializableRepr() as _:
-      stmt = f'target{subscripts} = {value!r}'
+    with Function.SerializableRepr():
+      stmt = f'target{chain} = {value!r}'
+      print(f'stmt = {stmt!r}')
       exec(stmt)
     ident.put(target)
     return value
-
+  
+  def handle_subscript_chain(self, children):
+    return self.process_operands(children)
+  
+  def handle_subscript(self, nodetype, children):
+    ss = self.handle_instruction(children[0])
+    if isinstance(ss, Function):
+      error = f'Functions cannot be used as keys or indices. ({ss!r})'
+      raise OperationError(error)
+    if nodetype == 'identifier_subscript':
+      print(f'ss = {ss}')
+      out = ss.name
+    else:
+      out = ss
+    return out
+  
   def handle_inline_if(self, children):
     '''Shorthand Python-like inline if-else expression.'''
     condition = self.handle_instruction(children[1])

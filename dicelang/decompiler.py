@@ -48,7 +48,7 @@ class Decompiler(object):
       condition, code = self.decompile_all(tree.children)
       out = f'if {condition} then {code}'
     elif tree.data == 'if_else':
-      condition, if_code, else_code = [self.decompile(child) for child in tree.children]
+      condition, if_code, else_code = self.decompile_all(tree.children)
       out = f'if {condition} then {if_code} else {else_code}'
     elif tree.data == 'body':
       out = self.decompile(tree.children[0])
@@ -80,25 +80,27 @@ class Decompiler(object):
       out = f'del {chain}'
     elif tree.data == 'deletable':
       out = self.decompile(tree.children[0])
-    elif tree.data in ('deletable_variable', 'deletable_element', 'deletable_attribute'):
+    elif tree.data.startswith('deletable_'):
       out = self.decompile(tree.children[0])
     
     elif tree.data == 'assignment':
       out = self.decompile(tree.children[0])
-    elif tree.data == 'setattr':
-      parts = self.decompile_all(tree.children)
-      chain = '.'.join(exprs[:-1])
-      expression = parts[-1]
-      out = f'{chain} = {expression}'
     elif tree.data == 'identifier_set':
       ident, expr = self.decompile_all(tree.children)
       out = f'{ident} = {expr}'
-    elif tree.data == 'identifier_set_subscript':
-      parts = self.decompile_all(tree.children)
-      identifier = parts[0]
-      subscripts = ''.join([f'[{c}]' for c in parts[1:-1]])
-      expression = parts[-1]
-      out = f'{identifier}{subscripts} = {expression}'
+    elif tree.data == 'subscript_set':
+      ident, chain, value = self.decompile_all(tree.children)
+      chain = ''.join(chain)
+      out = f'{ident}{chain} = {value}'
+    elif tree.data == 'subscript_chain':
+      out = self.decompile_all(tree.children)
+    elif tree.data == 'subscript':
+      ss_node = tree.children[0]
+      if ss_node.data == 'bracket_subscript':
+        s = f'[{self.decompile(ss_node.children[0])}]'
+      else:
+        s = f'.{self.decompile(ss_ncode.children[0])}'
+      out = s
     
     elif tree.data == 'identifier_get':
       out = self.decompile(tree.children[0])
