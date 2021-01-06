@@ -589,12 +589,16 @@ class Visitor(object):
     return out
   
   def handle_deletion(self, children):
+    '''Process multiple deletions in the same expression and return their
+    values as a tuple, or as just a single item if only one item was
+    deleted.'''
     out = tuple(self.process_operands(children))
     if len(out) == 1:
       out = out[0]
     return out
   
   def handle_identifier_deletable(self, children):
+    '''Handle the simple case of deleting the value held by a variable.'''
     ident = self.handle_instruction(children[0])
     out = ident.drop()
     print(out)
@@ -607,13 +611,12 @@ class Visitor(object):
     return ident.put(value)
  
   def handle_subscript_deletable(self, children):
+    '''Handle deletion of mixed index/key and getattr subscripts of an object.'''
     ident, subscripts = self.process_operands(children)
-    print('subscripts = ', subscripts)
     chain = ''.join([f'[{s!r}]' for s in subscripts])
     target = ident.get()
     val_repr = f'target{chain}'
     with Function.SerializableRepr():
-      print('val_repr =', val_repr)
       out = eval(val_repr)
       exec(f'del {val_repr}')
     ident.put(target)
@@ -632,7 +635,7 @@ class Visitor(object):
     return value
   
   def handle_subscript_chain(self, children):
-    '''Create a list of subscripts for assignment operations.'''
+    '''Create a list of subscripts for assignment and deletion operations.'''
     return self.process_operands(children)
   
   def handle_subscript(self, nodetype, children):

@@ -34,24 +34,25 @@ class Atropos(discord.Client):
     else:
       server_or_dm = msg.channel.guild
       channel_name = f'{server_or_dm.name}:{msg.channel.name}'
-    s = '\n'.join([
-      f'[usr:{msg.author.display_name}] in [chn:{channel_name}] sent:',
-      f'  {msg.content}',
-      f'  {command!r}',
-    ])
-    print(s)
-    return
-
+    print('\n'.join([
+      f'[usr:{msg.author.display_name}]'
+      f'  in [chn:{channel_name}]'
+      f'    sent {msg.content}',
+      f'    which parsed as {command!r}',
+    ]))
+  
+  def is_our_message(self, msg):
+    return msg.author.id == self.user.id
+  
   async def on_message(self, msg):
-    # Skip scanning Atropos' own messages to prevent code injection.
-    if msg.author.id == self.user.id:
+    if self.is_our_message(msg):
       return
     
-    # Process the message to determine if it is a command.
-    possible_command = commands.Command(msg)
-    self.console_log(msg, possible_command)
+    # Process the message to generate a command object.
+    cmd = commands.Command(msg)
+    self.console_log(msg, cmd)
     
-    # Send a reply if it was a valid command, else this operation is a no-op..
+    # Reply will be sent if command was valid, or ignored otherwise.
     await possible_command.send_reply_as(self)
     
 
