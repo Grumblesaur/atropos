@@ -98,7 +98,7 @@ class Builder(object):
       builtins = sep.join(self.dicelang.builtin_keys())
     
     if command_type == CommandType.view_help:
-      viewtypes = ['all', 'core', 'global', 'my', 'our']
+      viewtypes = ['all', 'builtin', 'core', 'global', 'my', 'our']
       return {
         'action': 'Possible options',
         'result': '\n'.join(map(lambda s:f'  {s}', viewtypes)),
