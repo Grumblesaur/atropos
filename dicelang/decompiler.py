@@ -82,12 +82,10 @@ class Decompiler(object):
       out = self.decompile(tree.children[0])
     elif tree.data == 'identifier_deletable':
       out = self.decompile(tree.children[0])
-      print(f'{tree.data} out: {out}')
     elif tree.data == 'subscript_deletable':
       ident, subscripts = self.decompile_all(tree.children)
       chain = ''.join(subscripts)
       out = f'{ident}{chain}'
-      print(f'{tree.data} out: {out}')
     
     elif tree.data == 'assignment':
       out = self.decompile(tree.children[0])
@@ -260,7 +258,7 @@ class Decompiler(object):
       step = self.decompile_all(tree.children)
       out = f'[::{step}]'
     elif tree.data == 'not_a_slice':
-      index = self.decompile_all(tree.children)
+      index = self.decompile(tree.children[0])
       out = f'[{index}]'
     
     elif tree.data == 'die':

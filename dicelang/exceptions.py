@@ -53,6 +53,14 @@ class StorageError(DicelangError):
 class PrivilegeError(StorageError):
   pass
 
+class BuiltinError(DicelangError):
+  pass
+
+class BuiltinInitError(BuiltinError):
+  pass
+
+class ProtectedError(BuiltinError):
+  pass
 
 class DicelangSignal(Exception):
   def __init__(self, data=None):
