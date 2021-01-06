@@ -1,13 +1,13 @@
 from dicelang.function import Function
 from dicelang.exceptions import BuiltinInitError 
 
-def build()
+def build():
   functions = {
     'sum'     : '(v) -> &v',
     'abs'     : '(x) -> |x|',
     'real'    : '(c) -> +c',
     'imag'    : '(c) -> &c',
-    'keys'    : '(d) -> &(<>(for key in dict do "%s  " % key))',
+    'keys'    : '(d) -> &(<>(for key in d do "%s  " % key))',
     'apply'   : '(f, v) -> begin f -: v end',
     'compose' : '(f, g) -> begin (x) -> f(g(x)) end',
   }
