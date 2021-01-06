@@ -99,7 +99,7 @@ class Identifier(object):
     elif self.mode == 'core':
       if self.scoping_data.user not in Identifier.core_editors:
         raise PrivilegeError('non-privileged user cannot delete core library')
-      out = self.datastore.drop(-1, self.name)
+      out = self.datastore.drop(-1, self.name, self.mode)
     elif self.mode == 'scoped':
       if self.name in Builtins:
         e = f'Builtin variable {self.name!r} may not be deleted.'

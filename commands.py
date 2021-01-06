@@ -30,6 +30,7 @@ syntax = r'''
       | "view" (( "our"    ("vars")?) | "shareds"  ) -> view_shared
       | "view" (( "my"     ("vars")?) | "privates" ) -> view_private
       | "view" (( "core"   ("vars")?) | "library"  ) -> view_core
+      | "view" (( "builtin"("vars")?) | "builtins" ) -> view_builtins
       | "view" (/\w+/)?                              -> view_help
   
   help: "help" /\b\w+\b/+ -> help_topic
@@ -50,6 +51,7 @@ class CommandType:
   view_private = 'view_private'
   view_core = 'view_core'
   view_help = 'view_help'
+  view_builtins = 'view_builtins'
   help_topic = 'help_topic'
   help_help = 'help_help'
   
@@ -58,6 +60,7 @@ class CommandType:
     view_public, view_private,
     view_core,   view_shared,
     view_help,   view_all,
+    view_builtins,
   ]
   
   no_args = views + [help_help] + [roll_help]
@@ -81,7 +84,7 @@ class Builder(object):
   def view_reply(self, command_type, msg):
     server_id = self.get_server_id(msg)
     user_id = msg.author.id
-    cores, pubs, servs, privs = ('',) * 4
+    cores, pubs, servs, privs, builtins = ('',) * 5
     sep = '  '
     if command_type in (CommandType.view_public, CommandType.view_all):
       pubs = sep.join(self.dicelang.keys('global'))
@@ -91,6 +94,8 @@ class Builder(object):
       privs = sep.join(self.dicelang.keys('private', user_id))
     if command_type in (CommandType.view_core, CommandType.view_all):
       cores = sep.join(self.dicelang.keys('core'))
+    if command_type in (CommandType.view_builtins, CommandType.view_all):
+      builtins = sep.join(self.dicelang.builtin_keys())
     
     if command_type == CommandType.view_help:
       viewtypes = ['all', 'core', 'global', 'my', 'our']
@@ -101,6 +106,8 @@ class Builder(object):
       }
     
     content = 'Variables:\n'
+    if builtins:
+      content += f'  BUILTINS:\n    {builtins}\n'
     if cores:
       content += f'  CORE:\n    {cores}\n'
     if pubs:
