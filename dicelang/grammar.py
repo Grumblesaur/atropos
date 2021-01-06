@@ -15,7 +15,6 @@ deletion: "del" deletable ("," deletable)*
 deletable: identifier                       -> identifier_deletable
          | identifier subscript_chain       -> subscript_deletable
 
-
 body: block | short_body
 block: "begin" expression (";" expression)* (";")? "end"
 short_body: expression
@@ -169,7 +168,6 @@ list_literal: "[" expression ("," expression)* (",")? "]"  -> populated_list
 tuple_literal: "(" expression                    ","   ")" -> mono_tuple
              | "(" expression ("," expression)+ (",")? ")" -> multi_tuple
              | "("                                     ")" -> empty_tuple
-
 
 dict_literal: "{" "}"                                   -> empty_dict
   | "{" key_value_pair ("," key_value_pair)* (",")? "}" -> populated_dict
