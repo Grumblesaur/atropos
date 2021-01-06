@@ -50,10 +50,10 @@ class Identifier(object):
     elif self.mode == 'global' or self.mode == 'core':
       out = self.datastore.get(-1, self.name, self.mode)
     elif self.mode == 'scoped':
+      lookup = NotLocal
       try:
         lookup = builtin.variables[self.name]
       except KeyError:
-        lookup = None
         if self.scoping_data:
           lookup = self.scoping_data.get(self.name)
         if not self.scoping_data or lookup is NotLocal:

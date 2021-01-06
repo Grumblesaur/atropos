@@ -12,8 +12,8 @@ subscript: "[" expression "]"    -> bracket_subscript
          | "." scoped_identifier -> identifier_subscript
 
 deletion: "del" deletable ("," deletable)*
-deletable: identifier                       -> identifier_deletable
-         | identifier subscript_chain       -> subscript_deletable
+deletable: identifier                 -> identifier_deletable
+         | identifier subscript_chain -> subscript_deletable
 
 body: block | short_body
 block: "begin" expression (";" expression)* (";")? "end"

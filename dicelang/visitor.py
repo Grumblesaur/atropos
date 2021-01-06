@@ -601,7 +601,6 @@ class Visitor(object):
     '''Handle the simple case of deleting the value held by a variable.'''
     ident = self.handle_instruction(children[0])
     out = ident.drop()
-    print(out)
     return out
  
   def handle_identifier_set(self, children):
@@ -959,12 +958,12 @@ class Visitor(object):
     operand = self.process_operands(children)[0]
     if isinstance(operand, str):
       out = ''.join(sorted(operand))
-    elif isinstance(operand, Number):
-      out = operand
     elif isinstance(operand, dict):
       out = sorted(operand.values())
+    elif isinstance(operand, Sequence):
+      out = type(operand)(sorted(operand))
     else:
-      out = sorted(operand)
+      out = operand
     return out
   
   def handle_shuffle(self, children):
@@ -974,8 +973,14 @@ class Visitor(object):
       operand = list(operand)
       random.shuffle(operand)
       out = ''.join(operand)
-    else:
+    elif isinstance(operand, Sequence):
       random.shuffle(operand)
+      out = operand
+    elif isinstance(operand, dict):
+      x = operand.values()
+      random.shuffle(x)
+      out = x
+    else:
       out = operand
     return out
 
