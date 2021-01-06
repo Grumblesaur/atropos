@@ -36,7 +36,7 @@ class Atropos(discord.Client):
       channel_name = f'{server_or_dm.name}:{msg.channel.name}'
     print('\n'.join([
       f'[usr:{msg.author.display_name}]',
-      f'  in [chn:{channel_name}]'
+      f'  in [chn:{channel_name}]',
       f'    sent {msg.content}',
       f'    which parsed as {command!r}',
     ]))
