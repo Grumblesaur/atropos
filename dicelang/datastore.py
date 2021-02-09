@@ -50,8 +50,7 @@ class Cache(object):
   def drop(self, owner_id, key, mode):
     if owner_id in self.vars[mode] and key in self.vars[mode][owner_id]:
       out = copy.copy(self.vars[mode][owner_id][key])
-      del self.vars[mode][owner_id][key]
-      del self.uses[mode][owner_id][key]
+      self._remove(self, mode, owner_id, key)
     else:
       out = None
     return out
@@ -75,19 +74,21 @@ class Cache(object):
     objects_pruned = 0
     for item in marked:
       objects_pruned += self._remove(*item)
+      print(f'prune {item} from cache')
     return objects_pruned
   
   def _remove(self, mode, owner, key):
-    print(f'prune {(mode, owner, key)} from cache')
     del self.vars[mode][owner][key]
     del self.uses[mode][owner][key]
     return 1
+
  
 class DataStore(object):
   def __init__(self, cache_time=6*60*60):
     self.cache = Cache()
     
     def pruning_task(cycle_time):
+      '''Automate the cache's pruning.'''
       while True:
         time.sleep(cycle_time)
         pruned = self.cache.prune()
@@ -98,6 +99,8 @@ class DataStore(object):
       args=(cache_time,),
       daemon=True)
     self.pruner.start()
+    print('Self-pruning datastore cache created.')
+    print(f'Culling time: {cache_time / 3600} hours.')
   
   def view(self, mode, owner_id):
     results = Variable.objects.filter(var_type=mode, owner_id=owner_id)
@@ -107,43 +110,43 @@ class DataStore(object):
     return names
   
   def get(self, owner_tag, key, mode):
+    '''Attempt to retrieve the object from the cache. If it's not there,
+    look it up from the DB directly, cache it and return it if we found it.
+    Otherwise, no such variable exists, and we return None.'''
     out = self.cache.get(owner_tag, key, mode)
     if out is None:
       try:
-        out_repr = Variable.objects.get(
-          owner_id=owner_tag,
-          var_type=mode,
-          name=key).value_string
-        out = eval(out_repr)
+        s = Variable.objects.get(owner_id=owner_tag, var_type=mode, name=key)
+        out = eval(s.value_string)
+        self.cache.put(owner_tag, key, out, mode)
       except Exception as e:
         out = None
-      else:
-        self.cache.put(owner_tag, key, out, mode)
     return out
 
   def put(self, owner_tag, key, value, mode):
+    '''Cache the updated value and create/update an entry in the
+    database for the variable. Return the value that we stored, but
+    don't ask for it from the DB to avoid long eval times.'''
     self.cache.put(owner_tag, key, value, mode)
-    
-    with Function.SerializableRepr() as _:
+    with Function.SerializableRepr():
       mutating = {'value_string': repr(value)}
-    
-    variable = Variable.objects.update_or_create(
+    Variable.objects.update_or_create(
       owner_id=owner_tag,
       var_type=mode,
       name=key,
       defaults=mutating)
+    return value
     
-    variable = variable[0].value_string
-    return eval(variable)
-
   def drop(self, owner_tag, key, mode):
+    '''Retrieve the value from the database, and then drop it
+    from the table. Return the value we retrieved.'''
     self.cache.drop(owner_tag, key, mode)
     try:
       var = Variable.objects.get(owner_id=owner_tag, var_type=mode, name=key)
-    except Variable.DoesNotExist:
-      out = None
-    else:
       out = eval(var.value_string)
       var.delete()
+    except Variable.DoesNotExist:
+      out = None
     return out
+
 
