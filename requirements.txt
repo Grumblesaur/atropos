@@ -28,7 +28,7 @@ tesnames @ git+https://github.com/hrmay/tesnames.git@3b7eac77613272c3fd25fbf4682
 timestamp @ git+https://github.com/Grumblesaur/timestamp.git@048075a28da4b854cc980d3759db823f333068e4
 typing-extensions==3.7.4.1
 Unidecode==1.1.1
-urllib3==1.26.2
+urllib3==1.26.4
 wcwidth==0.1.8
 websockets==6.0
 yarl==1.4.2
