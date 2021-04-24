@@ -16,7 +16,7 @@ def build():
   functions['zip'] = '''
   (keys, values) -> begin
     d = {};
-    for i in [0 to #key] do begin
+    for i in [0 to #keys] do begin
       d = d + {keys[i]: values[i]}
     end;
     d
