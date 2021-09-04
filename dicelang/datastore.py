@@ -24,6 +24,9 @@ VAR_MODES = ['private', 'server', 'core', 'global']
 
 class Cache(object):
   def __init__(self, modes=VAR_MODES, prune_below=10):
+    '''Create a new Cache object. `prune_below` is the number of uses
+    which a variable must see to survive a cache cycle. Functions are
+    only required to meet half this value.'''
     self.vars = {}
     self.uses = {}
     self.threshold = prune_below
@@ -50,7 +53,7 @@ class Cache(object):
   def drop(self, owner_id, key, mode):
     if owner_id in self.vars[mode] and key in self.vars[mode][owner_id]:
       out = copy.copy(self.vars[mode][owner_id][key])
-      self._remove(self, mode, owner_id, key)
+      self._remove(mode, owner_id, key)
     else:
       out = None
     return out
