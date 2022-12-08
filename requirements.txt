@@ -3,7 +3,7 @@ asgiref==3.2.10
 async-timeout==3.0.1
 attrs==19.3.0
 behindthename @ git+https://github.com/Grumblesaur/behindthename.git@daa96835137bf056844e991b64cfd8740168cd2c
-certifi==2020.12.5
+certifi==2022.12.7
 chardet==4.0.0
 discord==1.0.1
 discord.py==1.4.1
